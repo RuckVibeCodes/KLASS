@@ -1,0 +1,55 @@
+"use server";
+
+import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+
+interface UpdateProfileInput {
+  profileId: string;
+  displayName: string;
+  avatarUrl: string;
+  bio: string;
+  communitySlug: string;
+}
+
+export async function updateProfile(input: UpdateProfileInput) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const supabase = await createClient();
+
+  // Verify this profile belongs to the current user
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("clerk_user_id")
+    .eq("id", input.profileId)
+    .single();
+
+  if (!profile || profile.clerk_user_id !== userId) {
+    throw new Error("Unauthorized - cannot update another user's profile");
+  }
+
+  // Update profile using admin client
+  const adminSupabase = await createAdminClient();
+
+  const { error } = await adminSupabase
+    .from("profiles")
+    .update({
+      display_name: input.displayName || null,
+      avatar_url: input.avatarUrl || null,
+      bio: input.bio || null,
+    })
+    .eq("id", input.profileId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/${input.communitySlug}`);
+  revalidatePath(`/${input.communitySlug}/settings`);
+
+  return { success: true };
+}

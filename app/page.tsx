@@ -105,7 +105,7 @@ export default function LandingPage() {
             <span className="font-bold text-xl">Klass</span>
           </Link>
           <nav className="flex items-center gap-4">
-            <Link href="/demo-community" target="_blank">
+            <Link href="/demo" target="_blank">
               <Button variant="ghost">View Demo</Button>
             </Link>
             <Link href="/sign-in">
@@ -131,7 +131,7 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="flex flex-col gap-4 sm:flex-row">
-          <Link href="/demo-community" target="_blank">
+          <Link href="/demo" target="_blank">
             <Button size="lg" className="gap-2">
               View Demo <ArrowRight className="h-4 w-4" />
             </Button>
@@ -364,7 +364,7 @@ export default function LandingPage() {
             If you&apos;re already monetizing a community and want more control, Klass is the next step.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/demo-community" target="_blank">
+            <Link href="/demo" target="_blank">
               <Button size="lg" className="gap-2">
                 View Demo <ArrowRight className="h-4 w-4" />
               </Button>

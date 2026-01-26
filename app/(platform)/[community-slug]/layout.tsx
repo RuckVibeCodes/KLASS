@@ -27,7 +27,9 @@ export default async function CommunityLayoutPage({
   const resolvedParams = await params;
   const communitySlug = resolvedParams["community-slug"];
 
-  if (!userId) {
+  const isDemo = communitySlug === "demo";
+
+  if (!userId && !isDemo) {
     redirect("/sign-in");
   }
 
@@ -42,12 +44,12 @@ export default async function CommunityLayoutPage({
   // Fetch modules and profile in parallel using cached queries
   const [modules, profile] = await Promise.all([
     getCommunityModules(community.id),
-    getProfileByClerkId(userId, community.id),
+    userId ? getProfileByClerkId(userId, community.id) : Promise.resolve(null),
   ]);
 
   // If no profile exists, create one (non-blocking for returning users)
   let finalProfile = profile;
-  if (!profile) {
+  if (!profile && userId) {
     // Get default tier for new members
     const defaultTierId = await getDefaultTier(community.id);
     const newProfile = await createProfile(userId, community.id, defaultTierId);

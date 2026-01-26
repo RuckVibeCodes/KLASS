@@ -12,9 +12,10 @@ import { PaymentsSettings } from "@/components/admin/payments-settings";
 import { TiersSettings } from "@/components/admin/tiers-settings";
 import { ChatSettings } from "@/components/admin/chat-settings";
 import { AffiliateSettings } from "@/components/admin/affiliate-settings";
+import { IntegrationsSettings } from "@/components/admin/integrations-settings";
 import { AdvancedSettings } from "@/components/admin/advanced-settings";
 
-const validTabs = ["general", "layout", "payments", "tiers", "chat", "affiliates", "advanced"];
+const validTabs = ["general", "layout", "payments", "tiers", "chat", "affiliates", "integrations", "advanced"];
 
 export default function AdminSettingsPage() {
   const params = useParams();
@@ -66,13 +67,14 @@ export default function AdminSettingsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-8">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="layout">Layout</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="tiers">Tiers</TabsTrigger>
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="affiliates">Affiliates</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
         </TabsList>
 
@@ -102,6 +104,10 @@ export default function AdminSettingsPage() {
 
         <TabsContent value="affiliates" className="space-y-6">
           <AffiliateSettings community={community} communitySlug={communitySlug} />
+        </TabsContent>
+
+        <TabsContent value="integrations" className="space-y-6">
+          <IntegrationsSettings community={community} communitySlug={communitySlug} />
         </TabsContent>
 
         <TabsContent value="advanced" className="space-y-6">

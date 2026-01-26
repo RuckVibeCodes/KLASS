@@ -42,8 +42,26 @@ export function SubscriptionCard({
   const handleManageBilling = async () => {
     setLoading(true);
     try {
-      // For demo, just show an alert
-      alert("Stripe customer portal would open here");
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "member",
+          communitySlug,
+          profileId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Unable to open billing portal. You may not have an active subscription.");
+      }
+    } catch (error) {
+      console.error("Portal error:", error);
+      alert("Failed to open billing portal");
     } finally {
       setLoading(false);
     }

@@ -180,6 +180,7 @@ export async function createLesson(
     video_duration_seconds?: number;
     attachment_urls?: string[];
     visibility?: ContentVisibility;
+    section_id?: string | null;
   }
 ) {
   const { userId } = await auth();
@@ -189,14 +190,19 @@ export async function createLesson(
 
   const adminSupabase = await createAdminClient();
 
-  // Get max order_index for this program
-  const { data: maxOrder } = await adminSupabase
+  // Get max order_index for this program (scoped to section if provided)
+  let orderQuery = adminSupabase
     .from("lessons")
     .select("order_index")
     .eq("program_id", programId)
     .order("order_index", { ascending: false })
-    .limit(1)
-    .single();
+    .limit(1);
+
+  if (data.section_id) {
+    orderQuery = orderQuery.eq("section_id", data.section_id);
+  }
+
+  const { data: maxOrder } = await orderQuery.single();
 
   const newOrderIndex = (maxOrder?.order_index ?? -1) + 1;
 
@@ -212,6 +218,7 @@ export async function createLesson(
       visibility: data.visibility || "members",
       published: false,
       order_index: newOrderIndex,
+      section_id: data.section_id || null,
     })
     .select()
     .single();

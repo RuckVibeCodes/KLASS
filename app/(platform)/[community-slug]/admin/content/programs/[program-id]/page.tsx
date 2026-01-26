@@ -27,12 +27,13 @@ export default async function EditProgramPage({
 
   if (!community) redirect("/");
 
-  // Get program with lessons
+  // Get program with lessons and sections
   const { data: program } = await supabase
     .from("programs")
     .select(`
       *,
-      lessons(*)
+      lessons(*),
+      program_sections(*)
     `)
     .eq("id", programId)
     .eq("community_id", community.id)
@@ -42,6 +43,11 @@ export default async function EditProgramPage({
 
   // Sort lessons by order_index
   const lessons = (program.lessons || []).sort(
+    (a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index
+  );
+
+  // Sort sections by order_index
+  const sections = (program.program_sections || []).sort(
     (a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index
   );
 
@@ -69,10 +75,11 @@ export default async function EditProgramPage({
           communitySlug={communitySlug}
         />
 
-        {/* Lessons */}
+        {/* Lessons (with sections support) */}
         <LessonsList
           programId={programId}
           lessons={lessons}
+          sections={sections}
           communitySlug={communitySlug}
         />
       </div>

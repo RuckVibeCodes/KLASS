@@ -129,11 +129,25 @@ export interface Program {
   lessons_count?: number;
   completed_lessons_count?: number;
   lessons?: Lesson[];
+  sections?: ProgramSection[];
+}
+
+export interface ProgramSection {
+  id: string;
+  program_id: string;
+  title: string;
+  description: string | null;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  lessons?: Lesson[];
 }
 
 export interface Lesson {
   id: string;
   program_id: string;
+  section_id: string | null;
   title: string;
   content: string | null;
   video_url: string | null;
@@ -329,6 +343,117 @@ export interface LessonComment {
   author?: Profile;
   replies?: LessonComment[];
 }
+
+// Platform plan types (what community creators pay KLASS)
+export type PlatformPlan = "diy" | "done_with_you" | "done_for_you";
+
+export interface PlatformSubscription {
+  id: string;
+  community_id: string;
+  clerk_user_id: string;
+  plan: PlatformPlan;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  stripe_price_id: string | null;
+  status: SubscriptionStatus;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  trial_end: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StripeConnectAccount {
+  id: string;
+  community_id: string;
+  stripe_account_id: string;
+  clerk_user_id: string;
+  charges_enabled: boolean;
+  payouts_enabled: boolean;
+  details_submitted: boolean;
+  onboarding_complete: boolean;
+  platform_fee_percent: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WhopIntegration {
+  id: string;
+  community_id: string;
+  whop_company_id: string | null;
+  whop_product_id: string | null;
+  whop_access_pass_id: string | null;
+  api_key_encrypted: string | null;
+  webhook_secret: string | null;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WhopMember {
+  id: string;
+  community_id: string;
+  whop_user_id: string;
+  whop_membership_id: string | null;
+  profile_id: string | null;
+  email: string | null;
+  status: "active" | "canceled" | "expired";
+  created_at: string;
+  updated_at: string;
+}
+
+// Platform plan definitions
+export const PLATFORM_PLANS = {
+  diy: {
+    name: "DIY",
+    description: "Self-serve community platform with all core features",
+    price_cents: 7900,
+    price_display: "$79/mo",
+    features: [
+      "Unlimited members",
+      "Community feed & posts",
+      "Programs & lessons",
+      "Resource vault",
+      "Events calendar",
+      "Member management",
+      "Basic analytics",
+      "Custom branding",
+    ],
+  },
+  done_with_you: {
+    name: "Done-With-You",
+    description: "Guided setup with expert support to launch your community",
+    price_cents: 9900,
+    price_display: "$99/mo",
+    features: [
+      "Everything in DIY",
+      "Onboarding call",
+      "Content strategy session",
+      "Monthly check-in calls",
+      "Priority email support",
+      "Custom playbooks",
+      "Affiliate system",
+      "Advanced analytics",
+    ],
+  },
+  done_for_you: {
+    name: "Done-For-You",
+    description: "Full white-glove setup — we build and manage your community",
+    price_cents: 14900,
+    price_display: "$149/mo",
+    features: [
+      "Everything in Done-With-You",
+      "Full community setup",
+      "Content migration",
+      "Custom design & branding",
+      "Dedicated account manager",
+      "Weekly strategy calls",
+      "Stripe Connect setup",
+      "White-label mobile app",
+    ],
+  },
+} as const;
 
 // Database schema type for Supabase client
 export interface Database {

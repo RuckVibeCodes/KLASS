@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { createClient } from "@/lib/supabase/client";
@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,17 +27,22 @@ import {
   Sparkles,
   Copy,
   CheckCircle,
+  CreditCard,
+  ExternalLink,
+  Rocket,
+  SkipForward,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type Step = "name" | "branding" | "program" | "invite" | "complete";
+type Step = "basics" | "branding" | "stripe" | "program" | "launch";
 
 const STEPS: { key: Step; label: string; icon: React.ElementType }[] = [
-  { key: "name", label: "Community", icon: Sparkles },
+  { key: "basics", label: "Basics", icon: Sparkles },
   { key: "branding", label: "Branding", icon: Palette },
-  { key: "program", label: "First Program", icon: BookOpen },
-  { key: "invite", label: "Invite", icon: Users },
+  { key: "stripe", label: "Payments", icon: CreditCard },
+  { key: "program", label: "Program", icon: BookOpen },
+  { key: "launch", label: "Launch", icon: Rocket },
 ];
 
 const PRESET_COLORS = [
@@ -50,69 +56,130 @@ const PRESET_COLORS = [
   { name: "Amber", primary: "#451a03", accent: "#f59e0b" },
 ];
 
+const STORAGE_KEY = "klass-onboarding-progress";
+
+interface OnboardingProgress {
+  currentStep: Step;
+  communityId: string;
+  slug: string;
+  name: string;
+  description: string;
+  primaryColor: string;
+  accentColor: string;
+  logoUrl: string;
+  tagline: string;
+  stripeConnected: boolean;
+  programTitle: string;
+  programDescription: string;
+  skipProgram: boolean;
+}
+
+const defaultProgress: OnboardingProgress = {
+  currentStep: "basics",
+  communityId: "",
+  slug: "",
+  name: "",
+  description: "",
+  primaryColor: "#000000",
+  accentColor: "#6366f1",
+  logoUrl: "",
+  tagline: "",
+  stripeConnected: false,
+  programTitle: "",
+  programDescription: "",
+  skipProgram: false,
+};
+
 export default function CreateCommunityPage() {
   const router = useRouter();
   const { userId } = useAuth();
 
-  // Step state
-  const [currentStep, setCurrentStep] = useState<Step>("name");
-
-  // Form state
+  // Load saved progress from localStorage
+  const [progress, setProgress] = useState<OnboardingProgress>(defaultProgress);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Step 1: Name
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
-
-  // Step 2: Branding
-  const [primaryColor, setPrimaryColor] = useState("#000000");
-  const [accentColor, setAccentColor] = useState("#6366f1");
-  const [logoUrl, setLogoUrl] = useState("");
-
-  // Step 3: First Program
-  const [programTitle, setProgramTitle] = useState("");
-  const [programDescription, setProgramDescription] = useState("");
-  const [skipProgram, setSkipProgram] = useState(false);
-
-  // Step 4: Invite
-  const [inviteLink, setInviteLink] = useState("");
   const [copied, setCopied] = useState(false);
+  const [hasRestoredProgress, setHasRestoredProgress] = useState(false);
 
-  // Created community data
-  const [communityId, setCommunityId] = useState("");
+  // Restore progress on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as OnboardingProgress;
+        // Only restore if same user and community was created
+        if (parsed.communityId || parsed.name) {
+          setProgress(parsed);
+          setHasRestoredProgress(true);
+        }
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, []);
 
-  // Auto-generate slug from name
-  const handleNameChange = (value: string) => {
-    setName(value);
-    setSlug(
-      value
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
-    );
-  };
+  // Save progress to localStorage whenever it changes
+  const saveProgress = useCallback((newProgress: OnboardingProgress) => {
+    setProgress(newProgress);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newProgress));
+    } catch {
+      // Ignore
+    }
+  }, []);
 
+  // Clear saved progress
+  const clearProgress = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  // Update individual fields
+  const updateField = useCallback(<K extends keyof OnboardingProgress>(
+    key: K,
+    value: OnboardingProgress[K]
+  ) => {
+    saveProgress({ ...progress, [key]: value });
+  }, [progress, saveProgress]);
+
+  const currentStep = progress.currentStep;
   const stepIndex = STEPS.findIndex((s) => s.key === currentStep);
+  const progressPercent = ((stepIndex + 1) / STEPS.length) * 100;
+
+  const goToStep = (step: Step) => {
+    saveProgress({ ...progress, currentStep: step });
+    setError("");
+  };
 
   const goNext = () => {
     const nextIdx = stepIndex + 1;
     if (nextIdx < STEPS.length) {
-      setCurrentStep(STEPS[nextIdx].key);
+      goToStep(STEPS[nextIdx].key);
     }
   };
 
   const goBack = () => {
     const prevIdx = stepIndex - 1;
     if (prevIdx >= 0) {
-      setCurrentStep(STEPS[prevIdx].key);
+      goToStep(STEPS[prevIdx].key);
     }
+  };
+
+  // Auto-generate slug from name
+  const handleNameChange = (value: string) => {
+    const newSlug = value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    saveProgress({ ...progress, name: value, slug: newSlug });
   };
 
   // Step 1: Create community
   const handleCreateCommunity = async () => {
-    if (!userId || !name.trim() || !slug.trim()) return;
+    if (!userId || !progress.name.trim() || !progress.slug.trim()) return;
 
     setIsLoading(true);
     setError("");
@@ -120,13 +187,13 @@ export default function CreateCommunityPage() {
     try {
       const supabase = createClient();
 
-      // Create community with branding defaults
+      // Create community
       const { data: community, error: communityError } = await supabase
         .from("communities")
         .insert({
-          name: name.trim(),
-          slug: slug.trim(),
-          description: description.trim() || null,
+          name: progress.name.trim(),
+          slug: progress.slug.trim(),
+          description: progress.description.trim() || null,
           primary_color: "#000000",
           accent_color: "#6366f1",
           settings_json: {},
@@ -172,9 +239,34 @@ export default function CreateCommunityPage() {
         }))
       );
 
-      setCommunityId(community.id);
-      setInviteLink(`${window.location.origin}/${community.slug}`);
-      goNext(); // Move to branding step
+      // Create default membership tiers
+      await supabase.from("membership_tiers").insert([
+        {
+          community_id: community.id,
+          name: "Free",
+          slug: "free",
+          tier_level: 0,
+          is_default: true,
+          price_cents_monthly: 0,
+          price_cents_yearly: 0,
+          description: "Free community access",
+        },
+        {
+          community_id: community.id,
+          name: "Pro",
+          slug: "pro",
+          tier_level: 1,
+          price_cents_monthly: 0,
+          price_cents_yearly: 0,
+          description: "Full access to all premium content",
+        },
+      ]);
+
+      saveProgress({
+        ...progress,
+        communityId: community.id,
+        currentStep: "branding",
+      });
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -184,7 +276,7 @@ export default function CreateCommunityPage() {
 
   // Step 2: Save branding
   const handleSaveBranding = async () => {
-    if (!communityId) return;
+    if (!progress.communityId) return;
 
     setIsLoading(true);
     setError("");
@@ -193,18 +285,24 @@ export default function CreateCommunityPage() {
       const supabase = createClient();
 
       const updateData: Record<string, unknown> = {
-        primary_color: primaryColor,
-        accent_color: accentColor,
+        primary_color: progress.primaryColor,
+        accent_color: progress.accentColor,
       };
 
-      if (logoUrl.trim()) {
-        updateData.logo_url = logoUrl.trim();
+      if (progress.logoUrl.trim()) {
+        updateData.logo_url = progress.logoUrl.trim();
+      }
+
+      if (progress.tagline.trim()) {
+        updateData.settings_json = {
+          banner_description: progress.tagline.trim(),
+        };
       }
 
       const { error: updateError } = await supabase
         .from("communities")
         .update(updateData)
-        .eq("id", communityId);
+        .eq("id", progress.communityId);
 
       if (updateError) {
         setError(updateError.message);
@@ -219,14 +317,69 @@ export default function CreateCommunityPage() {
     }
   };
 
-  // Step 3: Create first program
+  // Step 3: Connect Stripe (calls API route)
+  const handleConnectStripe = async () => {
+    if (!progress.communityId) return;
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/stripe/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          communityId: progress.communityId,
+          returnUrl: `${window.location.origin}/create-community?stripe=connected`,
+          refreshUrl: `${window.location.origin}/create-community?stripe=refresh`,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Failed to start Stripe setup. You can do this later from settings.");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.url) {
+        // Save progress before redirecting
+        saveProgress({ ...progress, stripeConnected: false });
+        window.location.href = data.url;
+      } else {
+        setError("Could not generate Stripe onboarding link. You can set this up later.");
+      }
+    } catch {
+      setError("Failed to connect Stripe. You can set this up later from your admin settings.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Check for Stripe return
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("stripe") === "connected") {
+      saveProgress({ ...progress, stripeConnected: true, currentStep: "program" });
+      // Clean URL
+      window.history.replaceState({}, "", "/create-community");
+    } else if (params.get("stripe") === "refresh") {
+      // They need to retry Stripe onboarding
+      saveProgress({ ...progress, currentStep: "stripe" });
+      window.history.replaceState({}, "", "/create-community");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Step 4: Create first program
   const handleCreateProgram = async () => {
-    if (!communityId || skipProgram) {
+    if (!progress.communityId || progress.skipProgram) {
       goNext();
       return;
     }
 
-    if (!programTitle.trim()) {
+    if (!progress.programTitle.trim()) {
       setError("Enter a program title or skip this step.");
       return;
     }
@@ -238,9 +391,9 @@ export default function CreateCommunityPage() {
       const supabase = createClient();
 
       const { error: programError } = await supabase.from("programs").insert({
-        community_id: communityId,
-        title: programTitle.trim(),
-        description: programDescription.trim() || null,
+        community_id: progress.communityId,
+        title: progress.programTitle.trim(),
+        description: progress.programDescription.trim() || null,
         visibility: "members",
         published: false,
         order_index: 0,
@@ -262,7 +415,8 @@ export default function CreateCommunityPage() {
   // Copy invite link
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(inviteLink);
+      const link = `${window.location.origin}/${progress.slug}`;
+      await navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -270,10 +424,22 @@ export default function CreateCommunityPage() {
     }
   };
 
-  // Finish onboarding
-  const handleFinish = () => {
-    router.push(`/${slug}`);
+  // Launch
+  const handleLaunch = () => {
+    clearProgress();
+    router.push(`/${progress.slug}`);
   };
+
+  // Reset and start fresh
+  const handleStartFresh = () => {
+    clearProgress();
+    setProgress(defaultProgress);
+    setHasRestoredProgress(false);
+  };
+
+  const inviteLink = progress.slug
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/${progress.slug}`
+    : "";
 
   return (
     <div className="min-h-screen bg-muted/50">
@@ -290,17 +456,46 @@ export default function CreateCommunityPage() {
           <span className="text-sm font-medium text-muted-foreground">
             Create Your Community
           </span>
-          <div className="w-16" /> {/* spacer */}
+          <div className="w-16" />
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div className="container max-w-3xl py-6">
-        <div className="flex items-center justify-center gap-2 mb-8">
+      {/* Progress Bar */}
+      <div className="container max-w-3xl pt-6">
+        <div className="space-y-2 mb-2">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Step {stepIndex + 1} of {STEPS.length}</span>
+            <span>{Math.round(progressPercent)}% complete</span>
+          </div>
+          <Progress value={progressPercent} className="h-2" />
+        </div>
+
+        {/* Resumed progress notice */}
+        {hasRestoredProgress && progress.communityId && stepIndex > 0 && (
+          <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-2 mt-3">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              👋 Welcome back! Resuming where you left off.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-blue-600 text-xs"
+              onClick={handleStartFresh}
+            >
+              Start Fresh
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Step Navigation Dots */}
+      <div className="container max-w-3xl py-4">
+        <div className="flex items-center justify-center gap-2">
           {STEPS.map((step, idx) => {
             const Icon = step.icon;
             const isActive = idx === stepIndex;
             const isDone = idx < stepIndex;
+            const isClickable = isDone && progress.communityId;
 
             return (
               <div key={step.key} className="flex items-center gap-2">
@@ -312,12 +507,14 @@ export default function CreateCommunityPage() {
                     )}
                   />
                 )}
-                <div
+                <button
+                  onClick={() => isClickable ? goToStep(step.key) : undefined}
+                  disabled={!isClickable && !isActive}
                   className={cn(
                     "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors",
                     isActive && "bg-primary text-primary-foreground",
-                    isDone && "bg-primary/10 text-primary",
-                    !isActive && !isDone && "text-muted-foreground"
+                    isDone && "bg-primary/10 text-primary cursor-pointer hover:bg-primary/20",
+                    !isActive && !isDone && "text-muted-foreground cursor-default"
                   )}
                 >
                   {isDone ? (
@@ -326,19 +523,22 @@ export default function CreateCommunityPage() {
                     <Icon className="h-4 w-4" />
                   )}
                   <span className="hidden sm:inline">{step.label}</span>
-                </div>
+                </button>
               </div>
             );
           })}
         </div>
+      </div>
 
-        {/* Step Content */}
-        {currentStep === "name" && (
+      {/* Step Content */}
+      <div className="container max-w-3xl pb-12">
+        {/* Step 1: Community Basics */}
+        {currentStep === "basics" && (
           <Card className="max-w-lg mx-auto">
             <CardHeader>
-              <CardTitle className="text-2xl">Name Your Community</CardTitle>
+              <CardTitle className="text-2xl">Community Basics</CardTitle>
               <CardDescription>
-                Choose a name and URL for your community. You can change these later.
+                Choose a name, URL, and description for your community.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -346,7 +546,7 @@ export default function CreateCommunityPage() {
                 <Label htmlFor="name">Community Name</Label>
                 <Input
                   id="name"
-                  value={name}
+                  value={progress.name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="My Awesome Community"
                   disabled={isLoading}
@@ -361,8 +561,8 @@ export default function CreateCommunityPage() {
                   </span>
                   <Input
                     id="slug"
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
+                    value={progress.slug}
+                    onChange={(e) => updateField("slug", e.target.value)}
                     placeholder="my-community"
                     disabled={isLoading}
                     pattern="[a-z0-9-]+"
@@ -377,8 +577,8 @@ export default function CreateCommunityPage() {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={progress.description}
+                  onChange={(e) => updateField("description", e.target.value)}
                   placeholder="What's your community about?"
                   rows={3}
                   disabled={isLoading}
@@ -390,7 +590,7 @@ export default function CreateCommunityPage() {
               <Button
                 className="w-full"
                 onClick={handleCreateCommunity}
-                disabled={isLoading || !name.trim() || !slug.trim()}
+                disabled={isLoading || !progress.name.trim() || !progress.slug.trim()}
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -403,12 +603,13 @@ export default function CreateCommunityPage() {
           </Card>
         )}
 
+        {/* Step 2: Branding */}
         {currentStep === "branding" && (
           <Card className="max-w-lg mx-auto">
             <CardHeader>
-              <CardTitle className="text-2xl">Customize Your Branding</CardTitle>
+              <CardTitle className="text-2xl">Customize Your Brand</CardTitle>
               <CardDescription>
-                Set your community&apos;s colors and logo. These define the look of your community pages.
+                Set your community&apos;s colors, logo, and tagline.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -418,14 +619,17 @@ export default function CreateCommunityPage() {
                 <div className="grid grid-cols-4 gap-2">
                   {PRESET_COLORS.map((preset) => {
                     const isSelected =
-                      primaryColor === preset.primary &&
-                      accentColor === preset.accent;
+                      progress.primaryColor === preset.primary &&
+                      progress.accentColor === preset.accent;
                     return (
                       <button
                         key={preset.name}
                         onClick={() => {
-                          setPrimaryColor(preset.primary);
-                          setAccentColor(preset.accent);
+                          saveProgress({
+                            ...progress,
+                            primaryColor: preset.primary,
+                            accentColor: preset.accent,
+                          });
                         }}
                         className={cn(
                           "relative flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all",
@@ -462,13 +666,13 @@ export default function CreateCommunityPage() {
                     <input
                       type="color"
                       id="primary"
-                      value={primaryColor}
-                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      value={progress.primaryColor}
+                      onChange={(e) => updateField("primaryColor", e.target.value)}
                       className="w-10 h-10 rounded cursor-pointer border"
                     />
                     <Input
-                      value={primaryColor}
-                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      value={progress.primaryColor}
+                      onChange={(e) => updateField("primaryColor", e.target.value)}
                       className="flex-1"
                       disabled={isLoading}
                     />
@@ -480,13 +684,13 @@ export default function CreateCommunityPage() {
                     <input
                       type="color"
                       id="accent"
-                      value={accentColor}
-                      onChange={(e) => setAccentColor(e.target.value)}
+                      value={progress.accentColor}
+                      onChange={(e) => updateField("accentColor", e.target.value)}
                       className="w-10 h-10 rounded cursor-pointer border"
                     />
                     <Input
-                      value={accentColor}
-                      onChange={(e) => setAccentColor(e.target.value)}
+                      value={progress.accentColor}
+                      onChange={(e) => updateField("accentColor", e.target.value)}
                       className="flex-1"
                       disabled={isLoading}
                     />
@@ -494,44 +698,16 @@ export default function CreateCommunityPage() {
                 </div>
               </div>
 
-              {/* Preview */}
+              {/* Tagline */}
               <div className="space-y-2">
-                <Label>Preview</Label>
-                <div
-                  className="rounded-lg p-4 border"
-                  style={{ backgroundColor: `${primaryColor}08` }}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                      style={{ backgroundColor: accentColor }}
-                    >
-                      {name?.charAt(0)?.toUpperCase() || "K"}
-                    </div>
-                    <div>
-                      <p className="font-semibold" style={{ color: primaryColor }}>
-                        {name || "Your Community"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {description || "Community description"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <div
-                      className="px-3 py-1 rounded-full text-xs text-white font-medium"
-                      style={{ backgroundColor: accentColor }}
-                    >
-                      Join Now
-                    </div>
-                    <div
-                      className="px-3 py-1 rounded-full text-xs font-medium border"
-                      style={{ borderColor: accentColor, color: accentColor }}
-                    >
-                      Learn More
-                    </div>
-                  </div>
-                </div>
+                <Label htmlFor="tagline">Tagline (optional)</Label>
+                <Input
+                  id="tagline"
+                  value={progress.tagline}
+                  onChange={(e) => updateField("tagline", e.target.value)}
+                  placeholder="A short tagline for your community banner"
+                  disabled={isLoading}
+                />
               </div>
 
               {/* Logo URL */}
@@ -539,14 +715,54 @@ export default function CreateCommunityPage() {
                 <Label htmlFor="logo">Logo URL (optional)</Label>
                 <Input
                   id="logo"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
+                  value={progress.logoUrl}
+                  onChange={(e) => updateField("logoUrl", e.target.value)}
                   placeholder="https://example.com/logo.png"
                   disabled={isLoading}
                 />
                 <p className="text-xs text-muted-foreground">
                   You can upload a logo later from the admin settings
                 </p>
+              </div>
+
+              {/* Preview */}
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <div
+                  className="rounded-lg p-4 border"
+                  style={{ backgroundColor: `${progress.primaryColor}08` }}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                      style={{ backgroundColor: progress.accentColor }}
+                    >
+                      {progress.name?.charAt(0)?.toUpperCase() || "K"}
+                    </div>
+                    <div>
+                      <p className="font-semibold" style={{ color: progress.primaryColor }}>
+                        {progress.name || "Your Community"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {progress.tagline || progress.description || "Community description"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div
+                      className="px-3 py-1 rounded-full text-xs text-white font-medium"
+                      style={{ backgroundColor: progress.accentColor }}
+                    >
+                      Join Now
+                    </div>
+                    <div
+                      className="px-3 py-1 rounded-full text-xs font-medium border"
+                      style={{ borderColor: progress.accentColor, color: progress.accentColor }}
+                    >
+                      Learn More
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {error && <p className="text-sm text-destructive">{error}</p>}
@@ -573,6 +789,104 @@ export default function CreateCommunityPage() {
           </Card>
         )}
 
+        {/* Step 3: Connect Stripe */}
+        {currentStep === "stripe" && (
+          <Card className="max-w-lg mx-auto">
+            <CardHeader>
+              <CardTitle className="text-2xl">Connect Payments</CardTitle>
+              <CardDescription>
+                Connect Stripe to accept payments from your members. You can also
+                do this later from your admin settings.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {progress.stripeConnected ? (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">Stripe Connected!</h3>
+                  <p className="text-muted-foreground">
+                    Your payment account is set up. You can start accepting payments.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Accept member payments</p>
+                        <p className="text-xs text-muted-foreground">
+                          Stripe handles payments, subscriptions, and payouts securely
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Paid memberships</p>
+                        <p className="text-xs text-muted-foreground">
+                          Charge for community access, programs, or events
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Get paid directly</p>
+                        <p className="text-xs text-muted-foreground">
+                          Payments go straight to your bank account (minus a small platform fee)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    className="w-full"
+                    onClick={handleConnectStripe}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                    )}
+                    Connect Stripe Account
+                  </Button>
+
+                  <p className="text-xs text-muted-foreground text-center">
+                    You&apos;ll be redirected to Stripe to complete setup, then brought back here.
+                  </p>
+                </>
+              )}
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
+
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={goBack} disabled={isLoading}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+                <Button
+                  className="flex-1"
+                  variant={progress.stripeConnected ? "default" : "outline"}
+                  onClick={goNext}
+                  disabled={isLoading}
+                >
+                  {progress.stripeConnected ? (
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                  ) : (
+                    <SkipForward className="h-4 w-4 mr-2" />
+                  )}
+                  {progress.stripeConnected ? "Continue" : "Skip for Now"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 4: First Program */}
         {currentStep === "program" && (
           <Card className="max-w-lg mx-auto">
             <CardHeader>
@@ -583,14 +897,14 @@ export default function CreateCommunityPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {!skipProgram ? (
+              {!progress.skipProgram ? (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="program-title">Program Title</Label>
                     <Input
                       id="program-title"
-                      value={programTitle}
-                      onChange={(e) => setProgramTitle(e.target.value)}
+                      value={progress.programTitle}
+                      onChange={(e) => updateField("programTitle", e.target.value)}
                       placeholder="e.g., Getting Started Guide"
                       disabled={isLoading}
                     />
@@ -602,8 +916,8 @@ export default function CreateCommunityPage() {
                     </Label>
                     <Textarea
                       id="program-description"
-                      value={programDescription}
-                      onChange={(e) => setProgramDescription(e.target.value)}
+                      value={progress.programDescription}
+                      onChange={(e) => updateField("programDescription", e.target.value)}
                       placeholder="What will members learn?"
                       rows={3}
                       disabled={isLoading}
@@ -636,27 +950,27 @@ export default function CreateCommunityPage() {
                   <Button
                     className="flex-1"
                     onClick={handleCreateProgram}
-                    disabled={isLoading || (!skipProgram && !programTitle.trim())}
+                    disabled={isLoading || (!progress.skipProgram && !progress.programTitle.trim())}
                   >
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
                       <ArrowRight className="h-4 w-4 mr-2" />
                     )}
-                    {skipProgram ? "Skip & Continue" : "Create & Continue"}
+                    {progress.skipProgram ? "Skip & Continue" : "Create & Continue"}
                   </Button>
                 </div>
-                {!skipProgram && (
+                {!progress.skipProgram && (
                   <button
-                    onClick={() => setSkipProgram(true)}
+                    onClick={() => updateField("skipProgram", true)}
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     Skip this step →
                   </button>
                 )}
-                {skipProgram && (
+                {progress.skipProgram && (
                   <button
-                    onClick={() => setSkipProgram(false)}
+                    onClick={() => updateField("skipProgram", false)}
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     ← Actually, I want to create one
@@ -667,18 +981,56 @@ export default function CreateCommunityPage() {
           </Card>
         )}
 
-        {currentStep === "invite" && (
+        {/* Step 5: Launch! */}
+        {currentStep === "launch" && (
           <Card className="max-w-lg mx-auto">
-            <CardHeader>
-              <CardTitle className="text-2xl">Invite Members</CardTitle>
+            <CardHeader className="text-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4">
+                <Rocket className="h-10 w-10 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">You&apos;re Ready to Launch! 🎉</CardTitle>
               <CardDescription>
-                Share your community link to invite your first members.
+                Your community is set up and ready for members.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Invite link */}
+              {/* Summary */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Community</span>
+                  <span className="font-medium">{progress.name}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">URL</span>
+                  <span className="font-mono text-xs">{inviteLink}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Payments</span>
+                  <span className={cn(
+                    "flex items-center gap-1",
+                    progress.stripeConnected ? "text-green-600" : "text-muted-foreground"
+                  )}>
+                    {progress.stripeConnected ? (
+                      <>
+                        <CheckCircle className="h-3 w-3" />
+                        Connected
+                      </>
+                    ) : (
+                      "Not connected (can do later)"
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">First Program</span>
+                  <span className="font-medium">
+                    {progress.skipProgram ? "—" : progress.programTitle || "—"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Share Link */}
               <div className="space-y-2">
-                <Label>Your Community Link</Label>
+                <Label>Share Your Community Link</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     value={inviteLink}
@@ -697,44 +1049,35 @@ export default function CreateCommunityPage() {
                     )}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Anyone with this link can join your community
-                </p>
               </div>
 
               {/* Tips */}
               <div className="space-y-3">
-                <p className="text-sm font-medium">Invite ideas:</p>
+                <p className="text-sm font-medium">What&apos;s next:</p>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">📧</span>
-                    <p>Email your existing audience with the link</p>
+                    <span>📝</span>
+                    <p>Create your first post to welcome members</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">🐦</span>
-                    <p>Share on social media (Twitter, LinkedIn)</p>
+                    <span>📚</span>
+                    <p>Add course content with modules and lessons</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">💬</span>
-                    <p>Post in your Discord, Slack, or WhatsApp groups</p>
+                    <span>📧</span>
+                    <p>Share your link with your audience</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">🎥</span>
-                    <p>Add the link to your YouTube or TikTok bio</p>
+                    <span>⚙️</span>
+                    <p>Customize settings in the admin dashboard</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={goBack} disabled={isLoading}>
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
-                <Button className="flex-1" onClick={handleFinish}>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Launch My Community
-                </Button>
-              </div>
+              <Button className="w-full" size="lg" onClick={handleLaunch}>
+                <Rocket className="h-4 w-4 mr-2" />
+                Launch My Community
+              </Button>
             </CardContent>
           </Card>
         )}

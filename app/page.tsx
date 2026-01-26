@@ -28,17 +28,17 @@ const faqs = [
   {
     question: "Is Klass a SaaS tool or a custom build?",
     answer:
-      "Klass is a done-for-you platform. We configure, brand, and launch your community and content system so you don't have to piece tools together or manage infrastructure yourself.",
+      "Klass is a self-serve SaaS platform. On the DIY plan, you sign up and set everything up yourself. On higher-tier plans, we help configure, brand, and launch your community so you can focus on content.",
   },
   {
-    question: "Why is there a setup fee?",
+    question: "Why do some plans have a setup fee?",
     answer:
-      "The setup fee covers platform provisioning, white-label branding, membership and paywall configuration, Stripe integration, and launch and QA support. This isn't a template you sign up for — it's your platform, configured and ready to use.",
+      "The Done-With-You and Done-For-You plans include hands-on setup by our team — branding, configuration, migration, and launch support. The DIY plan has no setup fee at all.",
   },
   {
     question: "What does the monthly fee cover?",
     answer:
-      "The monthly maintenance fee covers hosting and infrastructure, ongoing updates and improvements, platform support, and long-term stability. Think of it as keeping your platform running smoothly — similar to hosting and maintenance for any serious software product.",
+      "Your monthly subscription covers full platform access, hosting and infrastructure, ongoing updates and improvements, platform support, and long-term stability. Think of it as everything you need to run your branded platform.",
   },
   {
     question: "Can I use my own domain?",
@@ -108,8 +108,8 @@ export default function LandingPage() {
             <Link href="/demo" target="_blank">
               <Button variant="ghost">View Demo</Button>
             </Link>
-            <Link href="/sign-in">
-              <Button>Book a Setup Call</Button>
+            <Link href="/sign-up">
+              <Button>Get Started</Button>
             </Link>
           </nav>
         </div>
@@ -136,9 +136,9 @@ export default function LandingPage() {
               View Demo <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
-          <Link href="/sign-in">
+          <Link href="/sign-up">
             <Button size="lg" variant="outline">
-              Book a Setup Call
+              Get Started Free
             </Button>
           </Link>
         </div>
@@ -183,8 +183,8 @@ export default function LandingPage() {
           />
           <BenefitCard
             icon={<Settings className="h-6 w-6" />}
-            title="Done-For-You Setup"
-            description="We configure, brand, and launch your platform — you focus on content."
+            title="Self-Serve or Done-For-You"
+            description="Set up yourself in minutes, or let us handle everything — your choice."
           />
         </div>
       </section>
@@ -238,23 +238,28 @@ export default function LandingPage() {
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Simple, Transparent Pricing
           </h2>
+          <p className="mt-4 text-muted-foreground">
+            Choose the plan that fits your stage. Upgrade anytime.
+          </p>
         </div>
-        <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-3">
+          {/* DIY */}
           <div className="flex flex-col rounded-lg border bg-card p-8">
-            <h3 className="font-semibold text-lg">Platform Setup</h3>
+            <h3 className="font-semibold text-lg">DIY</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Self-setup, all features</p>
             <div className="mt-4 flex items-baseline">
-              <span className="text-4xl font-bold">$999</span>
-              <span className="ml-2 text-muted-foreground">one-time</span>
+              <span className="text-4xl font-bold">$79</span>
+              <span className="ml-2 text-muted-foreground">/mo</span>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">Starting at</p>
-            <ul className="mt-6 space-y-3">
+            <p className="mt-2 text-sm text-muted-foreground">No setup fee</p>
+            <ul className="mt-6 flex-1 space-y-3">
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Branded platform setup</span>
+                <span className="text-sm">Full platform access</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Community, courses, and memberships configured</span>
+                <span className="text-sm">Community, courses & memberships</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
@@ -262,49 +267,112 @@ export default function LandingPage() {
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
+                <span className="text-sm">White-label branding</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" />
                 <span className="text-sm">Mobile-ready experience</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Launch support</span>
+                <span className="text-sm">Email support</span>
               </li>
             </ul>
-          </div>
-          <div className="flex flex-col rounded-lg border border-primary bg-primary/5 p-8 shadow-lg">
-            <h3 className="font-semibold text-lg">Ongoing Maintenance</h3>
-            <div className="mt-4 flex items-baseline">
-              <span className="text-4xl font-bold">$49</span>
-              <span className="ml-2 text-muted-foreground">/month</span>
+            <div className="mt-8">
+              <Link href="/sign-up" className="block">
+                <Button className="w-full" variant="outline">Get Started</Button>
+              </Link>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">After setup</p>
-            <ul className="mt-6 space-y-3">
+          </div>
+
+          {/* Done-With-You (Most Popular) */}
+          <div className="flex flex-col rounded-lg border-2 border-primary bg-primary/5 p-8 shadow-lg relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                Most Popular
+              </span>
+            </div>
+            <h3 className="font-semibold text-lg">Done-With-You</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Onboarding call + custom branding</p>
+            <div className="mt-4 flex items-baseline">
+              <span className="text-4xl font-bold">$99</span>
+              <span className="ml-2 text-muted-foreground">/mo</span>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">+ $499 one-time setup</p>
+            <ul className="mt-6 flex-1 space-y-3">
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Hosting & infrastructure</span>
+                <span className="text-sm font-medium">Everything in DIY, plus:</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Updates & improvements</span>
+                <span className="text-sm">1-on-1 onboarding call</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Support</span>
+                <span className="text-sm">Custom branding setup</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Platform stability</span>
+                <span className="text-sm">Membership & paywall configuration</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" />
+                <span className="text-sm">Priority email support</span>
               </li>
             </ul>
-            <p className="mt-6 text-sm text-muted-foreground">
-              Native mobile apps and custom features available as upgrades.
-            </p>
+            <div className="mt-8">
+              <Link href="/sign-up" className="block">
+                <Button className="w-full">Get Started</Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Done-For-You */}
+          <div className="flex flex-col rounded-lg border bg-card p-8">
+            <h3 className="font-semibold text-lg">Done-For-You</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Full setup, migration & priority support</p>
+            <div className="mt-4 flex items-baseline">
+              <span className="text-4xl font-bold">$149</span>
+              <span className="ml-2 text-muted-foreground">/mo</span>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">+ $1,499 one-time setup</p>
+            <ul className="mt-6 flex-1 space-y-3">
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Everything in Done-With-You, plus:</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" />
+                <span className="text-sm">Full platform setup by our team</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" />
+                <span className="text-sm">Content & member migration</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" />
+                <span className="text-sm">Custom domain setup</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" />
+                <span className="text-sm">Priority support with dedicated Slack</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary" />
+                <span className="text-sm">Launch QA & strategy call</span>
+              </li>
+            </ul>
+            <div className="mt-8">
+              <Link href="/sign-in" className="block">
+                <Button className="w-full" variant="outline">Book a Call</Button>
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="mt-12 text-center">
-          <Link href="/sign-in">
-            <Button size="lg">Book a Setup Call</Button>
-          </Link>
-        </div>
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          All plans include hosting, updates, and platform stability. Native mobile apps available as an upgrade.
+        </p>
       </section>
 
       {/* FAQ Section */}
@@ -364,14 +432,14 @@ export default function LandingPage() {
             If you&apos;re already monetizing a community and want more control, Klass is the next step.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/demo" target="_blank">
+            <Link href="/sign-up">
               <Button size="lg" className="gap-2">
-                View Demo <ArrowRight className="h-4 w-4" />
+                Get Started <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/sign-in">
+            <Link href="/demo" target="_blank">
               <Button size="lg" variant="outline">
-                Book a Setup Call
+                View Demo
               </Button>
             </Link>
           </div>

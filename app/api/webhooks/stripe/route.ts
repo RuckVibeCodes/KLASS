@@ -32,19 +32,31 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutCompleted(supabase, session);
+        if (session.metadata?.subscription_type === "platform") {
+          await handlePlatformCheckoutCompleted(supabase, session);
+        } else {
+          await handleCheckoutCompleted(supabase, session);
+        }
         break;
       }
 
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(supabase, subscription);
+        if (subscription.metadata?.subscription_type === "platform") {
+          await handlePlatformSubscriptionUpdated(supabase, subscription);
+        } else {
+          await handleSubscriptionUpdated(supabase, subscription);
+        }
         break;
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(supabase, subscription);
+        if (subscription.metadata?.subscription_type === "platform") {
+          await handlePlatformSubscriptionDeleted(supabase, subscription);
+        } else {
+          await handleSubscriptionDeleted(supabase, subscription);
+        }
         break;
       }
 
@@ -59,6 +71,13 @@ export async function POST(req: Request) {
         await handleInvoiceFailed(supabase, invoice);
         break;
       }
+
+      // Stripe Connect events
+      case "account.updated": {
+        const account = event.data.object as Stripe.Account;
+        await handleConnectAccountUpdated(supabase, account);
+        break;
+      }
     }
 
     return NextResponse.json({ received: true });
@@ -71,8 +90,118 @@ export async function POST(req: Request) {
   }
 }
 
+// ============================================
+// PLATFORM SUBSCRIPTION HANDLERS
+// ============================================
+
+async function handlePlatformCheckoutCompleted(
+  supabase: ReturnType<typeof createAdminClient>,
+  session: Stripe.Checkout.Session
+) {
+  const clerkUserId = session.metadata?.clerk_user_id;
+  const communityId = session.metadata?.community_id;
+  const plan = session.metadata?.platform_plan;
+  const customerId = session.customer as string;
+  const subscriptionId = session.subscription as string;
+
+  if (!clerkUserId || !communityId || !plan) {
+    console.error("Missing metadata in platform checkout session");
+    return;
+  }
+
+  // Create or update platform subscription
+  await supabase.from("platform_subscriptions").upsert(
+    {
+      community_id: communityId,
+      clerk_user_id: clerkUserId,
+      plan,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscriptionId,
+      status: "active",
+    },
+    { onConflict: "stripe_subscription_id" }
+  );
+
+  // Update community platform plan
+  await supabase
+    .from("communities")
+    .update({ platform_plan: plan, billing_status: "active" })
+    .eq("id", communityId);
+}
+
+async function handlePlatformSubscriptionUpdated(
+  supabase: ReturnType<typeof createAdminClient>,
+  subscription: Stripe.Subscription
+) {
+  const status = mapStripeStatus(subscription.status);
+
+  const updateData: Record<string, unknown> = {
+    status,
+    cancel_at_period_end: subscription.cancel_at_period_end,
+  };
+
+  if ("current_period_start" in subscription && subscription.current_period_start) {
+    updateData.current_period_start = new Date(
+      (subscription.current_period_start as number) * 1000
+    ).toISOString();
+  }
+  if ("current_period_end" in subscription && subscription.current_period_end) {
+    updateData.current_period_end = new Date(
+      (subscription.current_period_end as number) * 1000
+    ).toISOString();
+  }
+
+  await supabase
+    .from("platform_subscriptions")
+    .update(updateData)
+    .eq("stripe_subscription_id", subscription.id);
+
+  // Update community billing status
+  const { data: platSub } = await supabase
+    .from("platform_subscriptions")
+    .select("community_id")
+    .eq("stripe_subscription_id", subscription.id)
+    .single();
+
+  if (platSub?.community_id) {
+    const billingStatus =
+      status === "active" || status === "trialing" ? "active" : status === "past_due" ? "past_due" : "canceled";
+    await supabase
+      .from("communities")
+      .update({ billing_status: billingStatus })
+      .eq("id", platSub.community_id);
+  }
+}
+
+async function handlePlatformSubscriptionDeleted(
+  supabase: ReturnType<typeof createAdminClient>,
+  subscription: Stripe.Subscription
+) {
+  await supabase
+    .from("platform_subscriptions")
+    .update({ status: "canceled" })
+    .eq("stripe_subscription_id", subscription.id);
+
+  const { data: platSub } = await supabase
+    .from("platform_subscriptions")
+    .select("community_id")
+    .eq("stripe_subscription_id", subscription.id)
+    .single();
+
+  if (platSub?.community_id) {
+    await supabase
+      .from("communities")
+      .update({ billing_status: "canceled" })
+      .eq("id", platSub.community_id);
+  }
+}
+
+// ============================================
+// COMMUNITY MEMBER SUBSCRIPTION HANDLERS
+// ============================================
+
 async function handleCheckoutCompleted(
-  supabase: any,
+  supabase: ReturnType<typeof createAdminClient>,
   session: Stripe.Checkout.Session
 ) {
   const profileId = session.metadata?.profile_id;
@@ -103,13 +232,12 @@ async function handleCheckoutCompleted(
 }
 
 async function handleSubscriptionUpdated(
-  supabase: any,
+  supabase: ReturnType<typeof createAdminClient>,
   subscription: Stripe.Subscription
 ) {
   const profileId = subscription.metadata?.profile_id;
 
   if (!profileId) {
-    // Try to find by stripe_subscription_id
     const { data: existingSub } = await supabase
       .from("subscriptions")
       .select("profile_id")
@@ -129,7 +257,6 @@ async function handleSubscriptionUpdated(
     cancel_at_period_end: subscription.cancel_at_period_end,
   };
 
-  // Handle current_period fields which may not exist on all subscription objects
   if ("current_period_start" in subscription && subscription.current_period_start) {
     updateData.current_period_start = new Date(
       (subscription.current_period_start as number) * 1000
@@ -146,7 +273,6 @@ async function handleSubscriptionUpdated(
     .update(updateData)
     .eq("stripe_subscription_id", subscription.id);
 
-  // Update profile tier based on status
   const targetId =
     profileId ||
     (
@@ -164,10 +290,9 @@ async function handleSubscriptionUpdated(
 }
 
 async function handleSubscriptionDeleted(
-  supabase: any,
+  supabase: ReturnType<typeof createAdminClient>,
   subscription: Stripe.Subscription
 ) {
-  // Get profile from subscription
   const { data: sub } = await supabase
     .from("subscriptions")
     .select("profile_id")
@@ -175,33 +300,42 @@ async function handleSubscriptionDeleted(
     .single();
 
   if (sub?.profile_id) {
-    // Update profile tier to FREE
     await supabase
       .from("profiles")
       .update({ tier: "FREE" })
       .eq("id", sub.profile_id);
   }
 
-  // Update subscription status
   await supabase
     .from("subscriptions")
     .update({ status: "canceled" })
     .eq("stripe_subscription_id", subscription.id);
 }
 
-async function handleInvoicePaid(supabase: any, invoice: Stripe.Invoice) {
-  // Subscription renewals are handled here
+async function handleInvoicePaid(
+  supabase: ReturnType<typeof createAdminClient>,
+  invoice: Stripe.Invoice
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const subscriptionId = (invoice as any).subscription;
   if (subscriptionId) {
+    // Update both member and platform subscriptions
     await supabase
       .from("subscriptions")
+      .update({ status: "active" })
+      .eq("stripe_subscription_id", subscriptionId);
+
+    await supabase
+      .from("platform_subscriptions")
       .update({ status: "active" })
       .eq("stripe_subscription_id", subscriptionId);
   }
 }
 
-async function handleInvoiceFailed(supabase: any, invoice: Stripe.Invoice) {
+async function handleInvoiceFailed(
+  supabase: ReturnType<typeof createAdminClient>,
+  invoice: Stripe.Invoice
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const subscriptionId = (invoice as any).subscription;
   if (subscriptionId) {
@@ -209,8 +343,37 @@ async function handleInvoiceFailed(supabase: any, invoice: Stripe.Invoice) {
       .from("subscriptions")
       .update({ status: "past_due" })
       .eq("stripe_subscription_id", subscriptionId);
+
+    await supabase
+      .from("platform_subscriptions")
+      .update({ status: "past_due" })
+      .eq("stripe_subscription_id", subscriptionId);
   }
 }
+
+// ============================================
+// STRIPE CONNECT HANDLERS
+// ============================================
+
+async function handleConnectAccountUpdated(
+  supabase: ReturnType<typeof createAdminClient>,
+  account: Stripe.Account
+) {
+  await supabase
+    .from("stripe_connect_accounts")
+    .update({
+      charges_enabled: account.charges_enabled || false,
+      payouts_enabled: account.payouts_enabled || false,
+      details_submitted: account.details_submitted || false,
+      onboarding_complete:
+        (account.charges_enabled && account.details_submitted) || false,
+    })
+    .eq("stripe_account_id", account.id);
+}
+
+// ============================================
+// HELPERS
+// ============================================
 
 function mapStripeStatus(
   status: Stripe.Subscription.Status

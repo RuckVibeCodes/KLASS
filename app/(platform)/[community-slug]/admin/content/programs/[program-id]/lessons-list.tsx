@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,15 +40,23 @@ import {
   Layers,
 } from "lucide-react";
 import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  type DropResult,
+} from "@hello-pangea/dnd";
+import {
   createLesson,
   updateLesson,
   deleteLesson,
   duplicateLesson,
+  reorderLessons,
 } from "@/actions/programs";
 import {
   createSection,
   updateSection,
   deleteSection,
+  reorderSections,
 } from "@/actions/sections";
 import { useToast } from "@/hooks/use-toast";
 import type { Lesson, ProgramSection } from "@/types/database";
@@ -72,10 +80,87 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [newSectionDescription, setNewSectionDescription] = useState("");
 
+  // Local state for optimistic reordering
+  const [localSections, setLocalSections] = useState(sections);
+  const [localLessons, setLocalLessons] = useState(lessons);
+
   // Group lessons by section
-  const unsectionedLessons = lessons.filter((l) => !l.section_id);
+  const unsectionedLessons = localLessons.filter((l) => !l.section_id);
   const sectionLessons = (sectionId: string) =>
-    lessons.filter((l) => l.section_id === sectionId);
+    localLessons.filter((l) => l.section_id === sectionId).sort((a, b) => a.order_index - b.order_index);
+
+  // Handle drag end for lessons within a section or unsectioned
+  const handleLessonDragEnd = useCallback((result: DropResult) => {
+    if (!result.destination) return;
+
+    const { source, destination, draggableId } = result;
+
+    // Same position
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    const sourceDroppableId = source.droppableId;
+    const destDroppableId = destination.droppableId;
+
+    // Get source and dest lists
+    const getListForDroppable = (droppableId: string) => {
+      if (droppableId === "unsectioned") {
+        return localLessons.filter(l => !l.section_id).sort((a, b) => a.order_index - b.order_index);
+      }
+      return localLessons.filter(l => l.section_id === droppableId).sort((a, b) => a.order_index - b.order_index);
+    };
+
+    if (sourceDroppableId === destDroppableId) {
+      // Reorder within the same list
+      const list = getListForDroppable(sourceDroppableId);
+      const [movedItem] = list.splice(source.index, 1);
+      list.splice(destination.index, 0, movedItem);
+
+      // Update order_index and persist
+      const reorderedIds = list.map(l => l.id);
+      const updatedLessons = localLessons.map(l => {
+        const idx = reorderedIds.indexOf(l.id);
+        if (idx !== -1) {
+          return { ...l, order_index: idx };
+        }
+        return l;
+      });
+
+      setLocalLessons(updatedLessons);
+
+      startTransition(async () => {
+        const result = await reorderLessons(programId, communitySlug, reorderedIds);
+        if (result.error) {
+          toast({ variant: "destructive", title: "Error", description: "Failed to reorder lessons." });
+          setLocalLessons(lessons); // Revert
+        }
+      });
+    }
+    // Cross-section drag could be added later (move lesson between sections)
+  }, [localLessons, lessons, programId, communitySlug, toast, startTransition]);
+
+  // Handle section drag end
+  const handleSectionDragEnd = useCallback((result: DropResult) => {
+    if (!result.destination) return;
+    if (result.source.index === result.destination.index) return;
+
+    const newSections = [...localSections];
+    const [movedSection] = newSections.splice(result.source.index, 1);
+    newSections.splice(result.destination.index, 0, movedSection);
+
+    // Update local state optimistically
+    const updatedSections = newSections.map((s, i) => ({ ...s, order_index: i }));
+    setLocalSections(updatedSections);
+
+    // Persist
+    const sectionIds = newSections.map(s => s.id);
+    startTransition(async () => {
+      const res = await reorderSections(programId, communitySlug, sectionIds);
+      if (res.error) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to reorder modules." });
+        setLocalSections(sections); // Revert
+      }
+    });
+  }, [localSections, sections, programId, communitySlug, toast, startTransition]);
 
   const handleCreateLesson = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +236,7 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
     setCreateLessonOpen(true);
   };
 
-  const hasSections = sections.length > 0;
+  const hasSections = localSections.length > 0;
 
   return (
     <Card>
@@ -160,10 +245,12 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
           <div>
             <CardTitle>Course Content</CardTitle>
             <CardDescription>
-              {sections.length > 0
-                ? `${sections.length} modules, ${lessons.length} lessons`
-                : `${lessons.length} ${lessons.length === 1 ? "lesson" : "lessons"}`
+              {localSections.length > 0
+                ? `${localSections.length} modules, ${localLessons.length} lessons`
+                : `${localLessons.length} ${localLessons.length === 1 ? "lesson" : "lessons"}`
               }
+              {" · "}
+              <span className="text-muted-foreground">Drag to reorder</span>
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -253,7 +340,7 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
                         disabled={isPending}
                       />
                     </div>
-                    {sections.length > 0 && (
+                    {localSections.length > 0 && (
                       <div className="space-y-2">
                         <Label>Module (optional)</Label>
                         <select
@@ -263,7 +350,7 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
                           disabled={isPending}
                         >
                           <option value="">No module (standalone)</option>
-                          {sections.map((s) => (
+                          {localSections.map((s) => (
                             <option key={s.id} value={s.id}>
                               {s.title}
                             </option>
@@ -297,27 +384,59 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
         </div>
       </CardHeader>
       <CardContent>
-        {lessons.length === 0 && sections.length === 0 ? (
+        {localLessons.length === 0 && localSections.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No content yet. Add a module or lesson to get started.</p>
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Render sections with their lessons */}
-            {sections.map((section, sIdx) => (
-              <SectionBlock
-                key={section.id}
-                section={section}
-                sectionIndex={sIdx}
-                lessons={sectionLessons(section.id)}
-                programId={programId}
-                communitySlug={communitySlug}
-                onAddLesson={() => openCreateLessonInSection(section.id)}
-              />
-            ))}
+            {/* Sections with drag-to-reorder */}
+            {hasSections && (
+              <DragDropContext onDragEnd={handleSectionDragEnd}>
+                <Droppable droppableId="sections" type="section">
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-4"
+                    >
+                      {localSections
+                        .sort((a, b) => a.order_index - b.order_index)
+                        .map((section, sIdx) => (
+                          <Draggable
+                            key={section.id}
+                            draggableId={`section-${section.id}`}
+                            index={sIdx}
+                          >
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={snapshot.isDragging ? "opacity-80 shadow-lg rounded-lg" : ""}
+                              >
+                                <SectionBlock
+                                  section={section}
+                                  sectionIndex={sIdx}
+                                  lessons={sectionLessons(section.id)}
+                                  programId={programId}
+                                  communitySlug={communitySlug}
+                                  onAddLesson={() => openCreateLessonInSection(section.id)}
+                                  dragHandleProps={provided.dragHandleProps}
+                                  onLessonDragEnd={handleLessonDragEnd}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            )}
 
-            {/* Unsectioned lessons */}
+            {/* Unsectioned lessons with drag-to-reorder */}
             {unsectionedLessons.length > 0 && (
               <div className="space-y-2">
                 {hasSections && (
@@ -326,15 +445,52 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
                     Standalone Lessons
                   </div>
                 )}
-                {unsectionedLessons.map((lesson, index) => (
-                  <LessonItem
-                    key={lesson.id}
-                    lesson={lesson}
-                    index={index}
-                    programId={programId}
-                    communitySlug={communitySlug}
-                  />
-                ))}
+                <DragDropContext onDragEnd={handleLessonDragEnd}>
+                  <Droppable droppableId="unsectioned" type="lesson">
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="space-y-1"
+                      >
+                        {unsectionedLessons
+                          .sort((a, b) => a.order_index - b.order_index)
+                          .map((lesson, index) => (
+                            <Draggable
+                              key={lesson.id}
+                              draggableId={`lesson-${lesson.id}`}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={snapshot.isDragging ? "opacity-80 shadow-lg rounded-lg" : ""}
+                                >
+                                  <LessonItem
+                                    lesson={lesson}
+                                    index={index}
+                                    programId={programId}
+                                    communitySlug={communitySlug}
+                                    dragHandleProps={provided.dragHandleProps}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              </div>
+            )}
+
+            {/* No sections and no lessons */}
+            {!hasSections && unsectionedLessons.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No content yet. Add a module or lesson to get started.</p>
               </div>
             )}
           </div>
@@ -352,6 +508,8 @@ function SectionBlock({
   programId,
   communitySlug,
   onAddLesson,
+  dragHandleProps,
+  onLessonDragEnd,
 }: {
   section: ProgramSection;
   sectionIndex: number;
@@ -359,6 +517,8 @@ function SectionBlock({
   programId: string;
   communitySlug: string;
   onAddLesson: () => void;
+  dragHandleProps?: Record<string, unknown> | null;
+  onLessonDragEnd: (result: DropResult) => void;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -407,7 +567,7 @@ function SectionBlock({
     <div className="border rounded-lg overflow-hidden">
       {/* Section header */}
       <div className="flex items-center gap-3 bg-muted/50 px-4 py-3">
-        <div className="text-muted-foreground cursor-grab">
+        <div {...(dragHandleProps || {})} className="text-muted-foreground cursor-grab active:cursor-grabbing">
           <GripVertical className="h-4 w-4" />
         </div>
         <Layers className="h-4 w-4 text-muted-foreground" />
@@ -476,30 +636,55 @@ function SectionBlock({
         </DropdownMenu>
       </div>
 
-      {/* Section lessons */}
-      <div className="p-2 space-y-1">
-        {lessons.length > 0 ? (
-          lessons.map((lesson, index) => (
-            <LessonItem
-              key={lesson.id}
-              lesson={lesson}
-              index={index}
-              programId={programId}
-              communitySlug={communitySlug}
-            />
-          ))
-        ) : (
-          <div className="text-center py-4 text-sm text-muted-foreground">
-            No lessons in this module yet.
-            <button
-              onClick={onAddLesson}
-              className="text-primary hover:underline ml-1"
+      {/* Section lessons with drag-to-reorder */}
+      <DragDropContext onDragEnd={onLessonDragEnd}>
+        <Droppable droppableId={section.id} type="lesson">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="p-2 space-y-1"
             >
-              Add one
-            </button>
-          </div>
-        )}
-      </div>
+              {lessons.length > 0 ? (
+                lessons.map((lesson, index) => (
+                  <Draggable
+                    key={lesson.id}
+                    draggableId={`lesson-${lesson.id}`}
+                    index={index}
+                  >
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={snapshot.isDragging ? "opacity-80 shadow-lg rounded-lg" : ""}
+                      >
+                        <LessonItem
+                          lesson={lesson}
+                          index={index}
+                          programId={programId}
+                          communitySlug={communitySlug}
+                          dragHandleProps={provided.dragHandleProps}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))
+              ) : (
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  No lessons in this module yet.
+                  <button
+                    onClick={onAddLesson}
+                    className="text-primary hover:underline ml-1"
+                  >
+                    Add one
+                  </button>
+                </div>
+              )}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   );
 }
@@ -509,11 +694,13 @@ function LessonItem({
   index,
   programId,
   communitySlug,
+  dragHandleProps,
 }: {
   lesson: Lesson;
   index: number;
   programId: string;
   communitySlug: string;
+  dragHandleProps?: Record<string, unknown> | null;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -594,7 +781,7 @@ function LessonItem({
 
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-      <div className="text-muted-foreground cursor-grab">
+      <div {...(dragHandleProps || {})} className="text-muted-foreground cursor-grab active:cursor-grabbing">
         <GripVertical className="h-4 w-4" />
       </div>
       <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-sm font-medium">
@@ -614,6 +801,11 @@ function LessonItem({
           <span className="text-xs text-muted-foreground capitalize">
             {lesson.visibility}
           </span>
+          {lesson.video_duration_seconds && (
+            <span className="text-xs text-muted-foreground">
+              {Math.floor(lesson.video_duration_seconds / 60)} min
+            </span>
+          )}
         </div>
       </div>
       <DropdownMenu>

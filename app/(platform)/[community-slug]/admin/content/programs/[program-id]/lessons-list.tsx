@@ -422,7 +422,7 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
                                   programId={programId}
                                   communitySlug={communitySlug}
                                   onAddLesson={() => openCreateLessonInSection(section.id)}
-                                  dragHandleProps={provided.dragHandleProps}
+                                  dragHandleProps={provided.dragHandleProps as unknown as Record<string, unknown> | null}
                                   onLessonDragEnd={handleLessonDragEnd}
                                 />
                               </div>
@@ -472,7 +472,7 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
                                     index={index}
                                     programId={programId}
                                     communitySlug={communitySlug}
-                                    dragHandleProps={provided.dragHandleProps}
+                                    dragHandleProps={provided.dragHandleProps as unknown as Record<string, unknown> | null}
                                   />
                                 </div>
                               )}
@@ -663,7 +663,7 @@ function SectionBlock({
                           index={index}
                           programId={programId}
                           communitySlug={communitySlug}
-                          dragHandleProps={provided.dragHandleProps}
+                          dragHandleProps={provided.dragHandleProps as unknown as Record<string, unknown> | null}
                         />
                       </div>
                     )}

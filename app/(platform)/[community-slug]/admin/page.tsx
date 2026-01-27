@@ -39,7 +39,9 @@ export default async function AdminDashboardPage({
   const resolvedParams = await params;
   const communitySlug = resolvedParams["community-slug"];
 
-  if (!userId) {
+  const isDemo = communitySlug === "demo";
+
+  if (!userId && !isDemo) {
     redirect("/sign-in");
   }
 
@@ -48,12 +50,14 @@ export default async function AdminDashboardPage({
 
   if (!community) redirect("/");
 
-  // Use cached query for profile
-  const profile = await getProfileByClerkId(userId, community.id);
+  // Use cached query for profile (skip for unauthenticated demo visitors)
+  const profile = userId
+    ? await getProfileByClerkId(userId, community.id)
+    : null;
 
-  // For demo purposes, allow all authenticated users to access admin
-  // In production: if (profile?.role !== "ADMIN") redirect(...)
-  if (!profile) {
+  // For demo mode, allow unauthenticated access to view admin dashboard
+  // For regular communities, require a profile
+  if (!profile && !isDemo) {
     redirect(`/${communitySlug}`);
   }
 
@@ -69,6 +73,23 @@ export default async function AdminDashboardPage({
 
   return (
     <div className="container py-6">
+      {/* Demo Banner */}
+      {isDemo && (
+        <div className="mb-6 rounded-lg border border-violet-500/30 bg-violet-500/10 p-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-violet-400" />
+            <div>
+              <p className="font-medium text-violet-300">
+                Demo Admin Dashboard
+              </p>
+              <p className="text-sm text-violet-400/80">
+                This is what community owners see. Manage content, view analytics, and configure your community — all from one place.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>

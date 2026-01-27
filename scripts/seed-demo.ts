@@ -25,8 +25,8 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const DEMO_SLUG = "vibe-code-crew";
-const DEMO_COMMUNITY_NAME = "Vibe Code Crew";
+const DEMO_SLUG = "demo";
+const DEMO_COMMUNITY_NAME = "Creator Academy";
 
 // ============================================================================
 // Seed Data
@@ -388,8 +388,7 @@ const EVENTS = [
     location: "Zoom (link shared in community)",
     starts_at: getFutureDate(7),
     ends_at: getFutureDate(7, 2),
-    event_url: "https://zoom.us/demo",
-    price_cents: 0,
+    external_url: "https://zoom.us/demo",
   },
   {
     title: "AMA: From Side Project to Full-Time Indie Hacker",
@@ -399,8 +398,7 @@ const EVENTS = [
     location: "Discord Voice Channel",
     starts_at: getFutureDate(14),
     ends_at: getFutureDate(14, 1.5),
-    event_url: null,
-    price_cents: 0,
+    external_url: null,
   },
   {
     title: "Workshop: Mastering TypeScript Generics",
@@ -410,8 +408,7 @@ const EVENTS = [
     location: "Zoom (link shared 1hr before)",
     starts_at: getFutureDate(21),
     ends_at: getFutureDate(21, 3),
-    event_url: null,
-    price_cents: 0,
+    external_url: null,
   },
 ];
 
@@ -497,7 +494,7 @@ async function seedCommunity(): Promise<string> {
       name: DEMO_COMMUNITY_NAME,
       slug: DEMO_SLUG,
       description:
-        "A community for developers who love building with modern web technologies. Learn, ship, and grow together.",
+        "Master the art of building and monetizing online communities. Join 5,000+ creators learning to build sustainable businesses around their expertise.",
       primary_color: "#6366f1",
       accent_color: "#8b5cf6",
       logo_url: null,
@@ -622,7 +619,7 @@ async function seedComments(postIds: string[], profileIds: string[]) {
     if (count > 0) {
       await supabase
         .from("posts")
-        .update({ comment_count: count })
+        .update({ comments_count: count })
         .eq("id", postIds[i]);
     }
   }
@@ -657,7 +654,7 @@ async function seedLikes(postIds: string[], profileIds: string[]) {
     const count = likes.filter((l) => l.post_id === postId).length;
     await supabase
       .from("posts")
-      .update({ like_count: count })
+      .update({ likes_count: count })
       .eq("id", postId);
   }
 }
@@ -777,8 +774,7 @@ async function seedEvents(communityId: string) {
       location: event.location,
       starts_at: event.starts_at,
       ends_at: event.ends_at,
-      event_url: event.event_url,
-      price_cents: event.price_cents,
+      external_url: event.external_url,
     });
 
     if (error) {

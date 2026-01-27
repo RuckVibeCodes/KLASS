@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import type { ContentVisibility, QuestionType } from "@/types/database";
+import { isDemoSlug } from "@/lib/demo";
 
 // ============================================================================
 // PROGRAM CRUD
@@ -18,6 +19,8 @@ export async function createProgram(
     visibility?: ContentVisibility;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-program" } };
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Unauthorized" };
@@ -97,6 +100,8 @@ export async function updateProgram(
     order_index?: number;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-program" } };
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Unauthorized" };
@@ -148,6 +153,8 @@ export async function updateProgram(
 }
 
 export async function deleteProgram(programId: string, communitySlug: string) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Unauthorized" };
@@ -200,6 +207,8 @@ export async function reorderPrograms(
   communitySlug: string,
   programIds: string[]
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Unauthorized" };
@@ -243,6 +252,8 @@ export async function createLesson(
     section_id?: string | null;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-lesson" } };
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Unauthorized" };

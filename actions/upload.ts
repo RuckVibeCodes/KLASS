@@ -13,11 +13,19 @@ const ALLOWED_IMAGE_TYPES = [
   "image/svg+xml",
 ];
 
+// Demo community ID — uploads return a placeholder instead of storing files
+const DEMO_COMMUNITY_ID = "7e59f212-7ec1-4802-9684-51726cf7bd7a";
+
 export async function uploadImage(
   formData: FormData,
   bucket: BucketName,
   communityId: string
 ): Promise<{ url?: string; error?: string }> {
+  // Demo sandbox: return a placeholder image, don't actually upload
+  if (communityId === DEMO_COMMUNITY_ID) {
+    return { url: "https://api.dicebear.com/7.x/shapes/svg?seed=demo-upload" };
+  }
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Unauthorized" };

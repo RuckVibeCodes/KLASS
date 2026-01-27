@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { Resource, ContentVisibility } from "@/types/database";
+import { isDemoSlug } from "@/lib/demo";
 
 /**
  * Get all resources for a community
@@ -70,6 +71,8 @@ export async function createResource(
     visibility?: ContentVisibility;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-resource" } };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -152,6 +155,8 @@ export async function updateResource(
     visibility: ContentVisibility;
   }>
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-resource" } };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -216,6 +221,8 @@ export async function updateResource(
  * Delete a resource
  */
 export async function deleteResource(resourceId: string, communitySlug: string) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 

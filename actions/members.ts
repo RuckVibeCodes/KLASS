@@ -3,12 +3,15 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { isDemoSlug } from "@/lib/demo";
 
 export async function updateMemberRole(
   memberId: string,
   newRole: string,
   communitySlug: string
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -63,6 +66,8 @@ export async function updateMemberTier(
   newTier: string,
   communitySlug: string
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -116,6 +121,8 @@ export async function removeMember(
   memberId: string,
   communitySlug: string
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
 
   if (!userId) {

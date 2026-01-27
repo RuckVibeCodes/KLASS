@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { MembershipTier, BillingCycle } from "@/types/database";
+import { isDemoSlug } from "@/lib/demo";
 
 /**
  * Get all membership tiers for a community
@@ -52,6 +53,8 @@ export async function createTier(
     is_default?: boolean;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-tier" } };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -144,6 +147,8 @@ export async function updateTier(
     active: boolean;
   }>
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-tier" } };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -217,6 +222,8 @@ export async function updateTier(
  * Members on this tier should be migrated first
  */
 export async function deleteTier(tierId: string, communitySlug: string) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -275,6 +282,8 @@ export async function deleteTier(tierId: string, communitySlug: string) {
  * Set the default tier for new members
  */
 export async function setDefaultTier(tierId: string, communitySlug: string) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   return updateTier(tierId, communitySlug, { is_default: true });
 }
 

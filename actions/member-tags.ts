@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { isDemoSlug } from "@/lib/demo";
 
 export interface MemberTag {
   id: string;
@@ -64,6 +65,8 @@ export async function createTag(
   communitySlug: string,
   data: { name: string; color?: string; description?: string }
 ): Promise<{ data: MemberTag | null; error: string | null }> {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-tag", name: "Demo Tag" } as MemberTag, error: null };
+
   const { userId } = await auth();
   if (!userId) {
     return { data: null, error: "Not authenticated" };
@@ -123,6 +126,8 @@ export async function updateTag(
   communitySlug: string,
   data: { name?: string; color?: string; description?: string }
 ): Promise<{ data: MemberTag | null; error: string | null }> {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-tag", name: "Updated" } as MemberTag, error: null };
+
   const { userId } = await auth();
   if (!userId) {
     return { data: null, error: "Not authenticated" };
@@ -187,6 +192,7 @@ export async function deleteTag(
   tagId: string,
   communitySlug: string
 ): Promise<{ error: string | null }> {
+  if (isDemoSlug(communitySlug)) return { error: null };
   const { userId } = await auth();
   if (!userId) {
     return { error: "Not authenticated" };
@@ -238,6 +244,7 @@ export async function assignTag(
   tagId: string,
   communitySlug: string
 ): Promise<{ error: string | null }> {
+  if (isDemoSlug(communitySlug)) return { error: null };
   const { userId } = await auth();
   if (!userId) {
     return { error: "Not authenticated" };

@@ -3,8 +3,14 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { isDemoSlug } from "@/lib/demo";
 
 export async function createPost(formData: FormData) {
+  const communitySlugCheck = formData.get("communitySlug") as string;
+  if (isDemoSlug(communitySlugCheck || "")) {
+    return { id: "demo-post", content: formData.get("content") };
+  }
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -99,6 +105,8 @@ export async function createPost(formData: FormData) {
 }
 
 export async function deletePost(postId: string, communitySlug: string) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -122,6 +130,8 @@ export async function togglePinPost(
   communitySlug: string,
   pinned: boolean
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -144,6 +154,11 @@ export async function togglePinPost(
 }
 
 export async function createComment(formData: FormData) {
+  const commentSlugCheck = formData.get("communitySlug") as string;
+  if (isDemoSlug(commentSlugCheck || "")) {
+    return { id: "demo-comment", content: formData.get("content") };
+  }
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -198,6 +213,8 @@ export async function toggleLikePost(
   communityId: string,
   communitySlug: string
 ) {
+  if (isDemoSlug(communitySlug)) return { liked: true, count: Math.floor(Math.random() * 10) + 1 };
+
   const { userId } = await auth();
 
   if (!userId) {

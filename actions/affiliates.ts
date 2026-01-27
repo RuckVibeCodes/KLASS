@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { generateReferralCode } from "@/lib/referral";
+import { isDemoSlug } from "@/lib/demo";
 
 const MAX_CODE_GENERATION_ATTEMPTS = 5;
 
@@ -181,6 +182,8 @@ export async function updateAffiliateSettings(
     paid_only: boolean;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 

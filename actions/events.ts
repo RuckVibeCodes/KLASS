@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import type { ContentVisibility } from "@/types/database";
+import { isDemoSlug } from "@/lib/demo";
 
 export async function getCommunityEvents(communitySlug: string) {
   const { userId } = await auth();
@@ -96,6 +97,8 @@ export async function updateEvent(
     price_cents?: number;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-event" } };
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Not authenticated" };
@@ -146,6 +149,8 @@ export async function updateEvent(
 }
 
 export async function deleteEvent(eventId: string, communitySlug: string) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Not authenticated" };
@@ -205,6 +210,8 @@ export async function createEvent(
     price_cents?: number;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-event" } };
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "Not authenticated", data: null };

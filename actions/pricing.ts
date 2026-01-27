@@ -5,6 +5,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { syncContentToStripe } from "@/lib/stripe/products";
 import type { ContentType } from "@/types/database";
+import { isDemoSlug } from "@/lib/demo";
 
 /**
  * Update community membership pricing
@@ -14,6 +15,8 @@ export async function updateCommunityPricing(
   communitySlug: string,
   priceCents: number
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -87,6 +90,8 @@ export async function updateProgramPricing(
   communitySlug: string,
   priceCents: number
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -191,6 +196,8 @@ export async function updateResourcePricing(
   communitySlug: string,
   priceCents: number
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 

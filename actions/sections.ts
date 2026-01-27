@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { isDemoSlug } from "@/lib/demo";
 
 // ============================================================================
 // SECTION CRUD
@@ -37,6 +38,8 @@ export async function createSection(
     description?: string;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { data: { id: "demo-section" } };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -88,6 +91,8 @@ export async function updateSection(
     order_index?: number;
   }
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -119,6 +124,8 @@ export async function deleteSection(
   programId: string,
   communitySlug: string
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -155,6 +162,8 @@ export async function reorderSections(
   communitySlug: string,
   sectionIds: string[]
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
@@ -187,6 +196,8 @@ export async function moveLessonToSection(
   programId: string,
   communitySlug: string
 ) {
+  if (isDemoSlug(communitySlug)) return { success: true };
+
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 

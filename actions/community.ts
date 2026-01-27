@@ -5,11 +5,22 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { CommunitySettings } from "@/types/database";
 
+// Demo mode: return fake success without writing to DB
+const DEMO_SLUG = "demo";
+function isDemoMode(slug: string) {
+  return slug === DEMO_SLUG;
+}
+
 export async function updateCommunitySettings(
   communityId: string,
   communitySlug: string,
   settings: CommunitySettings
 ) {
+  // Demo sandbox: fake success, no writes
+  if (isDemoMode(communitySlug)) {
+    return { data: { id: communityId, settings_json: settings } };
+  }
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -61,6 +72,10 @@ export async function updateCommunity(
     accent_color?: string;
   }
 ) {
+  if (isDemoMode(communitySlug)) {
+    return { data: { id: communityId, ...updates } };
+  }
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -108,6 +123,10 @@ export async function updateCommunityModules(
     enabled: boolean;
   }>
 ) {
+  if (isDemoMode(communitySlug)) {
+    return { success: true };
+  }
+
   const { userId } = await auth();
 
   if (!userId) {

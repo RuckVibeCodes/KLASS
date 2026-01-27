@@ -10,6 +10,7 @@ import {
   MessageSquare,
   MessageCircle,
   BookOpen,
+  FolderOpen,
   Calendar,
   Users,
   Info,
@@ -25,6 +26,7 @@ import { ViewModeToggle } from "@/components/admin/view-mode-toggle";
 const navItems = [
   { key: "community", label: "Community", icon: MessageSquare, path: "" },
   { key: "programs", label: "Classroom", icon: BookOpen, path: "/programs" },
+  { key: "resources", label: "Resources", icon: FolderOpen, path: "/resources" },
   { key: "events", label: "Calendar", icon: Calendar, path: "/events" },
   { key: "members", label: "Members", icon: Users, path: "/members" },
   { key: "chat", label: "Chat", icon: MessageCircle, path: "/chat" },

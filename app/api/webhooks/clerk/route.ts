@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       "svix-signature": svix_signature,
     }) as WebhookEvent;
   } catch (err) {
-    console.error("Webhook verification failed:", err);
+    console.error("Webhook verification failed:", err instanceof Error ? err.message : "Unknown error");
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Clerk webhook handler error:", error);
+    console.error("Clerk webhook handler error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Webhook handler failed" },
       { status: 500 }

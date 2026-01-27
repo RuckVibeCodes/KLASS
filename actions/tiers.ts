@@ -29,8 +29,8 @@ export async function getCommunityTiers(communitySlug: string) {
     .order("tier_level", { ascending: true });
 
   if (error) {
-    console.error("Failed to get tiers:", error);
-    return { error: error.message };
+    console.error("Failed to get tiers:", error.message);
+    return { error: "Failed to get tiers" };
   }
 
   return { data: tiers as MembershipTier[] };
@@ -117,8 +117,8 @@ export async function createTier(
     .single();
 
   if (error) {
-    console.error("Failed to create tier:", error);
-    return { error: error.message };
+    console.error("Failed to create tier:", error.message);
+    return { error: "Failed to create tier" };
   }
 
   revalidatePath(`/${communitySlug}/admin/settings`);
@@ -202,8 +202,8 @@ export async function updateTier(
     .single();
 
   if (error) {
-    console.error("Failed to update tier:", error);
-    return { error: error.message };
+    console.error("Failed to update tier:", error.message);
+    return { error: "Failed to update tier" };
   }
 
   revalidatePath(`/${communitySlug}/admin/settings`);
@@ -261,8 +261,8 @@ export async function deleteTier(tierId: string, communitySlug: string) {
     .eq("id", tierId);
 
   if (error) {
-    console.error("Failed to delete tier:", error);
-    return { error: error.message };
+    console.error("Failed to delete tier:", error.message);
+    return { error: "Failed to delete tier" };
   }
 
   revalidatePath(`/${communitySlug}/admin/settings`);
@@ -396,8 +396,8 @@ export async function assignMemberTier(
     .eq("id", profileId);
 
   if (error) {
-    console.error("Failed to assign tier:", error);
-    return { error: error.message };
+    console.error("Failed to assign tier:", error.message);
+    return { error: "Failed to assign tier" };
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -425,8 +425,8 @@ export async function getContentTierRequirement(
     .single();
 
   if (error && error.code !== "PGRST116") {
-    console.error("Failed to get tier requirement:", error);
-    return { error: error.message };
+    console.error("Failed to get tier requirement:", error.message);
+    return { error: "Failed to get tier requirement" };
   }
 
   return { data: data || null };
@@ -479,8 +479,8 @@ export async function setContentTierRequirement(
       .eq("community_id", community.id);
 
     if (error) {
-      console.error("Failed to set event tier requirement:", error);
-      return { error: error.message };
+      console.error("Failed to set event tier requirement:", error.message);
+      return { error: "Failed to set event tier requirement" };
     }
 
     revalidatePath(`/${communitySlug}/admin/content/events`);
@@ -504,8 +504,8 @@ export async function setContentTierRequirement(
     .single();
 
   if (error) {
-    console.error("Failed to set tier requirement:", error);
-    return { error: error.message };
+    console.error("Failed to set tier requirement:", error.message);
+    return { error: "Failed to set tier requirement" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content`);
@@ -559,8 +559,8 @@ export async function removeContentTierRequirement(
       .eq("community_id", community.id);
 
     if (error) {
-      console.error("Failed to remove event tier requirement:", error);
-      return { error: error.message };
+      console.error("Failed to remove event tier requirement:", error.message);
+      return { error: "Failed to remove event tier requirement" };
     }
 
     revalidatePath(`/${communitySlug}/admin/content/events`);
@@ -577,8 +577,8 @@ export async function removeContentTierRequirement(
     .eq("content_id", contentId);
 
   if (error) {
-    console.error("Failed to remove tier requirement:", error);
-    return { error: error.message };
+    console.error("Failed to remove tier requirement:", error.message);
+    return { error: "Failed to remove tier requirement" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content`);

@@ -77,8 +77,8 @@ export async function grantContentAccess(
     .single();
 
   if (error) {
-    console.error("Failed to grant access:", error);
-    return { error: error.message };
+    console.error("Failed to grant access:", error.message);
+    return { error: "Failed to grant access" };
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -126,8 +126,8 @@ export async function revokeContentAccess(
     .eq("id", grantId);
 
   if (error) {
-    console.error("Failed to revoke access:", error);
-    return { error: error.message };
+    console.error("Failed to revoke access:", error.message);
+    return { error: "Failed to revoke access" };
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -191,8 +191,8 @@ export async function getContentAccessList(
     .order("granted_at", { ascending: false });
 
   if (error) {
-    console.error("Failed to get access list:", error);
-    return { error: error.message };
+    console.error("Failed to get access list:", error.message);
+    return { error: "Failed to get access list" };
   }
 
   return { data: grants };
@@ -245,8 +245,8 @@ export async function getMemberAccessGrants(
     .order("granted_at", { ascending: false });
 
   if (error) {
-    console.error("Failed to get member grants:", error);
-    return { error: error.message };
+    console.error("Failed to get member grants:", error.message);
+    return { error: "Failed to get member grants" };
   }
 
   return { data: grants };
@@ -313,8 +313,8 @@ export async function getCommunityMembersForGrants(communitySlug: string) {
     .order("display_name");
 
   if (error) {
-    console.error("Failed to get members:", error);
-    return { error: error.message };
+    console.error("Failed to get members:", error.message);
+    return { error: "Failed to get members" };
   }
 
   return { data: members };

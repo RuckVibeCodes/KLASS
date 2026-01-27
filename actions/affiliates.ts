@@ -62,7 +62,7 @@ export async function getOrCreateReferralCode(communitySlug: string) {
         .eq("id", profile.id);
 
       if (updateError) {
-        console.error("Failed to save referral code:", updateError);
+        console.error("Failed to save referral code:", updateError.message);
         return { error: "Failed to generate referral code" };
       }
 
@@ -225,8 +225,8 @@ export async function updateAffiliateSettings(
     .single();
 
   if (error) {
-    console.error("Failed to update affiliate settings:", error);
-    return { error: error.message };
+    console.error("Failed to update affiliate settings:", error.message);
+    return { error: "Failed to update affiliate settings" };
   }
 
   revalidatePath(`/${communitySlug}/admin/settings`);
@@ -282,8 +282,8 @@ export async function recordReferralSignup(
     .eq("id", newProfileId);
 
   if (updateError) {
-    console.error("Failed to set referrer:", updateError);
-    return { error: updateError.message };
+    console.error("Failed to set referrer:", updateError.message);
+    return { error: "Update failed" };
   }
 
   // Create signup event
@@ -298,8 +298,8 @@ export async function recordReferralSignup(
     });
 
   if (eventError) {
-    console.error("Failed to create referral event:", eventError);
-    return { error: eventError.message };
+    console.error("Failed to create referral event:", eventError.message);
+    return { error: "Operation failed" };
   }
 
   return { data: { success: true } };
@@ -372,8 +372,8 @@ export async function recordPaidConversion(
     });
 
   if (eventError) {
-    console.error("Failed to create conversion event:", eventError);
-    return { error: eventError.message };
+    console.error("Failed to create conversion event:", eventError.message);
+    return { error: "Operation failed" };
   }
 
   return {
@@ -432,8 +432,8 @@ export async function getMembersForConversionSimulation(communityId: string) {
     .limit(50);
 
   if (error) {
-    console.error("Failed to get members for simulation:", error);
-    return { error: error.message };
+    console.error("Failed to get members for simulation:", error.message);
+    return { error: "Failed to get members for simulation" };
   }
 
   return { data: profiles };

@@ -53,7 +53,7 @@ export async function getCommunityTags(
     .order("name");
 
   if (error) {
-    return { data: null, error: error.message };
+    return { data: null, error: "Failed to load tags" };
   }
 
   return { data: tags, error: null };
@@ -110,7 +110,7 @@ export async function createTag(
     if (error.code === "23505") {
       return { data: null, error: "A tag with this name already exists" };
     }
-    return { data: null, error: error.message };
+    return { data: null, error: "Failed to create tag" };
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -175,7 +175,7 @@ export async function updateTag(
     if (error.code === "23505") {
       return { data: null, error: "A tag with this name already exists" };
     }
-    return { data: null, error: error.message };
+    return { data: null, error: "Failed to update tag" };
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -225,7 +225,7 @@ export async function deleteTag(
   const { error } = await supabase.from("member_tags").delete().eq("id", tagId);
 
   if (error) {
-    return { error: error.message };
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -279,7 +279,7 @@ export async function assignTag(
     if (error.code === "23505") {
       return { error: "Tag already assigned to this member" };
     }
-    return { error: error.message };
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -330,7 +330,7 @@ export async function removeTag(
     .eq("tag_id", tagId);
 
   if (error) {
-    return { error: error.message };
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -372,7 +372,7 @@ export async function getProfileTags(
     .eq("profile_id", profileId);
 
   if (error) {
-    return { data: null, error: error.message };
+    return { data: null, error: "Failed to load profile tags" };
   }
 
   return { data: profileTags, error: null };

@@ -45,7 +45,8 @@ export async function updateProfile(input: UpdateProfileInput) {
     .eq("id", input.profileId);
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to update profile:", error.message);
+    throw new Error("Failed to update profile");
   }
 
   revalidatePath(`/${input.communitySlug}`);

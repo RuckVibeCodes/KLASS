@@ -61,7 +61,7 @@ export async function getPlaybookProgress(
     .single();
 
   if (error && error.code !== "PGRST116") {
-    return { data: null, error: error.message };
+    return { data: null, error: "Failed to load playbook progress" };
   }
 
   // Return existing progress or empty progress
@@ -122,7 +122,7 @@ export async function getAllPlaybookProgress(
     .eq("profile_id", profile.id);
 
   if (error) {
-    return { data: [], error: error.message };
+    return { data: [], error: "Failed to load playbook progress" };
   }
 
   return { data: progress || [], error: null };
@@ -212,8 +212,8 @@ export async function togglePlaybookStep(
   );
 
   if (error) {
-    console.error("Failed to toggle step:", error);
-    return { error: error.message };
+    console.error("Failed to toggle step:", error.message);
+    return { error: "Failed to toggle step" };
   }
 
   revalidatePath(`/${communitySlug}/admin/playbooks`);
@@ -269,8 +269,8 @@ export async function resetPlaybookProgress(
     .eq("playbook_id", playbookId);
 
   if (error) {
-    console.error("Failed to reset progress:", error);
-    return { error: error.message };
+    console.error("Failed to reset progress:", error.message);
+    return { error: "Failed to reset progress" };
   }
 
   revalidatePath(`/${communitySlug}/admin/playbooks`);

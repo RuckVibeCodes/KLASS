@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: result.url });
   } catch (error) {
-    console.error("Platform checkout error:", error);
+    console.error("Platform checkout error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to create checkout session" },
       { status: 500 }

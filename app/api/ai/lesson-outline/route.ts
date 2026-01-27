@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ outline });
   } catch (error) {
-    console.error("AI lesson outline error:", error);
+    console.error("AI lesson outline error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to generate outline" },
       { status: 500 }

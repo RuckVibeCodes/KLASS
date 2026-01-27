@@ -147,7 +147,7 @@ export async function GET(req: Request) {
       pendingPayouts,
     });
   } catch (error) {
-    console.error("Earnings fetch error:", error);
+    console.error("Earnings fetch error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to fetch earnings" },
       { status: 500 }

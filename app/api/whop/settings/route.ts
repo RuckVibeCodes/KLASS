@@ -75,7 +75,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Whop settings error:", error);
+    console.error("Whop settings error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to save Whop settings" },
       { status: 500 }
@@ -137,7 +137,7 @@ export async function GET(req: Request) {
       whopMemberCount: whopMemberCount || 0,
     });
   } catch (error) {
-    console.error("Whop settings fetch error:", error);
+    console.error("Whop settings fetch error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to fetch Whop settings" },
       { status: 500 }

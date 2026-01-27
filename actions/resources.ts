@@ -27,8 +27,8 @@ export async function getCommunityResources(communitySlug: string) {
     .order("order_index");
 
   if (error) {
-    console.error("Failed to get resources:", error);
-    return { error: error.message };
+    console.error("Failed to get resources:", error.message);
+    return { error: "Failed to get resources" };
   }
 
   return { data: resources as Resource[] };
@@ -47,8 +47,8 @@ export async function getResource(resourceId: string) {
     .single();
 
   if (error) {
-    console.error("Failed to get resource:", error);
-    return { error: error.message };
+    console.error("Failed to get resource:", error.message);
+    return { error: "Failed to get resource" };
   }
 
   return { data: data as Resource };
@@ -128,8 +128,8 @@ export async function createResource(
     .single();
 
   if (error) {
-    console.error("Failed to create resource:", error);
-    return { error: error.message };
+    console.error("Failed to create resource:", error.message);
+    return { error: "Failed to create resource" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/resources`);
@@ -202,8 +202,8 @@ export async function updateResource(
     .single();
 
   if (error) {
-    console.error("Failed to update resource:", error);
-    return { error: error.message };
+    console.error("Failed to update resource:", error.message);
+    return { error: "Failed to update resource" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/resources`);
@@ -250,8 +250,8 @@ export async function deleteResource(resourceId: string, communitySlug: string) 
     .eq("id", resourceId);
 
   if (error) {
-    console.error("Failed to delete resource:", error);
-    return { error: error.message };
+    console.error("Failed to delete resource:", error.message);
+    return { error: "Failed to delete resource" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/resources`);

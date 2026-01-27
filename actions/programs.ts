@@ -36,6 +36,18 @@ export async function createProgram(
     return { error: "Community not found" };
   }
 
+  // Verify admin role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("clerk_user_id", userId)
+    .eq("community_id", community.id)
+    .single();
+
+  if (profile?.role !== "ADMIN") {
+    return { error: "Admin access required" };
+  }
+
   // Get max order_index
   const adminSupabase = await createAdminClient();
   const { data: maxOrder } = await adminSupabase
@@ -63,8 +75,8 @@ export async function createProgram(
     .single();
 
   if (error) {
-    console.error("Failed to create program:", error);
-    return { error: error.message };
+    console.error("Failed to create program:", error.message);
+    return { error: "Failed to create program" };
   }
 
   revalidatePath(`/${communitySlug}/programs`);
@@ -90,6 +102,30 @@ export async function updateProgram(
     return { error: "Unauthorized" };
   }
 
+  const supabase = await createClient();
+
+  // Get community and verify admin
+  const { data: community } = await supabase
+    .from("communities")
+    .select("id")
+    .eq("slug", communitySlug)
+    .single();
+
+  if (!community) {
+    return { error: "Community not found" };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("clerk_user_id", userId)
+    .eq("community_id", community.id)
+    .single();
+
+  if (profile?.role !== "ADMIN") {
+    return { error: "Admin access required" };
+  }
+
   const adminSupabase = await createAdminClient();
 
   const { data: program, error } = await adminSupabase
@@ -100,8 +136,8 @@ export async function updateProgram(
     .single();
 
   if (error) {
-    console.error("Failed to update program:", error);
-    return { error: error.message };
+    console.error("Failed to update program:", error.message);
+    return { error: "Failed to update program" };
   }
 
   revalidatePath(`/${communitySlug}/programs`);
@@ -117,6 +153,30 @@ export async function deleteProgram(programId: string, communitySlug: string) {
     return { error: "Unauthorized" };
   }
 
+  const supabase = await createClient();
+
+  // Get community and verify admin
+  const { data: community } = await supabase
+    .from("communities")
+    .select("id")
+    .eq("slug", communitySlug)
+    .single();
+
+  if (!community) {
+    return { error: "Community not found" };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("clerk_user_id", userId)
+    .eq("community_id", community.id)
+    .single();
+
+  if (profile?.role !== "ADMIN") {
+    return { error: "Admin access required" };
+  }
+
   const adminSupabase = await createAdminClient();
 
   // Delete program (lessons will cascade delete)
@@ -126,8 +186,8 @@ export async function deleteProgram(programId: string, communitySlug: string) {
     .eq("id", programId);
 
   if (error) {
-    console.error("Failed to delete program:", error);
-    return { error: error.message };
+    console.error("Failed to delete program:", error.message);
+    return { error: "Failed to delete program" };
   }
 
   revalidatePath(`/${communitySlug}/programs`);
@@ -155,8 +215,8 @@ export async function reorderPrograms(
       .eq("id", programIds[i]);
 
     if (error) {
-      console.error("Failed to reorder program:", error);
-      return { error: error.message };
+      console.error("Failed to reorder program:", error.message);
+      return { error: "Operation failed" };
     }
   }
 
@@ -224,8 +284,8 @@ export async function createLesson(
     .single();
 
   if (error) {
-    console.error("Failed to create lesson:", error);
-    return { error: error.message };
+    console.error("Failed to create lesson:", error.message);
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}`);
@@ -264,8 +324,8 @@ export async function updateLesson(
     .single();
 
   if (error) {
-    console.error("Failed to update lesson:", error);
-    return { error: error.message };
+    console.error("Failed to update lesson:", error.message);
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}`);
@@ -293,8 +353,8 @@ export async function deleteLesson(
     .eq("id", lessonId);
 
   if (error) {
-    console.error("Failed to delete lesson:", error);
-    return { error: error.message };
+    console.error("Failed to delete lesson:", error.message);
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}`);
@@ -323,8 +383,8 @@ export async function reorderLessons(
       .eq("id", lessonIds[i]);
 
     if (error) {
-      console.error("Failed to reorder lesson:", error);
-      return { error: error.message };
+      console.error("Failed to reorder lesson:", error.message);
+      return { error: "Operation failed" };
     }
   }
 
@@ -386,8 +446,8 @@ export async function duplicateLesson(
     .single();
 
   if (error) {
-    console.error("Failed to duplicate lesson:", error);
-    return { error: error.message };
+    console.error("Failed to duplicate lesson:", error.message);
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}`);
@@ -435,8 +495,8 @@ export async function createQuiz(
     .single();
 
   if (error) {
-    console.error("Failed to create quiz:", error);
-    return { error: error.message };
+    console.error("Failed to create quiz:", error.message);
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/programs/${programId}/lessons/${lessonId}`);
@@ -473,8 +533,8 @@ export async function updateQuiz(
     .single();
 
   if (error) {
-    console.error("Failed to update quiz:", error);
-    return { error: error.message };
+    console.error("Failed to update quiz:", error.message);
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/programs/${programId}/lessons/${lessonId}`);
@@ -501,8 +561,8 @@ export async function deleteQuiz(
     .eq("id", quizId);
 
   if (error) {
-    console.error("Failed to delete quiz:", error);
-    return { error: error.message };
+    console.error("Failed to delete quiz:", error.message);
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/programs/${programId}/lessons/${lessonId}`);
@@ -566,7 +626,7 @@ export async function createQuizQuestion(
     .single();
 
   if (questionError) {
-    console.error("Failed to create question:", questionError);
+    console.error("Failed to create question:", questionError.message);
     return { error: questionError.message };
   }
 
@@ -584,7 +644,7 @@ export async function createQuizQuestion(
     .insert(optionsToInsert);
 
   if (optionsError) {
-    console.error("Failed to create options:", optionsError);
+    console.error("Failed to create options:", optionsError.message);
     // Clean up the question if options failed
     await adminSupabase.from("quiz_questions").delete().eq("id", question.id);
     return { error: optionsError.message };
@@ -636,8 +696,8 @@ export async function updateQuizQuestion(
       .eq("id", questionId);
 
     if (error) {
-      console.error("Failed to update question:", error);
-      return { error: error.message };
+      console.error("Failed to update question:", error.message);
+      return { error: "Operation failed" };
     }
   }
 
@@ -660,7 +720,7 @@ export async function updateQuizQuestion(
       .insert(optionsToInsert);
 
     if (optionsError) {
-      console.error("Failed to update options:", optionsError);
+      console.error("Failed to update options:", optionsError.message);
       return { error: optionsError.message };
     }
   }
@@ -689,8 +749,8 @@ export async function deleteQuizQuestion(
     .eq("id", questionId);
 
   if (error) {
-    console.error("Failed to delete question:", error);
-    return { error: error.message };
+    console.error("Failed to delete question:", error.message);
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/programs/${programId}/lessons/${lessonId}`);
@@ -719,8 +779,8 @@ export async function reorderQuizQuestions(
       .eq("id", questionIds[i]);
 
     if (error) {
-      console.error("Failed to reorder question:", error);
-      return { error: error.message };
+      console.error("Failed to reorder question:", error.message);
+      return { error: "Operation failed" };
     }
   }
 
@@ -750,8 +810,8 @@ export async function getQuizForLesson(lessonId: string) {
     .single();
 
   if (error && error.code !== "PGRST116") {
-    console.error("Failed to get quiz:", error);
-    return { error: error.message };
+    console.error("Failed to get quiz:", error.message);
+    return { error: "Operation failed" };
   }
 
   return { data: quiz };

@@ -45,8 +45,8 @@ export async function listCommunities(filters?: {
   const { data, error } = await query;
 
   if (error) {
-    console.error("Failed to list communities:", error);
-    return { error: error.message };
+    console.error("Failed to list communities:", error.message);
+    return { error: "Failed to list communities" };
   }
 
   // Transform the count results
@@ -76,8 +76,8 @@ export async function getCommunityDetails(communityId: string) {
     .single();
 
   if (communityError) {
-    console.error("Failed to get community:", communityError);
-    return { error: communityError.message };
+    console.error("Failed to get community:", communityError.message);
+    return { error: "Community not found" };
   }
 
   // Get admins
@@ -137,8 +137,8 @@ export async function pauseCommunity(communityId: string) {
     .single();
 
   if (error) {
-    console.error("Failed to pause community:", error);
-    return { error: error.message };
+    console.error("Failed to pause community:", error.message);
+    return { error: "Failed to pause community" };
   }
 
   revalidatePath("/system-admin/communities");
@@ -163,8 +163,8 @@ export async function reactivateCommunity(communityId: string) {
     .single();
 
   if (error) {
-    console.error("Failed to reactivate community:", error);
-    return { error: error.message };
+    console.error("Failed to reactivate community:", error.message);
+    return { error: "Failed to reactivate community" };
   }
 
   revalidatePath("/system-admin/communities");
@@ -189,8 +189,8 @@ export async function suspendCommunity(communityId: string) {
     .single();
 
   if (error) {
-    console.error("Failed to suspend community:", error);
-    return { error: error.message };
+    console.error("Failed to suspend community:", error.message);
+    return { error: "Failed to suspend community" };
   }
 
   revalidatePath("/system-admin/communities");
@@ -218,8 +218,8 @@ export async function updateBillingStatus(
     .single();
 
   if (error) {
-    console.error("Failed to update billing status:", error);
-    return { error: error.message };
+    console.error("Failed to update billing status:", error.message);
+    return { error: "Failed to update billing status" };
   }
 
   revalidatePath("/system-admin/communities");
@@ -308,8 +308,8 @@ export async function provisionCommunity(data: {
     .single();
 
   if (communityError) {
-    console.error("Failed to create community:", communityError);
-    return { error: communityError.message };
+    console.error("Failed to create community:", communityError.message);
+    return { error: "Community not found" };
   }
 
   // 3. Create modules from template
@@ -326,7 +326,7 @@ export async function provisionCommunity(data: {
     .insert(moduleRecords);
 
   if (modulesError) {
-    console.error("Failed to create modules:", modulesError);
+    console.error("Failed to create modules:", modulesError.message);
     // Clean up community on failure
     await supabase.from("communities").delete().eq("id", community.id);
     return { error: modulesError.message };
@@ -342,7 +342,7 @@ export async function provisionCommunity(data: {
   });
 
   if (profileError) {
-    console.error("Failed to create admin profile:", profileError);
+    console.error("Failed to create admin profile:", profileError.message);
     // Clean up on failure
     await supabase.from("community_modules").delete().eq("community_id", community.id);
     await supabase.from("communities").delete().eq("id", community.id);

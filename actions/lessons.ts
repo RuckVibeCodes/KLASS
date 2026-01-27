@@ -63,7 +63,8 @@ export async function markLessonComplete(
   });
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to mark lesson complete:", error.message);
+    throw new Error("Failed to mark lesson as complete");
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}`);
@@ -118,7 +119,8 @@ export async function unmarkLessonComplete(
     .eq("profile_id", profile.id);
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to unmark lesson complete:", error.message);
+    throw new Error("Failed to update lesson progress");
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}`);

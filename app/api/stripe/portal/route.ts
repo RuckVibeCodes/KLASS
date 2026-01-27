@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ url: result.url });
     }
   } catch (error) {
-    console.error("Portal session error:", error);
+    console.error("Portal session error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to create portal session" },
       { status: 500 }

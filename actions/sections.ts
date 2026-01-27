@@ -2,11 +2,32 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 // ============================================================================
 // SECTION CRUD
 // ============================================================================
+
+async function verifyAdmin(userId: string, communitySlug: string) {
+  const supabase = await createClient();
+  const { data: community } = await supabase
+    .from("communities")
+    .select("id")
+    .eq("slug", communitySlug)
+    .single();
+
+  if (!community) return null;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("clerk_user_id", userId)
+    .eq("community_id", community.id)
+    .single();
+
+  if (profile?.role !== "ADMIN") return null;
+  return community.id;
+}
 
 export async function createSection(
   programId: string,
@@ -18,6 +39,9 @@ export async function createSection(
 ) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
+
+  const communityId = await verifyAdmin(userId, communitySlug);
+  if (!communityId) return { error: "Admin access required" };
 
   const adminSupabase = await createAdminClient();
 
@@ -44,8 +68,8 @@ export async function createSection(
     .single();
 
   if (error) {
-    console.error("Failed to create section:", error);
-    return { error: error.message };
+    console.error("Failed to create section:", error.message);
+    return { error: "Failed to create section" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/programs/${programId}`);
@@ -67,6 +91,9 @@ export async function updateSection(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
+  const communityId = await verifyAdmin(userId, communitySlug);
+  if (!communityId) return { error: "Admin access required" };
+
   const adminSupabase = await createAdminClient();
 
   const { data: section, error } = await adminSupabase
@@ -77,8 +104,8 @@ export async function updateSection(
     .single();
 
   if (error) {
-    console.error("Failed to update section:", error);
-    return { error: error.message };
+    console.error("Failed to update section:", error.message);
+    return { error: "Failed to update section" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/programs/${programId}`);
@@ -95,6 +122,9 @@ export async function deleteSection(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
+  const communityId = await verifyAdmin(userId, communitySlug);
+  if (!communityId) return { error: "Admin access required" };
+
   const adminSupabase = await createAdminClient();
 
   // First, unlink lessons from this section (don't delete them)
@@ -110,8 +140,8 @@ export async function deleteSection(
     .eq("id", sectionId);
 
   if (error) {
-    console.error("Failed to delete section:", error);
-    return { error: error.message };
+    console.error("Failed to delete section:", error.message);
+    return { error: "Failed to delete section" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/programs/${programId}`);
@@ -128,6 +158,9 @@ export async function reorderSections(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
+  const communityId = await verifyAdmin(userId, communitySlug);
+  if (!communityId) return { error: "Admin access required" };
+
   const adminSupabase = await createAdminClient();
 
   for (let i = 0; i < sectionIds.length; i++) {
@@ -137,8 +170,8 @@ export async function reorderSections(
       .eq("id", sectionIds[i]);
 
     if (error) {
-      console.error("Failed to reorder section:", error);
-      return { error: error.message };
+      console.error("Failed to reorder section:", error.message);
+      return { error: "Failed to reorder sections" };
     }
   }
 
@@ -157,6 +190,9 @@ export async function moveLessonToSection(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
+  const communityId = await verifyAdmin(userId, communitySlug);
+  if (!communityId) return { error: "Admin access required" };
+
   const adminSupabase = await createAdminClient();
 
   const { error } = await adminSupabase
@@ -165,8 +201,8 @@ export async function moveLessonToSection(
     .eq("id", lessonId);
 
   if (error) {
-    console.error("Failed to move lesson:", error);
-    return { error: error.message };
+    console.error("Failed to move lesson:", error.message);
+    return { error: "Failed to move lesson" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/programs/${programId}`);

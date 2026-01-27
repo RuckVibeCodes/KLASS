@@ -86,7 +86,7 @@ export async function POST(req: Request) {
       emailBody: content.emailBody,
     });
   } catch (error) {
-    console.error("AI onboarding error:", error);
+    console.error("AI onboarding error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to generate content" },
       { status: 500 }

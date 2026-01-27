@@ -145,7 +145,7 @@ export async function POST(req: Request) {
       accountId: result.accountId,
     });
   } catch (error) {
-    console.error("Stripe Connect error:", error);
+    console.error("Stripe Connect error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to setup Stripe Connect" },
       { status: 500 }

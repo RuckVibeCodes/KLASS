@@ -43,7 +43,7 @@ export async function getCommunityEvents(communitySlug: string) {
     .order("starts_at", { ascending: false });
 
   if (error) {
-    return { error: error.message, data: null };
+    return { error: "Failed to load events", data: null };
   }
 
   return { error: null, data: events };
@@ -76,7 +76,7 @@ export async function getEvent(eventId: string, communitySlug: string) {
     .single();
 
   if (error) {
-    return { error: error.message, data: null };
+    return { error: "Failed to load event", data: null };
   }
 
   return { error: null, data: event };
@@ -136,7 +136,7 @@ export async function updateEvent(
     .eq("community_id", community.id);
 
   if (error) {
-    return { error: error.message };
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/events`);
@@ -183,7 +183,7 @@ export async function deleteEvent(eventId: string, communitySlug: string) {
     .eq("community_id", community.id);
 
   if (error) {
-    return { error: error.message };
+    return { error: "Operation failed" };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/events`);
@@ -252,7 +252,7 @@ export async function createEvent(
     .single();
 
   if (error) {
-    return { error: error.message, data: null };
+    return { error: "Failed to create event", data: null };
   }
 
   revalidatePath(`/${communitySlug}/admin/content/events`);

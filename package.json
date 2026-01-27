@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:demo": "npx tsx scripts/seed-demo.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.4",

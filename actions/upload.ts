@@ -86,7 +86,7 @@ export async function deleteImage(
   const { error } = await supabase.storage.from(bucket).remove([filePath]);
 
   if (error) {
-    console.error("Delete error:", error);
+    console.error("Delete error:", error instanceof Error ? error.message : "Unknown error");
     return { error: "Failed to delete file." };
   }
 

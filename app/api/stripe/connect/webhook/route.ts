@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, connectWebhookSecret);
   } catch (err) {
-    console.error("Connect webhook signature verification failed:", err);
+    console.error("Connect webhook signature verification failed:", err instanceof Error ? err.message : "Unknown error");
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -110,7 +110,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Connect webhook handler error:", error);
+    console.error("Connect webhook handler error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Webhook handler failed" },
       { status: 500 }
@@ -199,7 +199,7 @@ async function handleConnectedPayment(
   });
 
   console.log(
-    `Connected payment recorded: ${paymentIntent.id}, amount: ${amountReceived}, fee: ${applicationFee}`
+    `Connected payment recorded for community ${connectAccount.community_id}`
   );
 }
 

@@ -27,8 +27,8 @@ export async function updateSystemFeatureFlag(
     .single();
 
   if (error) {
-    console.error("Failed to update feature flag:", error);
-    return { error: error.message };
+    console.error("Failed to update feature flag:", error.message);
+    return { error: "Failed to update feature flag" };
   }
 
   revalidatePath("/system-admin/feature-flags");
@@ -66,8 +66,8 @@ export async function setCommunityFeatureOverride(
     .single();
 
   if (error) {
-    console.error("Failed to set community feature override:", error);
-    return { error: error.message };
+    console.error("Failed to set community feature override:", error.message);
+    return { error: "Failed to set community feature override" };
   }
 
   revalidatePath(`/system-admin/communities/${communityId}`);
@@ -93,8 +93,8 @@ export async function removeCommunityFeatureOverride(
     .eq("feature_key", featureKey);
 
   if (error) {
-    console.error("Failed to remove community feature override:", error);
-    return { error: error.message };
+    console.error("Failed to remove community feature override:", error.message);
+    return { error: "Failed to remove community feature override" };
   }
 
   revalidatePath(`/system-admin/communities/${communityId}`);
@@ -127,8 +127,8 @@ export async function setBulkCommunityOverrides(
     });
 
   if (error) {
-    console.error("Failed to set bulk community overrides:", error);
-    return { error: error.message };
+    console.error("Failed to set bulk community overrides:", error.message);
+    return { error: "Failed to set bulk community overrides" };
   }
 
   revalidatePath(`/system-admin/communities/${communityId}`);

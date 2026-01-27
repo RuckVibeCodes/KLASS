@@ -57,7 +57,8 @@ export async function createPost(formData: FormData) {
     .single();
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to create post:", error.message);
+    throw new Error("Failed to create post");
   }
 
   // Create poll if provided
@@ -72,7 +73,8 @@ export async function createPost(formData: FormData) {
       .single();
 
     if (pollError) {
-      throw new Error(pollError.message);
+      console.error("Failed to create poll:", pollError.message);
+      throw new Error("Failed to create poll");
     }
 
     if (poll) {
@@ -87,7 +89,8 @@ export async function createPost(formData: FormData) {
         .insert(pollOptionsData);
 
       if (optionsError) {
-        throw new Error(optionsError.message);
+        console.error("Failed to create poll options:", optionsError.message);
+        throw new Error("Failed to create poll options");
       }
     }
   }
@@ -107,7 +110,8 @@ export async function deletePost(postId: string, communitySlug: string) {
   const { error } = await supabase.from("posts").delete().eq("id", postId);
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to delete post:", error.message);
+    throw new Error("Failed to delete post");
   }
 
   revalidatePath(`/${communitySlug}`);
@@ -132,7 +136,8 @@ export async function togglePinPost(
     .eq("id", postId);
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to toggle pin:", error.message);
+    throw new Error("Failed to update post");
   }
 
   revalidatePath(`/${communitySlug}`);
@@ -178,7 +183,8 @@ export async function createComment(formData: FormData) {
   });
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to create comment:", error.message);
+    throw new Error("Failed to create comment");
   }
 
   // Update post comment count
@@ -219,7 +225,8 @@ export async function toggleLikePost(
   });
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to toggle like:", error.message);
+    throw new Error("Failed to update like");
   }
 
   revalidatePath(`/${communitySlug}`);
@@ -277,7 +284,8 @@ export async function voteOnPoll(
   });
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to vote on poll:", error.message);
+    throw new Error("Failed to submit vote");
   }
 
   revalidatePath(`/${communitySlug}`);

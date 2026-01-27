@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   try {
     event = parseWhopWebhookEvent(body);
   } catch (err) {
-    console.error("Failed to parse Whop webhook:", err);
+    console.error("Failed to parse Whop webhook:", err instanceof Error ? err.message : "Unknown error");
     return NextResponse.json(
       { error: "Invalid event body" },
       { status: 400 }
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Whop webhook handler error:", error);
+    console.error("Whop webhook handler error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Webhook handler failed" },
       { status: 500 }
@@ -142,7 +142,7 @@ async function handleMembershipValid(
   }
 
   console.log(
-    `Whop member ${data.user_id} mapped to community ${communityId}`
+    `Whop member mapped to community successfully`
   );
 }
 

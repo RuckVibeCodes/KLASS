@@ -46,7 +46,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ account: account || null });
   } catch (error) {
-    console.error("Connect status error:", error);
+    console.error("Connect status error:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json(
       { error: "Failed to fetch Connect status" },
       { status: 500 }

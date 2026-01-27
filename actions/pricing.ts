@@ -71,8 +71,8 @@ export async function updateCommunityPricing(
     .eq("id", communityId);
 
   if (error) {
-    console.error("Failed to update community pricing:", error);
-    return { error: error.message };
+    console.error("Failed to update community pricing:", error.message);
+    return { error: "Failed to update community pricing" };
   }
 
   revalidatePath(`/${communitySlug}/admin/settings`);
@@ -173,8 +173,8 @@ export async function updateProgramPricing(
     .eq("id", programId);
 
   if (error) {
-    console.error("Failed to update program pricing:", error);
-    return { error: error.message };
+    console.error("Failed to update program pricing:", error.message);
+    return { error: "Failed to update program pricing" };
   }
 
   revalidatePath(`/${communitySlug}/programs`);
@@ -275,8 +275,8 @@ export async function updateResourcePricing(
     .eq("id", resourceId);
 
   if (error) {
-    console.error("Failed to update resource pricing:", error);
-    return { error: error.message };
+    console.error("Failed to update resource pricing:", error.message);
+    return { error: "Failed to update resource pricing" };
   }
 
   revalidatePath(`/${communitySlug}/resources`);

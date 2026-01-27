@@ -57,8 +57,8 @@ export async function createLessonComment(
     .single();
 
   if (error) {
-    console.error("Failed to create comment:", error);
-    return { error: error.message };
+    console.error("Failed to create comment:", error.message);
+    return { error: "Failed to create comment" };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}/lessons/${lessonId}`);
@@ -114,8 +114,8 @@ export async function updateLessonComment(
     .single();
 
   if (error) {
-    console.error("Failed to update comment:", error);
-    return { error: error.message };
+    console.error("Failed to update comment:", error.message);
+    return { error: "Failed to update comment" };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}/lessons/${lessonId}`);
@@ -170,8 +170,8 @@ export async function deleteLessonComment(
     .eq("id", commentId);
 
   if (error) {
-    console.error("Failed to delete comment:", error);
-    return { error: error.message };
+    console.error("Failed to delete comment:", error.message);
+    return { error: "Failed to delete comment" };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}/lessons/${lessonId}`);
@@ -221,7 +221,7 @@ export async function toggleCommentLike(
       .eq("id", existingLike.id);
 
     if (error) {
-      return { error: error.message };
+      return { error: "Operation failed" };
     }
 
     // Update likes count
@@ -236,7 +236,7 @@ export async function toggleCommentLike(
       });
 
     if (error) {
-      return { error: error.message };
+      return { error: "Operation failed" };
     }
 
     // Update likes count
@@ -280,8 +280,8 @@ export async function getLessonComments(lessonId: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Failed to get comments:", error);
-    return { error: error.message };
+    console.error("Failed to get comments:", error.message);
+    return { error: "Failed to get comments" };
   }
 
   // Get replies for each comment

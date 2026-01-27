@@ -49,7 +49,8 @@ export async function updateMemberRole(
     .eq("id", memberId);
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to update member role:", error.message);
+    throw new Error("Failed to update member role");
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -102,7 +103,8 @@ export async function updateMemberTier(
     .eq("id", memberId);
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to update member tier:", error.message);
+    throw new Error("Failed to update member tier");
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);
@@ -160,7 +162,8 @@ export async function removeMember(
     .eq("community_id", community.id);
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Failed to remove member:", error.message);
+    throw new Error("Failed to remove member");
   }
 
   revalidatePath(`/${communitySlug}/admin/members`);

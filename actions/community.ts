@@ -16,9 +16,19 @@ export async function updateCommunitySettings(
     return { error: "Unauthorized" };
   }
 
-  // Use admin client to bypass RLS for demo purposes
-  // In production, you would verify admin role first
   const supabase = await createAdminClient();
+
+  // Verify admin role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("clerk_user_id", userId)
+    .eq("community_id", communityId)
+    .single();
+
+  if (profile?.role !== "ADMIN") {
+    return { error: "Admin access required" };
+  }
 
   const { data, error } = await supabase
     .from("communities")
@@ -30,8 +40,8 @@ export async function updateCommunitySettings(
     .single();
 
   if (error) {
-    console.error("Failed to update community settings:", error);
-    return { error: error.message };
+    console.error("Failed to update community settings:", error.message);
+    return { error: "Failed to update community settings" };
   }
 
   // Revalidate all pages under this community
@@ -59,6 +69,18 @@ export async function updateCommunity(
 
   const supabase = await createAdminClient();
 
+  // Verify admin role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("clerk_user_id", userId)
+    .eq("community_id", communityId)
+    .single();
+
+  if (profile?.role !== "ADMIN") {
+    return { error: "Admin access required" };
+  }
+
   const { data, error } = await supabase
     .from("communities")
     .update(updates)
@@ -67,8 +89,8 @@ export async function updateCommunity(
     .single();
 
   if (error) {
-    console.error("Failed to update community:", error);
-    return { error: error.message };
+    console.error("Failed to update community:", error.message);
+    return { error: "Failed to update community" };
   }
 
   // Revalidate all pages under this community
@@ -94,6 +116,18 @@ export async function updateCommunityModules(
 
   const supabase = await createAdminClient();
 
+  // Verify admin role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("clerk_user_id", userId)
+    .eq("community_id", communityId)
+    .single();
+
+  if (profile?.role !== "ADMIN") {
+    return { error: "Admin access required" };
+  }
+
   // Update each module
   for (const module of moduleUpdates) {
     const { error } = await supabase
@@ -105,8 +139,8 @@ export async function updateCommunityModules(
       .eq("id", module.id);
 
     if (error) {
-      console.error("Failed to update module:", error);
-      return { error: `Failed to update module: ${error.message}` };
+      console.error("Failed to update module:", error.message);
+      return { error: "Failed to update module" };
     }
   }
 

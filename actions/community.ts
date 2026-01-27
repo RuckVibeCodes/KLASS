@@ -16,9 +16,23 @@ export async function updateCommunitySettings(
   communitySlug: string,
   settings: CommunitySettings
 ) {
-  // Demo sandbox: fake success, no writes
+  const supabase = await createAdminClient();
+
+  // Demo mode: allow settings writes (layout switching, etc.) but skip auth
   if (isDemoMode(communitySlug)) {
-    return { data: { id: communityId, settings_json: settings } };
+    const { data, error } = await supabase
+      .from("communities")
+      .update({ settings_json: settings })
+      .eq("id", communityId)
+      .select()
+      .single();
+
+    if (error) {
+      return { error: "Failed to update settings" };
+    }
+
+    revalidatePath(`/${communitySlug}`, "layout");
+    return { data };
   }
 
   const { userId } = await auth();
@@ -26,8 +40,6 @@ export async function updateCommunitySettings(
   if (!userId) {
     return { error: "Unauthorized" };
   }
-
-  const supabase = await createAdminClient();
 
   // Verify admin role
   const { data: profile } = await supabase
@@ -123,28 +135,27 @@ export async function updateCommunityModules(
     enabled: boolean;
   }>
 ) {
-  if (isDemoMode(communitySlug)) {
-    return { success: true };
-  }
-
-  const { userId } = await auth();
-
-  if (!userId) {
-    return { error: "Unauthorized" };
-  }
-
   const supabase = await createAdminClient();
 
-  // Verify admin role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("clerk_user_id", userId)
-    .eq("community_id", communityId)
-    .single();
+  // Demo mode: allow module updates (nav toggling) but skip auth
+  if (!isDemoMode(communitySlug)) {
+    const { userId } = await auth();
 
-  if (profile?.role !== "ADMIN") {
-    return { error: "Admin access required" };
+    if (!userId) {
+      return { error: "Unauthorized" };
+    }
+
+    // Verify admin role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("clerk_user_id", userId)
+      .eq("community_id", communityId)
+      .single();
+
+    if (profile?.role !== "ADMIN") {
+      return { error: "Admin access required" };
+    }
   }
 
   // Update each module

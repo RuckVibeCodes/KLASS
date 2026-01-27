@@ -47,9 +47,26 @@ export default async function CommunityLayoutPage({
     userId ? getProfileByClerkId(userId, community.id) : Promise.resolve(null),
   ]);
 
-  // If no profile exists, create one (non-blocking for returning users)
+  // For demo mode, create a virtual admin profile so anonymous visitors see everything
   let finalProfile = profile;
-  if (!profile && userId) {
+  if (!finalProfile && isDemo) {
+    finalProfile = {
+      id: "demo-visitor",
+      community_id: community.id,
+      clerk_user_id: "demo-visitor",
+      display_name: "Demo Visitor",
+      email: "demo@klasscommunity.com",
+      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=DemoVisitor",
+      bio: "Exploring Creator Academy in demo mode",
+      role: "ADMIN",
+      tier: "PAID",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as typeof profile;
+  }
+
+  // If no profile exists, create one (non-blocking for returning users)
+  if (!finalProfile && userId) {
     // Get default tier for new members
     const defaultTierId = await getDefaultTier(community.id);
     const newProfile = await createProfile(userId, community.id, defaultTierId);

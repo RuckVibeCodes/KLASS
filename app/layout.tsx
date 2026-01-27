@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
@@ -28,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider dynamic>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <head>
           <meta name="theme-color" content="#18181b" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -39,8 +40,15 @@ export default function RootLayout({
           <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
         </head>
         <body className={inter.className}>
-          {children}
-          <Toaster />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
           <script
             dangerouslySetInnerHTML={{
               __html: `

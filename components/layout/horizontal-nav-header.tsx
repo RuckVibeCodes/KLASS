@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useCommunity } from "@/components/providers/community-provider";
 import { ViewModeToggle } from "@/components/admin/view-mode-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   { key: "community", label: "Community", icon: MessageSquare, path: "" },
@@ -114,6 +115,7 @@ export function HorizontalNavHeader({
           <div className="hidden md:block">
             <ViewModeToggle />
           </div>
+          <ThemeToggle />
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="sr-only">Notifications</span>

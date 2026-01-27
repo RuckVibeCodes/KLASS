@@ -17,6 +17,7 @@ import { useCommunity } from "@/components/providers/community-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const defaultModules = [
   { key: "programs", label: "Programs", icon: BookOpen },
@@ -74,6 +75,7 @@ export function Sidebar() {
             </div>
           )}
         </div>
+        <ThemeToggle />
       </div>
 
       {/* Navigation */}

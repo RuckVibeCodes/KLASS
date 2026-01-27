@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       }
 
       case "account.application.deauthorized": {
-        const account = event.data.object as Stripe.Account;
+        const account = event.data.object as unknown as Stripe.Account;
         await handleAccountDeauthorized(supabase, account);
         break;
       }

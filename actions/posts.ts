@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isDemoSlug } from "@/lib/demo";
+import { sendContentNotification, isEmailAvailable } from "@/lib/email";
 
 export async function createPost(formData: FormData) {
   const communitySlugCheck = formData.get("communitySlug") as string;
@@ -97,6 +98,42 @@ export async function createPost(formData: FormData) {
       if (optionsError) {
         console.error("Failed to create poll options:", optionsError.message);
         throw new Error("Failed to create poll options");
+      }
+    }
+  }
+
+  // Send content notifications asynchronously to community admins (non-blocking)
+  if (post && isEmailAvailable()) {
+    const { data: admins } = await supabase
+      .from("profiles")
+      .select("display_name, email")
+      .eq("community_id", communityId)
+      .eq("role", "ADMIN")
+      .neq("id", profile.id);
+
+    const { data: community } = await supabase
+      .from("communities")
+      .select("name")
+      .eq("id", communityId)
+      .single();
+
+    if (admins && community) {
+      const contentPreview = content ? content.substring(0, 200) : undefined;
+      for (const admin of admins) {
+        if (admin.email) {
+          sendContentNotification({
+            recipientEmail: admin.email,
+            recipientName: admin.display_name || "Admin",
+            communityName: community.name,
+            communitySlug,
+            contentType: "post",
+            contentTitle: contentPreview?.substring(0, 60) || "New post",
+            contentPreview,
+            authorName: profile ? undefined : undefined,
+          }).catch((err) => {
+            console.error("[Email] Content notification failed:", err);
+          });
+        }
       }
     }
   }

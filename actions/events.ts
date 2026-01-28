@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import type { ContentVisibility } from "@/types/database";
 import { isDemoSlug } from "@/lib/demo";
+import { sendContentNotification, isEmailAvailable } from "@/lib/email";
 
 export async function getCommunityEvents(communitySlug: string) {
   const { userId } = await auth();
@@ -222,7 +223,7 @@ export async function createEvent(
   // Get community and verify admin
   const { data: community } = await supabase
     .from("communities")
-    .select("id")
+    .select("id, name")
     .eq("slug", communitySlug)
     .single();
 
@@ -264,6 +265,33 @@ export async function createEvent(
 
   revalidatePath(`/${communitySlug}/admin/content/events`);
   revalidatePath(`/${communitySlug}/events`);
+
+  // Send event notification to all members asynchronously
+  if (event && isEmailAvailable()) {
+    const { data: members } = await supabase
+      .from("profiles")
+      .select("display_name, email")
+      .eq("community_id", community.id)
+      .neq("email", null);
+
+    if (members) {
+      for (const member of members) {
+        if (member.email) {
+          sendContentNotification({
+            recipientEmail: member.email,
+            recipientName: member.display_name || "Member",
+            communityName: community.name || communitySlug,
+            communitySlug,
+            contentType: "event",
+            contentTitle: data.title,
+            contentPreview: data.description?.substring(0, 200) || undefined,
+          }).catch((err) => {
+            console.error("[Email] Event notification failed:", err);
+          });
+        }
+      }
+    }
+  }
 
   return { error: null, data: event };
 }

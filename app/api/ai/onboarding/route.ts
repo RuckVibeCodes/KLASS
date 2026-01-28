@@ -2,7 +2,14 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { generateOnboardingContent, type OnboardingInputs } from "@/lib/ai/prompts";
+import {
+  isAIAvailable,
+  generateOnboardingContentAI,
+} from "@/lib/ai/client";
+import {
+  generateOnboardingContent as generateOnboardingStub,
+  type OnboardingInputs,
+} from "@/lib/ai/prompts";
 
 export async function POST(req: Request) {
   try {
@@ -68,7 +75,28 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate content
+    // Use real AI if available
+    if (isAIAvailable()) {
+      try {
+        const content = await generateOnboardingContentAI({
+          communityName: community.name,
+          communityType: communityType || "membership",
+          communityDescription: communityDescription || "",
+          tone: tone || "friendly",
+          primaryCTA: primaryCTA || "",
+        });
+
+        return NextResponse.json({ ...content, source: "ai" });
+      } catch (aiError) {
+        console.error(
+          "AI generation failed, falling back to templates:",
+          aiError instanceof Error ? aiError.message : "Unknown error"
+        );
+        // Fall through to stub
+      }
+    }
+
+    // Fallback: template-based generation
     const inputs: OnboardingInputs = {
       communityName: community.name,
       communityType: communityType || "membership",
@@ -77,16 +105,20 @@ export async function POST(req: Request) {
       primaryCTA: primaryCTA || "",
     };
 
-    const content = generateOnboardingContent(inputs);
+    const content = generateOnboardingStub(inputs);
 
     return NextResponse.json({
       welcomePost: content.welcomePost,
       firstDm: content.firstDm,
       emailSubject: content.emailSubject,
       emailBody: content.emailBody,
+      source: "template",
     });
   } catch (error) {
-    console.error("AI onboarding error:", error instanceof Error ? error.message : "Unknown error");
+    console.error(
+      "AI onboarding error:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
     return NextResponse.json(
       { error: "Failed to generate content" },
       { status: 500 }

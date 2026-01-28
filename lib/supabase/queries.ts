@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient, createAdminClient } from "./server";
 import type { Community, CommunityModule, Profile } from "@/types/database";
+import { sendWelcomeEmail, isEmailAvailable } from "@/lib/email";
 
 /**
  * Cached data fetching functions for improved navigation performance.
@@ -97,6 +98,28 @@ export async function createProfile(
   if (error) {
     console.error("Error creating profile:", error);
     return null;
+  }
+
+  // Send welcome email asynchronously (non-blocking)
+  if (data && isEmailAvailable()) {
+    // Look up community name for the email
+    const { data: community } = await adminSupabase
+      .from("communities")
+      .select("name, slug, description")
+      .eq("id", communityId)
+      .single();
+
+    if (community) {
+      sendWelcomeEmail({
+        memberName: data.display_name || "New Member",
+        memberEmail: data.email || "",
+        communityName: community.name,
+        communitySlug: community.slug,
+        communityDescription: community.description || undefined,
+      }).catch((err) => {
+        console.error("[Email] Welcome email failed:", err);
+      });
+    }
   }
 
   return data;

@@ -10,6 +10,7 @@
     "seed:demo": "npx tsx scripts/seed-demo.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@clerk/nextjs": "^6.36.4",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
@@ -44,6 +45,7 @@
     "react-dom": "^19.2.3",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "resend": "^6.9.1",
     "stripe": "^20.1.0",
     "svix": "^1.82.0",
     "tailwind-merge": "^3.4.0",

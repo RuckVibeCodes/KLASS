@@ -1,8 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import {
+  isAIAvailable,
+  generateLessonOutlineAI,
+} from "@/lib/ai/client";
+import { generateLessonOutline as generateLessonOutlineStub } from "@/lib/ai/prompts";
 
-// AI Stub - Generates a lesson outline
-// In production, this would call OpenAI or similar
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -13,74 +16,61 @@ export async function POST(req: Request) {
 
     const { topic, targetAudience, lessonCount } = await req.json();
 
-    // Stub response - would use AI in production
-    const outline = generateLessonOutline(
-      topic,
-      targetAudience,
-      lessonCount || 5
-    );
+    if (!topic) {
+      return NextResponse.json(
+        { error: "Topic is required" },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json({ outline });
+    const count = lessonCount || 5;
+
+    // Use real AI if available, otherwise fall back to template-based generation
+    if (isAIAvailable()) {
+      try {
+        const outline = await generateLessonOutlineAI(
+          topic,
+          targetAudience,
+          count
+        );
+        return NextResponse.json({ outline, source: "ai" });
+      } catch (aiError) {
+        console.error(
+          "AI generation failed, falling back to templates:",
+          aiError instanceof Error ? aiError.message : "Unknown error"
+        );
+        // Fall through to stub
+      }
+    }
+
+    // Fallback: template-based generation
+    const stubOutline = generateLessonOutlineStub({
+      programTitle: topic,
+      programDescription: topic,
+      targetAudience: targetAudience || "beginners",
+      numberOfLessons: count,
+    });
+
+    return NextResponse.json({
+      outline: {
+        title: `Master ${topic}: A Complete Guide`,
+        description: `A comprehensive ${count}-part program designed for ${targetAudience || "beginners"}. Learn ${topic} from the ground up.`,
+        lessons: stubOutline.map((lesson) => ({
+          title: lesson.title,
+          description: lesson.description,
+          duration: `${10 + Math.floor(Math.random() * 20)} minutes`,
+        })),
+      },
+      source: "template",
+    });
   } catch (error) {
-    console.error("AI lesson outline error:", error instanceof Error ? error.message : "Unknown error");
+    console.error(
+      "AI lesson outline error:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
     return NextResponse.json(
       { error: "Failed to generate outline" },
       { status: 500 }
     );
   }
-}
-
-interface LessonOutline {
-  title: string;
-  description: string;
-  lessons: {
-    title: string;
-    description: string;
-    duration: string;
-  }[];
-}
-
-function generateLessonOutline(
-  topic: string,
-  targetAudience?: string,
-  lessonCount: number = 5
-): LessonOutline {
-  const audience = targetAudience || "beginners";
-
-  // Generate placeholder lessons
-  const lessons = Array.from({ length: lessonCount }, (_, i) => ({
-    title: `Lesson ${i + 1}: ${getLessonTitle(topic, i)}`,
-    description: `In this lesson, you'll learn the ${
-      i === 0 ? "fundamentals" : `${getOrdinal(i + 1)} key concept`
-    } of ${topic}. Perfect for ${audience}.`,
-    duration: `${10 + Math.floor(Math.random() * 20)} minutes`,
-  }));
-
-  return {
-    title: `Master ${topic}: A Complete Guide`,
-    description: `A comprehensive ${lessonCount}-part program designed for ${audience}. Learn ${topic} from the ground up with practical exercises and real-world examples.`,
-    lessons,
-  };
-}
-
-function getLessonTitle(topic: string, index: number): string {
-  const prefixes = [
-    "Introduction to",
-    "Understanding",
-    "Deep Dive into",
-    "Practical Applications of",
-    "Advanced Techniques in",
-    "Mastering",
-    "Best Practices for",
-    "Common Mistakes in",
-  ];
-
-  const prefix = prefixes[index % prefixes.length];
-  return `${prefix} ${topic}`;
-}
-
-function getOrdinal(n: number): string {
-  const suffixes = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
 }

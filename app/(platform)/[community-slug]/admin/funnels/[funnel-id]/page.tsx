@@ -1,0 +1,75 @@
+import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
+import { redirect, notFound } from "next/navigation";
+import { FunnelForm } from "@/components/funnels/funnel-form";
+import type { Funnel } from "@/types/database";
+
+export default async function EditFunnelPage({
+  params,
+}: {
+  params: Promise<{ "community-slug": string; "funnel-id": string }>;
+}) {
+  const { userId } = await auth();
+  const resolvedParams = await params;
+  const communitySlug = resolvedParams["community-slug"];
+  const funnelId = resolvedParams["funnel-id"];
+  const supabase = await createClient();
+
+  // Get community
+  const { data: community } = await supabase
+    .from("communities")
+    .select("*")
+    .eq("slug", communitySlug)
+    .single();
+
+  if (!community) redirect("/");
+
+  // Check if user is admin
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("clerk_user_id", userId)
+    .eq("community_id", community.id)
+    .single();
+
+  if (profile?.role !== "ADMIN") {
+    redirect(`/${communitySlug}`);
+  }
+
+  // Get funnel
+  const { data: funnel } = await supabase
+    .from("funnels")
+    .select("*")
+    .eq("id", funnelId)
+    .eq("community_id", community.id)
+    .single();
+
+  if (!funnel) {
+    notFound();
+  }
+
+  // Get programs and resources for content selection
+  const [{ data: programs }, { data: resources }] = await Promise.all([
+    supabase
+      .from("programs")
+      .select("id, title")
+      .eq("community_id", community.id)
+      .eq("published", true)
+      .order("title"),
+    supabase
+      .from("resources")
+      .select("id, title")
+      .eq("community_id", community.id)
+      .order("title"),
+  ]);
+
+  return (
+    <FunnelForm
+      communitySlug={communitySlug}
+      communityId={community.id}
+      funnel={funnel as Funnel}
+      programs={programs || []}
+      resources={resources || []}
+    />
+  );
+}

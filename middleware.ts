@@ -7,9 +7,14 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/webhooks(.*)",
+  "/api/funnels(.*)",
   "/demo(.*)",
   "/offline",
 ]);
+
+// Funnel pages are served from (funnel) route group
+// They need special handling since they're at /{community-slug}/{funnel-slug}
+// The (funnel) layout doesn't require auth, so middleware just needs to not block
 
 // System admin routes require master admin access
 const isSystemAdminRoute = createRouteMatcher(["/system-admin(.*)"]);

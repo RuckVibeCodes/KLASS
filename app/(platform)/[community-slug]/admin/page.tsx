@@ -15,6 +15,7 @@ import {
   ArrowRight,
   ClipboardList,
   Sparkles,
+  Target,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -168,6 +169,12 @@ export default async function AdminDashboardPage({
               <Button variant="outline" className="w-full justify-start">
                 <Calendar className="h-4 w-4 mr-2" />
                 Manage Events
+              </Button>
+            </Link>
+            <Link href={`${baseUrl}/admin/funnels`}>
+              <Button variant="outline" className="w-full justify-start">
+                <Target className="h-4 w-4 mr-2" />
+                Funnels & Lead Magnets
               </Button>
             </Link>
             <Link href={`${baseUrl}/admin/playbooks`}>

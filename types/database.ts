@@ -15,8 +15,11 @@ export type SubscriptionStatus =
 
 // Pricing types
 export type ContentType = "community" | "program" | "resource" | "event";
-export type GrantSource = "purchase" | "manual" | "subscription";
+export type GrantSource = "purchase" | "manual" | "subscription" | "funnel";
 export type BillingCycle = "monthly" | "yearly";
+
+// Funnel types
+export type FunnelContentType = "resource" | "program" | "community";
 
 export interface CommunitySettings {
   layout_mode?: LayoutMode;
@@ -245,6 +248,48 @@ export interface ContentAccessGrant {
   // Joined fields
   profile?: Profile;
   granted_by?: Profile;
+}
+
+// Funnel types
+export interface Funnel {
+  id: string;
+  community_id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  cover_image_url: string | null;
+  content_type: FunnelContentType;
+  content_id: string | null;
+  price_cents: number;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
+  headline: string | null;
+  subheadline: string | null;
+  bullet_points: string[];
+  cta_text: string;
+  redirect_path: string;
+  welcome_message: string | null;
+  views_count: number;
+  signups_count: number;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  community?: Community;
+  content?: Program | Resource;
+}
+
+export interface FunnelConversion {
+  id: string;
+  funnel_id: string;
+  profile_id: string;
+  converted_at: string;
+  source: string | null;
+  stripe_payment_intent_id: string | null;
+  amount_cents: number | null;
+  // Joined fields
+  profile?: Profile;
+  funnel?: Funnel;
 }
 
 // Membership tier types

@@ -269,3 +269,32 @@ export async function createCommunityWithProfile(data: {
 
   return { community };
 }
+
+// Create a program for a community (for self-serve onboarding)
+export async function createProgram(data: {
+  communityId: string;
+  title: string;
+  description?: string;
+}) {
+  const supabase = await createAdminClient();
+
+  const { data: program, error } = await supabase
+    .from("programs")
+    .insert({
+      community_id: data.communityId,
+      title: data.title,
+      description: data.description || null,
+      visibility: "members",
+      published: false,
+      order_index: 0,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Failed to create program:", error);
+    return { error: error.message };
+  }
+
+  return { program };
+}

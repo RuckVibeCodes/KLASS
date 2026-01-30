@@ -333,19 +333,16 @@ export default function CreateCommunityPage() {
     setError("");
 
     try {
-      const supabase = createClient();
-
-      const { error: programError } = await supabase.from("programs").insert({
-        community_id: progress.communityId,
+      // Use server action to bypass RLS
+      const { createProgram } = await import("@/actions/community");
+      const result = await createProgram({
+        communityId: progress.communityId,
         title: progress.programTitle.trim(),
-        description: progress.programDescription.trim() || null,
-        visibility: "members",
-        published: false,
-        order_index: 0,
+        description: progress.programDescription.trim() || undefined,
       });
 
-      if (programError) {
-        setError(programError.message);
+      if (result.error) {
+        setError(result.error);
         return;
       }
 

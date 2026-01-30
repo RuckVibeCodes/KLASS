@@ -12,7 +12,7 @@ export default async function ProgramsPage({
   params: Promise<{ "community-slug": string }>;
 }) {
   const resolvedParams = await params;
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
 
   // Get community
   const { data: community } = await supabase

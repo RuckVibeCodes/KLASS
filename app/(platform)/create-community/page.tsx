@@ -557,7 +557,7 @@ export default function CreateCommunityPage() {
                 <Label htmlFor="slug">URL</Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    klass.app/
+                    klasscommunity.com/
                   </span>
                   <Input
                     id="slug"

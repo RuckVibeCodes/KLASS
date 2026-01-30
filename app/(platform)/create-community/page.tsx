@@ -384,18 +384,21 @@ export default function CreateCommunityPage() {
     : "";
 
   return (
-    <div className="min-h-screen bg-muted/50">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-950 to-zinc-900 text-zinc-100">
+      {/* Background gradient effects */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/10 via-transparent to-transparent pointer-events-none" />
+      
       {/* Header */}
-      <div className="border-b bg-background">
+      <div className="relative border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
         <div className="container max-w-3xl flex items-center justify-between py-4">
           <Link
             href="/"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center text-sm text-zinc-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Link>
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-sm font-medium text-zinc-300">
             Create Your Community
           </span>
           <div className="w-16" />
@@ -403,25 +406,30 @@ export default function CreateCommunityPage() {
       </div>
 
       {/* Progress Bar */}
-      <div className="container max-w-3xl pt-6">
+      <div className="relative container max-w-3xl pt-6">
         <div className="space-y-2 mb-2">
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-xs text-zinc-400">
             <span>Step {stepIndex + 1} of {STEPS.length}</span>
             <span>{Math.round(progressPercent)}% complete</span>
           </div>
-          <Progress value={progressPercent} className="h-2" />
+          <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
 
         {/* Resumed progress notice */}
         {hasRestoredProgress && progress.communityId && stepIndex > 0 && (
-          <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-2 mt-3">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="flex items-center justify-between bg-violet-500/10 border border-violet-500/20 rounded-lg px-4 py-2 mt-3">
+            <p className="text-sm text-violet-300">
               👋 Welcome back! Resuming where you left off.
             </p>
             <Button
               variant="ghost"
               size="sm"
-              className="text-blue-600 text-xs"
+              className="text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 text-xs"
               onClick={handleStartFresh}
             >
               Start Fresh
@@ -431,7 +439,7 @@ export default function CreateCommunityPage() {
       </div>
 
       {/* Step Navigation Dots */}
-      <div className="container max-w-3xl py-4">
+      <div className="relative container max-w-3xl py-4">
         <div className="flex items-center justify-center gap-2">
           {STEPS.map((step, idx) => {
             const Icon = step.icon;
@@ -445,7 +453,7 @@ export default function CreateCommunityPage() {
                   <div
                     className={cn(
                       "w-8 h-0.5 rounded",
-                      isDone ? "bg-primary" : "bg-muted-foreground/20"
+                      isDone ? "bg-gradient-to-r from-violet-500 to-fuchsia-500" : "bg-zinc-700"
                     )}
                   />
                 )}
@@ -453,10 +461,10 @@ export default function CreateCommunityPage() {
                   onClick={() => isClickable ? goToStep(step.key) : undefined}
                   disabled={!isClickable && !isActive}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors",
-                    isActive && "bg-primary text-primary-foreground",
-                    isDone && "bg-primary/10 text-primary cursor-pointer hover:bg-primary/20",
-                    !isActive && !isDone && "text-muted-foreground cursor-default"
+                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
+                    isActive && "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25",
+                    isDone && "bg-violet-500/10 text-violet-300 cursor-pointer hover:bg-violet-500/20 border border-violet-500/20",
+                    !isActive && !isDone && "text-zinc-500 cursor-default"
                   )}
                 >
                   {isDone ? (
@@ -473,13 +481,13 @@ export default function CreateCommunityPage() {
       </div>
 
       {/* Step Content */}
-      <div className="container max-w-3xl pb-12">
+      <div className="relative container max-w-3xl pb-12">
         {/* Step 1: Community Basics */}
         {currentStep === "basics" && (
-          <Card className="max-w-lg mx-auto">
+          <Card className="max-w-lg mx-auto bg-zinc-900/50 border-zinc-800 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl">Community Basics</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-white">Community Basics</CardTitle>
+              <CardDescription className="text-zinc-400">
                 Choose a name, URL, and description for your community.
               </CardDescription>
             </CardHeader>
@@ -547,10 +555,10 @@ export default function CreateCommunityPage() {
 
         {/* Step 2: Branding */}
         {currentStep === "branding" && (
-          <Card className="max-w-lg mx-auto">
+          <Card className="max-w-lg mx-auto bg-zinc-900/50 border-zinc-800 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl">Customize Your Brand</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-white">Customize Your Brand</CardTitle>
+              <CardDescription className="text-zinc-400">
                 Set your community&apos;s colors, logo, and tagline.
               </CardDescription>
             </CardHeader>
@@ -733,10 +741,10 @@ export default function CreateCommunityPage() {
 
         {/* Step 3: Connect Stripe */}
         {currentStep === "stripe" && (
-          <Card className="max-w-lg mx-auto">
+          <Card className="max-w-lg mx-auto bg-zinc-900/50 border-zinc-800 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl">Connect Payments</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-white">Connect Payments</CardTitle>
+              <CardDescription className="text-zinc-400">
                 Connect Stripe to accept payments from your members. You can also
                 do this later from your admin settings.
               </CardDescription>
@@ -830,10 +838,10 @@ export default function CreateCommunityPage() {
 
         {/* Step 4: First Program */}
         {currentStep === "program" && (
-          <Card className="max-w-lg mx-auto">
+          <Card className="max-w-lg mx-auto bg-zinc-900/50 border-zinc-800 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl">Create Your First Program</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-white">Create Your First Program</CardTitle>
+              <CardDescription className="text-zinc-400">
                 Programs are structured learning paths with modules and lessons.
                 Set up your first one now, or skip and add it later.
               </CardDescription>
@@ -925,13 +933,13 @@ export default function CreateCommunityPage() {
 
         {/* Step 5: Launch! */}
         {currentStep === "launch" && (
-          <Card className="max-w-lg mx-auto">
+          <Card className="max-w-lg mx-auto bg-zinc-900/50 border-zinc-800 backdrop-blur-sm">
             <CardHeader className="text-center">
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4">
                 <Rocket className="h-10 w-10 text-primary" />
               </div>
-              <CardTitle className="text-2xl">You&apos;re Ready to Launch! 🎉</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-white">You&apos;re Ready to Launch! 🎉</CardTitle>
+              <CardDescription className="text-zinc-400">
                 Your community is set up and ready for members.
               </CardDescription>
             </CardHeader>

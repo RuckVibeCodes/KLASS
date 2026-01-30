@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCommunity } from "@/components/providers/community-provider";
 import { GeneralSettings } from "@/components/admin/general-settings";
 import { LayoutSettings } from "@/components/admin/layout-settings";
+import { FeedSettings } from "@/components/admin/feed-settings";
 import { PaymentsSettings } from "@/components/admin/payments-settings";
 import { TiersSettings } from "@/components/admin/tiers-settings";
 import { ChatSettings } from "@/components/admin/chat-settings";
@@ -15,7 +16,7 @@ import { AffiliateSettings } from "@/components/admin/affiliate-settings";
 import { IntegrationsSettings } from "@/components/admin/integrations-settings";
 import { AdvancedSettings } from "@/components/admin/advanced-settings";
 
-const validTabs = ["general", "layout", "payments", "tiers", "chat", "affiliates", "integrations", "advanced"];
+const validTabs = ["general", "layout", "feed", "payments", "tiers", "chat", "affiliates", "integrations", "advanced"];
 
 export default function AdminSettingsPage() {
   const params = useParams();
@@ -67,9 +68,10 @@ export default function AdminSettingsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 md:grid-cols-8">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="layout">Layout</TabsTrigger>
+          <TabsTrigger value="feed">Feed</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="tiers">Tiers</TabsTrigger>
           <TabsTrigger value="chat">Chat</TabsTrigger>
@@ -88,6 +90,10 @@ export default function AdminSettingsPage() {
             modules={modules}
             communitySlug={communitySlug}
           />
+        </TabsContent>
+
+        <TabsContent value="feed" className="space-y-6">
+          <FeedSettings community={community} communitySlug={communitySlug} />
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">

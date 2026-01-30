@@ -274,6 +274,7 @@ export default function CreateCommunityPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           communityId: progress.communityId,
+          communitySlug: progress.slug,
           returnUrl: `${window.location.origin}/create-community?stripe=connected`,
           refreshUrl: `${window.location.origin}/create-community?stripe=refresh`,
         }),

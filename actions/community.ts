@@ -301,3 +301,48 @@ export async function createProgram(data: {
 
   return { program };
 }
+
+// Update community branding during onboarding (bypasses RLS with admin client)
+export async function updateCommunityBranding(data: {
+  communityId: string;
+  primaryColor: string;
+  accentColor: string;
+  logoUrl?: string;
+  tagline?: string;
+}) {
+  const supabase = await createAdminClient();
+
+  const updateData: Record<string, unknown> = {
+    primary_color: data.primaryColor,
+    accent_color: data.accentColor,
+  };
+
+  if (data.logoUrl?.trim()) {
+    updateData.logo_url = data.logoUrl.trim();
+  }
+
+  if (data.tagline?.trim()) {
+    updateData.settings_json = {
+      banner_description: data.tagline.trim(),
+    };
+  }
+
+  const { data: community, error } = await supabase
+    .from("communities")
+    .update(updateData)
+    .eq("id", data.communityId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Failed to update branding:", error);
+    return { error: error.message };
+  }
+
+  // Revalidate community pages to bust cache
+  if (community?.slug) {
+    revalidatePath(`/${community.slug}`, "layout");
+  }
+
+  return { community };
+}

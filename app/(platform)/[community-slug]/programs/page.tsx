@@ -52,6 +52,7 @@ export default async function ProgramsPage({
               key={program.id}
               program={program}
               communitySlug={resolvedParams["community-slug"]}
+              accentColor={community.accent_color}
             />
           ))}
         </div>
@@ -73,9 +74,11 @@ export default async function ProgramsPage({
 function ProgramCard({
   program,
   communitySlug,
+  accentColor,
 }: {
   program: any;
   communitySlug: string;
+  accentColor: string;
 }) {
   const lessonCount = program.lessons?.length || 0;
   const isPaid = program.visibility === "paid";
@@ -118,7 +121,10 @@ function ProgramCard({
         </div>
 
         <Link href={`/${communitySlug}/programs/${program.id}`}>
-          <Button className="w-full">
+          <Button 
+            className="w-full text-white hover:opacity-90"
+            style={{ backgroundColor: accentColor }}
+          >
             <Play className="h-4 w-4 mr-2" />
             Start Program
           </Button>

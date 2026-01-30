@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ export default async function ProgramsPage({
   params: Promise<{ "community-slug": string }>;
 }) {
   const resolvedParams = await params;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase

@@ -170,13 +170,14 @@ export function PostCard({
   // Collapse long posts by default (280 chars or 4 newlines)
   const COLLAPSE_THRESHOLD = 280;
   const MAX_LINES = 4;
-  const contentLength = post.content?.length || 0;
-  const lineCount = (post.content?.match(/\n/g) || []).length;
+  const postContent = post.content || '';
+  const contentLength = postContent.length;
+  const lineCount = (postContent.match(/\n/g) || []).length;
   const shouldCollapse = contentLength > COLLAPSE_THRESHOLD || lineCount > MAX_LINES;
   
   const truncatedContent = shouldCollapse && !isExpanded
-    ? post.content.substring(0, COLLAPSE_THRESHOLD).split('\n').slice(0, MAX_LINES).join('\n') + '...'
-    : post.content;
+    ? postContent.substring(0, COLLAPSE_THRESHOLD).split('\n').slice(0, MAX_LINES).join('\n') + '...'
+    : postContent;
   const requiredTierLevel = post.min_tier?.tier_level ?? 0;
   const canViewFullContent = !isTierGated || effectiveIsAdmin || currentProfileTierLevel >= requiredTierLevel;
 

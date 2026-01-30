@@ -154,12 +154,14 @@ export default async function CommunityHomePage({
       {/* Category Filter Bar with Feed Filter */}
       <div className="flex items-center gap-2">
         <div className="flex-1 overflow-hidden">
-          {categories && categories.length > 0 && (
+          {(categories && categories.length > 0) || profile?.role === "ADMIN" ? (
             <CategoryFilterBar
-              categories={categories}
+              categories={categories || []}
               primaryColor={community.primary_color}
+              isAdmin={profile?.role === "ADMIN"}
+              communitySlug={communitySlug}
             />
-          )}
+          ) : null}
         </div>
         <FeedFilter currentSort={sortFilter} />
       </div>

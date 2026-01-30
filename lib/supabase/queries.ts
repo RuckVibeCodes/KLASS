@@ -50,7 +50,9 @@ export const getProfileByClerkId = cache(async (
   clerkUserId: string,
   communityId: string
 ): Promise<Profile | null> => {
-  const supabase = await createClient();
+  // Use admin client to bypass RLS until Clerk-Supabase JWT integration is set up
+  const { createAdminClient } = await import("./admin");
+  const supabase = createAdminClient();
   const { data } = await supabase
     .from("profiles")
     .select("*, membership_tier:membership_tiers(*)")

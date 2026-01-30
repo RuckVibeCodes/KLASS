@@ -273,6 +273,7 @@ export async function createCommunityWithProfile(data: {
 }
 
 // Create a program for a community (for self-serve onboarding)
+// Note: published=true since creator explicitly created this during onboarding
 export async function createProgram(data: {
   communityId: string;
   title: string;
@@ -287,7 +288,7 @@ export async function createProgram(data: {
       title: data.title,
       description: data.description || null,
       visibility: "members",
-      published: false,
+      published: true,
       order_index: 0,
     })
     .select()

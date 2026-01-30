@@ -130,6 +130,7 @@ export function PostCard({
   communityId,
   isAdmin,
   currentProfileId,
+  currentProfileTierLevel = 0,
   primaryColor = "#6366f1",
   isLiked: initialIsLiked = false,
   members = [],
@@ -161,6 +162,11 @@ export function PostCard({
   // Use effectiveIsAdmin to respect view mode
   // When viewing as member, admin actions are hidden
   const canModify = effectiveIsAdmin || currentProfileId === author?.id;
+
+  // Check if user can view full post content (tier gating)
+  const isTierGated = !!post.min_tier_id && !!post.min_tier;
+  const requiredTierLevel = post.min_tier?.tier_level ?? 0;
+  const canViewFullContent = !isTierGated || effectiveIsAdmin || currentProfileTierLevel >= requiredTierLevel;
 
   // Get top-level comments and their replies
   const topLevelComments =
@@ -428,25 +434,92 @@ export function PostCard({
         </div>
       </CardHeader>
       <CardContent className="pb-3">
-        <p className="whitespace-pre-wrap">
-          {renderContentWithMentions(post.content, primaryColor)}
-        </p>
-
-        {post.media_urls && post.media_urls.length > 0 && (
-          <div className="mt-4 grid gap-2">
-            {post.media_urls.map((url: string, index: number) => (
-              <img
-                key={index}
-                src={url}
-                alt=""
-                className="rounded-lg max-h-96 object-cover"
-              />
-            ))}
+        {/* Tier gating badge */}
+        {isTierGated && (
+          <div className="mb-3 flex items-center gap-2">
+            <div
+              className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium"
+              style={{
+                backgroundColor: "rgba(245, 158, 11, 0.15)",
+                color: "rgb(180, 83, 9)",
+              }}
+            >
+              <Crown className="h-3 w-3" />
+              {post.min_tier?.name} & above
+            </div>
           </div>
         )}
 
-        {/* Poll */}
-        {poll && pollOptionsState.length > 0 && (
+        {canViewFullContent ? (
+          <>
+            <p className="whitespace-pre-wrap">
+              {renderContentWithMentions(post.content, primaryColor)}
+            </p>
+
+            {post.media_urls && post.media_urls.length > 0 && (
+              <div className="mt-4 grid gap-2">
+                {post.media_urls.map((url: string, index: number) => (
+                  <img
+                    key={index}
+                    src={url}
+                    alt=""
+                    className="rounded-lg max-h-96 object-cover"
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          /* Tier-gated content preview */
+          <div className="space-y-4">
+            {/* Preview content */}
+            <p className="whitespace-pre-wrap text-muted-foreground">
+              {post.preview_content ||
+                (post.content.length > 150
+                  ? post.content.substring(0, 150) + "..."
+                  : post.content)}
+            </p>
+
+            {/* Blurred preview for media */}
+            {post.media_urls && post.media_urls.length > 0 && (
+              <div className="relative rounded-lg overflow-hidden">
+                <img
+                  src={post.media_urls[0]}
+                  alt=""
+                  className="w-full h-48 object-cover blur-xl"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/50" />
+              </div>
+            )}
+
+            {/* Upgrade CTA */}
+            <div className="p-4 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/50 dark:bg-amber-950/20">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/50">
+                  <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-amber-900 dark:text-amber-100">
+                    Exclusive content for {post.min_tier?.name} members
+                  </p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                    Upgrade to {post.min_tier?.name} to unlock this post and more premium content.
+                  </p>
+                  <Link
+                    href={`/${communitySlug}/pricing`}
+                    className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-amber-700 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-200"
+                  >
+                    <Crown className="h-4 w-4" />
+                    View membership options →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Poll - only show if user can view full content */}
+        {canViewFullContent && poll && pollOptionsState.length > 0 && (
           <div className="mt-4 space-y-3">
             <p className="font-medium">{poll.question}</p>
             <div className="space-y-2">

@@ -49,13 +49,14 @@ export default async function CommunityHomePage({
     filterCategoryId = filterCategory?.id || null;
   }
 
-  // Get posts with authors, comments, categories, and polls
+  // Get posts with authors, comments, categories, polls, and tier info
   let postsQuery = supabase
     .from("posts")
     .select(`
       *,
       author:profiles!posts_author_profile_id_fkey(id, display_name, avatar_url),
       category:post_categories(id, name, slug, color),
+      min_tier:membership_tiers!posts_min_tier_id_fkey(id, name, slug, tier_level),
       comments:comments(
         id,
         content,
@@ -127,6 +128,13 @@ export default async function CommunityHomePage({
     .eq("community_id", community.id)
     .order("display_name");
 
+  // Get membership tiers for tier gating
+  const { data: tiers } = await supabase
+    .from("membership_tiers")
+    .select("id, name, slug, tier_level")
+    .eq("community_id", community.id)
+    .order("tier_level");
+
   // Get next upcoming event
   const { data: upcomingEvents } = await supabase
     .from("events")
@@ -172,6 +180,8 @@ export default async function CommunityHomePage({
         communitySlug={communitySlug}
         members={members || []}
         categories={categories || []}
+        tiers={tiers || []}
+        isAdmin={isAdmin}
       />
 
       <div className="space-y-4">

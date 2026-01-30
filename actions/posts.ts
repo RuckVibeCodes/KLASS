@@ -28,6 +28,9 @@ export async function createPost(formData: FormData) {
   const pollQuestion = formData.get("pollQuestion") as string | null;
   const pollOptionsJson = formData.get("pollOptions") as string | null;
   const pollOptions = pollOptionsJson ? JSON.parse(pollOptionsJson) : [];
+  // Tier gating fields
+  const minTierId = formData.get("minTierId") as string | null;
+  const previewContent = formData.get("previewContent") as string | null;
 
   // Allow post if it has content, media, or a poll
   const hasPoll = pollQuestion && pollOptions.length >= 2;
@@ -59,6 +62,8 @@ export async function createPost(formData: FormData) {
       visibility,
       media_urls: mediaUrls,
       category_id: categoryId || null,
+      min_tier_id: minTierId || null,
+      preview_content: previewContent || null,
     })
     .select("id")
     .single();

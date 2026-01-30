@@ -24,6 +24,8 @@ import {
   Image,
   Video,
   Link,
+  Lock,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import data from "@emoji-mart/data";
@@ -40,6 +42,13 @@ interface Category {
   name: string;
   slug: string;
   color: string;
+}
+
+interface MembershipTier {
+  id: string;
+  name: string;
+  slug: string;
+  tier_level: number;
 }
 
 interface GifResult {
@@ -64,6 +73,8 @@ interface PostFormProps {
   communitySlug: string;
   members?: Member[];
   categories?: Category[];
+  tiers?: MembershipTier[];
+  isAdmin?: boolean;
 }
 
 export function PostForm({
@@ -72,6 +83,8 @@ export function PostForm({
   communitySlug,
   members = [],
   categories = [],
+  tiers = [],
+  isAdmin = false,
 }: PostFormProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [content, setContent] = useState("");
@@ -99,6 +112,10 @@ export function PostForm({
   const [showVideoInput, setShowVideoInput] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  // Tier gating
+  const [selectedTier, setSelectedTier] = useState<MembershipTier | null>(null);
+  const [previewContent, setPreviewContent] = useState("");
+  const [showTierPicker, setShowTierPicker] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
@@ -135,6 +152,9 @@ export function PostForm({
     setMediaUrls([]);
     setVideoUrl("");
     setShowVideoInput(false);
+    setSelectedTier(null);
+    setPreviewContent("");
+    setShowTierPicker(false);
     setIsExpanded(false);
   };
 
@@ -169,6 +189,14 @@ export function PostForm({
           "pollOptions",
           JSON.stringify(validOptions.map((o) => o.text))
         );
+      }
+    }
+
+    // Tier gating
+    if (selectedTier) {
+      formData.append("minTierId", selectedTier.id);
+      if (previewContent.trim()) {
+        formData.append("previewContent", previewContent.trim());
       }
     }
 
@@ -634,6 +662,39 @@ export function PostForm({
             )}
           </div>
         )}
+
+        {/* Tier Gating Preview */}
+        {selectedTier && (
+          <div className="ml-13 space-y-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium flex items-center gap-2">
+                <Lock className="h-4 w-4 text-amber-500" />
+                Restricted to {selectedTier.name} & above
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTier(null);
+                  setPreviewContent("");
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">
+                Preview text (shown to non-eligible members)
+              </label>
+              <Textarea
+                placeholder="Write a teaser to encourage upgrades... (optional)"
+                value={previewContent}
+                onChange={(e) => setPreviewContent(e.target.value)}
+                className="bg-background min-h-[60px] text-sm"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom toolbar */}
@@ -766,6 +827,67 @@ export function PostForm({
           >
             <BarChart3 className="h-4 w-4" />
           </Button>
+
+          {/* Tier Lock Button (Admin only) */}
+          {isAdmin && tiers.length > 0 && (
+            <Popover open={showTierPicker} onOpenChange={setShowTierPicker}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("h-8 w-8", selectedTier && "text-amber-500")}
+                  type="button"
+                >
+                  <Lock className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-2" align="start">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground px-2 py-1">
+                    Restrict to tier
+                  </p>
+                  <button
+                    className={cn(
+                      "w-full flex items-center justify-between px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors",
+                      !selectedTier && "bg-muted"
+                    )}
+                    onClick={() => {
+                      setSelectedTier(null);
+                      setPreviewContent("");
+                      setShowTierPicker(false);
+                    }}
+                  >
+                    <span>Everyone</span>
+                    {!selectedTier && <Check className="h-4 w-4 text-primary" />}
+                  </button>
+                  {tiers
+                    .filter(t => t.tier_level > 0)
+                    .sort((a, b) => a.tier_level - b.tier_level)
+                    .map((tier) => (
+                      <button
+                        key={tier.id}
+                        className={cn(
+                          "w-full flex items-center justify-between px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors",
+                          selectedTier?.id === tier.id && "bg-muted"
+                        )}
+                        onClick={() => {
+                          setSelectedTier(tier);
+                          setShowTierPicker(false);
+                        }}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Lock className="h-3 w-3 text-amber-500" />
+                          {tier.name} & above
+                        </span>
+                        {selectedTier?.id === tier.id && (
+                          <Check className="h-4 w-4 text-primary" />
+                        )}
+                      </button>
+                    ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

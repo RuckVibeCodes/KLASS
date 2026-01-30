@@ -527,10 +527,10 @@ export default function CreateCommunityPage() {
                 />
               </div>
 
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && <p className="text-sm text-red-400">{error}</p>}
 
               <Button
-                className="w-full"
+                className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25"
                 onClick={handleCreateCommunity}
                 disabled={isLoading || !progress.name.trim() || !progress.slug.trim()}
               >
@@ -547,10 +547,10 @@ export default function CreateCommunityPage() {
 
         {/* Step 2: Branding */}
         {currentStep === "branding" && (
-          <Card className="max-w-lg mx-auto">
+          <Card className="max-w-lg mx-auto border-zinc-800 bg-zinc-900/50 backdrop-blur">
             <CardHeader>
-              <CardTitle className="text-2xl">Customize Your Brand</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-white">Customize Your Brand</CardTitle>
+              <CardDescription className="text-zinc-400">
                 Set your community&apos;s colors, logo, and tagline.
               </CardDescription>
             </CardHeader>

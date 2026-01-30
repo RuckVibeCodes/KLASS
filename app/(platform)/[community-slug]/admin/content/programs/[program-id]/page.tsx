@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
@@ -16,7 +16,7 @@ export default async function EditProgramPage({
   const resolvedParams = await params;
   const communitySlug = resolvedParams["community-slug"];
   const programId = resolvedParams["program-id"];
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // Get community
   const { data: community } = await supabase

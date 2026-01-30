@@ -186,7 +186,6 @@ export async function createCommunityWithProfile(data: {
   slug: string;
   description?: string;
   clerkUserId: string;
-  userEmail?: string;
   userName?: string;
 }) {
   const supabase = await createAdminClient();
@@ -207,13 +206,13 @@ export async function createCommunityWithProfile(data: {
     return { error: communityError.message };
   }
 
-  // Create profile for the creator as OWNER
+  // Create profile for the creator as ADMIN
   const { error: profileError } = await supabase.from("profiles").insert({
     community_id: community.id,
     clerk_user_id: data.clerkUserId,
-    email: data.userEmail || null,
     display_name: data.userName || data.name,
-    role: "OWNER",
+    role: "ADMIN",
+    tier: "PAID",
   });
 
   if (profileError) {
@@ -224,15 +223,22 @@ export async function createCommunityWithProfile(data: {
   }
 
   // Create default modules
+  const defaultModules = [
+    { key: "feed", label: "Community" },
+    { key: "programs", label: "Programs" },
+    { key: "resources", label: "Resources" },
+    { key: "events", label: "Events" },
+    { key: "members", label: "Members" },
+    { key: "about", label: "About" },
+  ];
   await supabase.from("community_modules").insert(
-    ["feed", "programs", "resources", "events", "members", "about"].map(
-      (module, index) => ({
-        community_id: community.id,
-        module_type: module,
-        is_enabled: true,
-        order_index: index,
-      })
-    )
+    defaultModules.map((mod, index) => ({
+      community_id: community.id,
+      key: mod.key,
+      label: mod.label,
+      enabled: true,
+      order_index: index,
+    }))
   );
 
   // Create default free tier
@@ -240,18 +246,22 @@ export async function createCommunityWithProfile(data: {
     {
       community_id: community.id,
       name: "Free",
+      slug: "free",
       description: "Basic access to the community",
-      price_monthly: 0,
-      price_yearly: 0,
+      price_cents_monthly: 0,
+      price_cents_yearly: 0,
+      tier_level: 0,
       is_default: true,
       order_index: 0,
     },
     {
       community_id: community.id,
       name: "Pro",
+      slug: "pro",
       description: "Full access to all content",
-      price_monthly: 29,
-      price_yearly: 290,
+      price_cents_monthly: 2900,
+      price_cents_yearly: 29000,
+      tier_level: 1,
       is_default: false,
       order_index: 1,
     },

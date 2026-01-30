@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -18,7 +18,7 @@ export default async function AffiliatePage({
 
   if (!userId) redirect("/sign-in");
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // Get community
   const { data: community } = await supabase

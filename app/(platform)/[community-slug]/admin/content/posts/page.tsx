@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +22,7 @@ export default async function AdminPostsPage({
   const { userId } = await auth();
   const resolvedParams = await params;
   const communitySlug = resolvedParams["community-slug"];
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // Get community
   const { data: community } = await supabase

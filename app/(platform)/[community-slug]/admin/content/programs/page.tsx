@@ -1,4 +1,4 @@
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,7 +17,7 @@ export default async function AdminProgramsPage({
   const { userId } = await auth();
   const resolvedParams = await params;
   const communitySlug = resolvedParams["community-slug"];
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -35,10 +35,8 @@ export default async function AdminProgramsPage({
     .eq("clerk_user_id", userId)
     .eq("community_id", community.id)
     .single();
-
-  // Get programs with lesson count (use admin client to bypass RLS)
-  const adminSupabase = await createAdminClient();
-  const { data: programs } = await adminSupabase
+  // Get programs with lesson count
+  const { data: programs } = await supabase
     .from("programs")
     .select(`
       *,

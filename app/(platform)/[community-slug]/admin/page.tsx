@@ -24,7 +24,7 @@ import {
   getCommunityStats,
   getRecentMembers,
 } from "@/lib/supabase/queries";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { getMemberSignals } from "@/lib/member-signals";
 import { NeedsAttentionPanel } from "@/components/admin/needs-attention-panel";
 
@@ -63,7 +63,7 @@ export default async function AdminDashboardPage({
   }
 
   // Get stats, recent members, and member signals using consolidated cached queries
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const [stats, recentMembers, signals] = await Promise.all([
     getCommunityStats(community.id),
     getRecentMembers(community.id, 5),

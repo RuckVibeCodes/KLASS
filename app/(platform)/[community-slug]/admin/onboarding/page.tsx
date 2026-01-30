@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Sparkles, Lock } from "lucide-react";
@@ -16,7 +16,7 @@ export default async function AdminOnboardingPage({
   const { userId } = await auth();
   const resolvedParams = await params;
   const communitySlug = resolvedParams["community-slug"];
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // Get community
   const { data: community } = await supabase

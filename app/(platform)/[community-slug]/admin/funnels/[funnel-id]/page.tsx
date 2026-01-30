@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { FunnelForm } from "@/components/funnels/funnel-form";
@@ -13,7 +13,7 @@ export default async function EditFunnelPage({
   const resolvedParams = await params;
   const communitySlug = resolvedParams["community-slug"];
   const funnelId = resolvedParams["funnel-id"];
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // Get community
   const { data: community } = await supabase

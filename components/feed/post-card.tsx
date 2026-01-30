@@ -142,6 +142,7 @@ export function PostCard({
   const category = post.category;
   const [showComments, setShowComments] = useState(false);
   const [commentContent, setCommentContent] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
   const [replyingTo, setReplyingTo] = useState<{
     id: string;
     name: string;
@@ -165,6 +166,17 @@ export function PostCard({
 
   // Check if user can view full post content (tier gating)
   const isTierGated = !!post.min_tier_id && !!post.min_tier;
+  
+  // Collapse long posts by default (280 chars or 4 newlines)
+  const COLLAPSE_THRESHOLD = 280;
+  const MAX_LINES = 4;
+  const contentLength = post.content?.length || 0;
+  const lineCount = (post.content?.match(/\n/g) || []).length;
+  const shouldCollapse = contentLength > COLLAPSE_THRESHOLD || lineCount > MAX_LINES;
+  
+  const truncatedContent = shouldCollapse && !isExpanded
+    ? post.content.substring(0, COLLAPSE_THRESHOLD).split('\n').slice(0, MAX_LINES).join('\n') + '...'
+    : post.content;
   const requiredTierLevel = post.min_tier?.tier_level ?? 0;
   const canViewFullContent = !isTierGated || effectiveIsAdmin || currentProfileTierLevel >= requiredTierLevel;
 
@@ -453,8 +465,18 @@ export function PostCard({
         {canViewFullContent ? (
           <>
             <p className="whitespace-pre-wrap">
-              {renderContentWithMentions(post.content, primaryColor)}
+              {renderContentWithMentions(truncatedContent, primaryColor)}
             </p>
+            
+            {shouldCollapse && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-sm font-medium mt-1 hover:underline"
+                style={{ color: primaryColor || 'hsl(var(--primary))' }}
+              >
+                {isExpanded ? 'Show less' : 'Read more'}
+              </button>
+            )}
 
             {post.media_urls && post.media_urls.length > 0 && (
               <div className="mt-4 grid gap-2">

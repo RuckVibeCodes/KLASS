@@ -37,7 +37,8 @@ import {
   Pencil,
   Trash2,
   Loader2,
-  GripVertical,
+  ChevronUp,
+  ChevronDown,
   Sparkles,
   MessageSquare,
   Lightbulb,
@@ -53,6 +54,7 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  reorderCategories,
   type Category,
 } from "@/actions/categories";
 import { cn } from "@/lib/utils";
@@ -205,6 +207,36 @@ export function FeedSettings({ community, communitySlug }: FeedSettingsProps) {
     });
   };
 
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
+    
+    const newCategories = [...categories];
+    [newCategories[index - 1], newCategories[index]] = [newCategories[index], newCategories[index - 1]];
+    setCategories(newCategories);
+    
+    // Save the new order
+    startTransition(async () => {
+      const orders = newCategories.map((cat, idx) => ({ id: cat.id, display_order: idx }));
+      await reorderCategories(communitySlug, orders);
+      router.refresh();
+    });
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index === categories.length - 1) return;
+    
+    const newCategories = [...categories];
+    [newCategories[index], newCategories[index + 1]] = [newCategories[index + 1], newCategories[index]];
+    setCategories(newCategories);
+    
+    // Save the new order
+    startTransition(async () => {
+      const orders = newCategories.map((cat, idx) => ({ id: cat.id, display_order: idx }));
+      await reorderCategories(communitySlug, orders);
+      router.refresh();
+    });
+  };
+
   return (
     <>
       <Card>
@@ -234,7 +266,7 @@ export function FeedSettings({ community, communitySlug }: FeedSettingsProps) {
           ) : (
             <>
               <div className="space-y-2">
-                {categories.map((category) => {
+                {categories.map((category, index) => {
                   const IconComponent = getIconComponent(category.icon);
                   return (
                     <div
@@ -242,7 +274,27 @@ export function FeedSettings({ community, communitySlug }: FeedSettingsProps) {
                       className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+                        {/* Reorder buttons */}
+                        <div className="flex flex-col">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5"
+                            onClick={() => handleMoveUp(index)}
+                            disabled={index === 0 || isPending}
+                          >
+                            <ChevronUp className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5"
+                            onClick={() => handleMoveDown(index)}
+                            disabled={index === categories.length - 1 || isPending}
+                          >
+                            <ChevronDown className="h-3 w-3" />
+                          </Button>
+                        </div>
                         <div
                           className="h-8 w-8 rounded-full flex items-center justify-center"
                           style={{ backgroundColor: `${category.color}20` }}

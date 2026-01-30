@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isDemoSlug } from "@/lib/demo";
 import { sendContentNotification, isEmailAvailable } from "@/lib/email";
 
@@ -35,7 +35,7 @@ export async function createPost(formData: FormData) {
     throw new Error("Missing required fields");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get profile
   const { data: profile } = await supabase
@@ -150,7 +150,7 @@ export async function deletePost(postId: string, communitySlug: string) {
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { error } = await supabase.from("posts").delete().eq("id", postId);
 
@@ -175,7 +175,7 @@ export async function togglePinPost(
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { error } = await supabase
     .from("posts")
@@ -212,7 +212,7 @@ export async function createComment(formData: FormData) {
     throw new Error("Missing required fields");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get profile
   const { data: profile } = await supabase
@@ -258,7 +258,7 @@ export async function toggleLikePost(
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get profile
   const { data: profile } = await supabase
@@ -292,7 +292,7 @@ export async function hasUserLikedPost(
   postId: string,
   profileId: string
 ): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data } = await supabase
     .from("post_likes")
@@ -316,7 +316,7 @@ export async function voteOnPoll(
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get profile
   const { data: profile } = await supabase

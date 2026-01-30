@@ -185,83 +185,27 @@ export default function CreateCommunityPage() {
     setError("");
 
     try {
-      const supabase = createClient();
+      // Use server action to bypass RLS
+      const { createCommunityWithProfile } = await import("@/actions/community");
+      const result = await createCommunityWithProfile({
+        name: progress.name.trim(),
+        slug: progress.slug.trim(),
+        description: progress.description.trim() || undefined,
+        clerkUserId: userId,
+      });
 
-      // Create community
-      const { data: community, error: communityError } = await supabase
-        .from("communities")
-        .insert({
-          name: progress.name.trim(),
-          slug: progress.slug.trim(),
-          description: progress.description.trim() || null,
-          primary_color: "#000000",
-          accent_color: "#6366f1",
-          settings_json: {},
-        })
-        .select()
-        .single();
-
-      if (communityError) {
-        if (communityError.code === "23505") {
+      if (result.error) {
+        if (result.error.includes("duplicate") || result.error.includes("unique")) {
           setError("This community URL is already taken. Try a different name.");
         } else {
-          setError(communityError.message);
+          setError(result.error);
         }
         return;
       }
 
-      // Create profile as admin
-      const { error: profileError } = await supabase.from("profiles").insert({
-        clerk_user_id: userId,
-        community_id: community.id,
-        role: "ADMIN",
-        tier: "PAID",
-      });
+      const community = result.community;
 
-      if (profileError) {
-        setError(profileError.message);
-        return;
-      }
-
-      // Create default modules
-      const defaultModules = [
-        { key: "feed", label: "Community", enabled: true, order_index: 0 },
-        { key: "programs", label: "Programs", enabled: true, order_index: 1 },
-        { key: "resources", label: "Resources", enabled: true, order_index: 2 },
-        { key: "events", label: "Events", enabled: true, order_index: 3 },
-        { key: "members", label: "Members", enabled: true, order_index: 4 },
-      ];
-
-      await supabase.from("community_modules").insert(
-        defaultModules.map((module) => ({
-          ...module,
-          community_id: community.id,
-        }))
-      );
-
-      // Create default membership tiers
-      await supabase.from("membership_tiers").insert([
-        {
-          community_id: community.id,
-          name: "Free",
-          slug: "free",
-          tier_level: 0,
-          is_default: true,
-          price_cents_monthly: 0,
-          price_cents_yearly: 0,
-          description: "Free community access",
-        },
-        {
-          community_id: community.id,
-          name: "Pro",
-          slug: "pro",
-          tier_level: 1,
-          price_cents_monthly: 0,
-          price_cents_yearly: 0,
-          description: "Full access to all premium content",
-        },
-      ]);
-
+      // Server action already created profile, modules, and tiers
       saveProgress({
         ...progress,
         communityId: community.id,

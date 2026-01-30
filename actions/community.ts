@@ -179,3 +179,83 @@ export async function updateCommunityModules(
 
   return { success: true };
 }
+
+// Create a new community (for self-serve onboarding)
+export async function createCommunityWithProfile(data: {
+  name: string;
+  slug: string;
+  description?: string;
+  clerkUserId: string;
+  userEmail?: string;
+  userName?: string;
+}) {
+  const supabase = await createAdminClient();
+
+  // Create community
+  const { data: community, error: communityError } = await supabase
+    .from("communities")
+    .insert({
+      name: data.name,
+      slug: data.slug,
+      description: data.description || null,
+    })
+    .select()
+    .single();
+
+  if (communityError) {
+    console.error("Failed to create community:", communityError);
+    return { error: communityError.message };
+  }
+
+  // Create profile for the creator as OWNER
+  const { error: profileError } = await supabase.from("profiles").insert({
+    community_id: community.id,
+    clerk_user_id: data.clerkUserId,
+    email: data.userEmail || null,
+    display_name: data.userName || data.name,
+    role: "OWNER",
+  });
+
+  if (profileError) {
+    console.error("Failed to create profile:", profileError);
+    // Rollback community creation
+    await supabase.from("communities").delete().eq("id", community.id);
+    return { error: profileError.message };
+  }
+
+  // Create default modules
+  await supabase.from("community_modules").insert(
+    ["feed", "programs", "resources", "events", "members", "about"].map(
+      (module, index) => ({
+        community_id: community.id,
+        module_type: module,
+        is_enabled: true,
+        order_index: index,
+      })
+    )
+  );
+
+  // Create default free tier
+  await supabase.from("membership_tiers").insert([
+    {
+      community_id: community.id,
+      name: "Free",
+      description: "Basic access to the community",
+      price_monthly: 0,
+      price_yearly: 0,
+      is_default: true,
+      order_index: 0,
+    },
+    {
+      community_id: community.id,
+      name: "Pro",
+      description: "Full access to all content",
+      price_monthly: 29,
+      price_yearly: 290,
+      is_default: false,
+      order_index: 1,
+    },
+  ]);
+
+  return { community };
+}

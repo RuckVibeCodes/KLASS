@@ -51,6 +51,9 @@ export interface Community {
   membership_price_cents: number;
   stripe_product_id: string | null;
   stripe_price_id: string | null;
+  // Creator profile fields
+  creator_display_name: string | null;
+  creator_avatar_url: string | null;
 }
 
 export interface CommunityModule {

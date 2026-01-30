@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Save, Image as ImageIcon } from "lucide-react";
+import { Loader2, Save, Image as ImageIcon, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { updateCommunity, updateCommunitySettings } from "@/actions/community";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -32,6 +32,8 @@ export function GeneralSettings({ community, communitySlug }: GeneralSettingsPro
     accentColor: community.accent_color,
     bannerImageUrl: community.settings_json?.banner_image_url || "",
     bannerDescription: community.settings_json?.banner_description || "",
+    creatorDisplayName: community.creator_display_name || "",
+    creatorAvatarUrl: community.creator_avatar_url || "",
   });
 
   const handleSave = () => {
@@ -43,6 +45,8 @@ export function GeneralSettings({ community, communitySlug }: GeneralSettingsPro
         logo_url: formData.logoUrl || null,
         primary_color: formData.primaryColor,
         accent_color: formData.accentColor,
+        creator_display_name: formData.creatorDisplayName || null,
+        creator_avatar_url: formData.creatorAvatarUrl || null,
       });
 
       if (communityResult.error) {
@@ -282,6 +286,83 @@ export function GeneralSettings({ community, communitySlug }: GeneralSettingsPro
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {formData.bannerDescription || formData.description || "Welcome to our community!"}
                   </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={isPending}>
+              {isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              Save Changes
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Creator Profile Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Creator Profile
+          </CardTitle>
+          <CardDescription>
+            Your public identity as the creator of this community. This is shown on landing pages and in the sidebar.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="creator-name">Display Name</Label>
+            <Input
+              id="creator-name"
+              value={formData.creatorDisplayName}
+              onChange={(e) => setFormData({ ...formData, creatorDisplayName: e.target.value })}
+              placeholder="Your name as the community creator"
+            />
+            <p className="text-xs text-muted-foreground">
+              This name appears alongside your avatar on the landing page and community sidebar.
+            </p>
+          </div>
+
+          <ImageUpload
+            label="Creator Avatar"
+            description="Recommended size: 200x200px (square). Your photo or avatar as the creator."
+            value={formData.creatorAvatarUrl || null}
+            onChange={(url) => setFormData({ ...formData, creatorAvatarUrl: url || "" })}
+            bucket={BUCKETS.AVATARS}
+            communityId={community.id}
+            aspectRatio="square"
+          />
+
+          {/* Creator Preview */}
+          {(formData.creatorDisplayName || formData.creatorAvatarUrl) && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Preview</p>
+              <div className="flex items-center gap-3 p-4 border rounded-lg max-w-xs">
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                  {formData.creatorAvatarUrl ? (
+                    <img
+                      src={formData.creatorAvatarUrl}
+                      alt="Creator avatar"
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <User className="h-6 w-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium">
+                    {formData.creatorDisplayName || "Creator Name"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Community Creator</p>
                 </div>
               </div>
             </div>

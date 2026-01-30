@@ -82,6 +82,8 @@ export async function updateCommunity(
     logo_url?: string | null;
     primary_color?: string;
     accent_color?: string;
+    creator_display_name?: string | null;
+    creator_avatar_url?: string | null;
   }
 ) {
   if (isDemoMode(communitySlug)) {

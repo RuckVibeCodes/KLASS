@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { isDemoSlug } from "@/lib/demo";
@@ -96,8 +96,9 @@ export async function createTag(
     return { data: null, error: "Only admins can create tags" };
   }
 
-  // Create tag
-  const { data: tag, error } = await supabase
+  // Create tag using admin client
+  const adminSupabase = await createAdminClient();
+  const { data: tag, error } = await adminSupabase
     .from("member_tags")
     .insert({
       community_id: community.id,
@@ -162,14 +163,15 @@ export async function updateTag(
     return { data: null, error: "Only admins can update tags" };
   }
 
-  // Update tag
+  // Update tag using admin client
   const updateData: Partial<MemberTag> = {};
   if (data.name !== undefined) updateData.name = data.name.trim();
   if (data.color !== undefined) updateData.color = data.color;
   if (data.description !== undefined)
     updateData.description = data.description?.trim() || null;
 
-  const { data: tag, error } = await supabase
+  const adminSupabase = await createAdminClient();
+  const { data: tag, error } = await adminSupabase
     .from("member_tags")
     .update(updateData)
     .eq("id", tagId)
@@ -227,8 +229,9 @@ export async function deleteTag(
     return { error: "Only admins can delete tags" };
   }
 
-  // Delete tag (cascade will remove profile_tags)
-  const { error } = await supabase.from("member_tags").delete().eq("id", tagId);
+  // Delete tag using admin client (cascade will remove profile_tags)
+  const adminSupabase = await createAdminClient();
+  const { error } = await adminSupabase.from("member_tags").delete().eq("id", tagId);
 
   if (error) {
     return { error: "Operation failed" };
@@ -275,8 +278,9 @@ export async function assignTag(
     return { error: "Only admins can assign tags" };
   }
 
-  // Assign tag
-  const { error } = await supabase.from("profile_tags").insert({
+  // Assign tag using admin client
+  const adminSupabase = await createAdminClient();
+  const { error } = await adminSupabase.from("profile_tags").insert({
     profile_id: profileId,
     tag_id: tagId,
     assigned_by: adminProfile.id,
@@ -329,8 +333,9 @@ export async function removeTag(
     return { error: "Only admins can remove tags" };
   }
 
-  // Remove tag
-  const { error } = await supabase
+  // Remove tag using admin client
+  const adminSupabase = await createAdminClient();
+  const { error } = await adminSupabase
     .from("profile_tags")
     .delete()
     .eq("profile_id", profileId)
@@ -421,14 +426,15 @@ export async function bulkAssignTag(
     return { success: 0, errors: profileIds.length };
   }
 
-  // Bulk insert (ignoring conflicts)
+  // Bulk insert using admin client (ignoring conflicts)
   const inserts = profileIds.map((profileId) => ({
     profile_id: profileId,
     tag_id: tagId,
     assigned_by: adminProfile.id,
   }));
 
-  const { data, error } = await supabase
+  const adminSupabase = await createAdminClient();
+  const { data, error } = await adminSupabase
     .from("profile_tags")
     .upsert(inserts, { onConflict: "profile_id,tag_id", ignoreDuplicates: true })
     .select();

@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import type { ContentVisibility } from "@/types/database";
@@ -129,8 +129,9 @@ export async function updateEvent(
     return { error: "Not authorized" };
   }
 
-  // Update event
-  const { error } = await supabase
+  // Update event using admin client
+  const adminSupabase = await createAdminClient();
+  const { error } = await adminSupabase
     .from("events")
     .update({
       ...data,
@@ -181,8 +182,9 @@ export async function deleteEvent(eventId: string, communitySlug: string) {
     return { error: "Not authorized" };
   }
 
-  // Delete event
-  const { error } = await supabase
+  // Delete event using admin client
+  const adminSupabase = await createAdminClient();
+  const { error } = await adminSupabase
     .from("events")
     .delete()
     .eq("id", eventId)
@@ -242,8 +244,9 @@ export async function createEvent(
     return { error: "Not authorized", data: null };
   }
 
-  // Create event
-  const { data: event, error } = await supabase
+  // Create event using admin client
+  const adminSupabase = await createAdminClient();
+  const { data: event, error } = await adminSupabase
     .from("events")
     .insert({
       community_id: community.id,

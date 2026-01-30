@@ -54,6 +54,10 @@ export interface Community {
   // Creator profile fields
   creator_display_name: string | null;
   creator_avatar_url: string | null;
+  // Custom domain fields
+  custom_domain: string | null;
+  custom_domain_verified: boolean;
+  custom_domain_verified_at: string | null;
 }
 
 export interface CommunityModule {

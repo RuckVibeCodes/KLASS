@@ -15,8 +15,9 @@ import { ChatSettings } from "@/components/admin/chat-settings";
 import { AffiliateSettings } from "@/components/admin/affiliate-settings";
 import { IntegrationsSettings } from "@/components/admin/integrations-settings";
 import { AdvancedSettings } from "@/components/admin/advanced-settings";
+import { CustomDomainSettings } from "@/components/admin/custom-domain-settings";
 
-const validTabs = ["general", "layout", "feed", "payments", "tiers", "chat", "affiliates", "integrations", "advanced"];
+const validTabs = ["general", "layout", "feed", "payments", "tiers", "chat", "affiliates", "integrations", "domain", "advanced"];
 
 export default function AdminSettingsPage() {
   const params = useParams();
@@ -68,7 +69,7 @@ export default function AdminSettingsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-9">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 lg:grid-cols-10">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="layout">Layout</TabsTrigger>
           <TabsTrigger value="feed">Feed</TabsTrigger>
@@ -77,6 +78,7 @@ export default function AdminSettingsPage() {
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="affiliates">Affiliates</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          <TabsTrigger value="domain">Domain</TabsTrigger>
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
         </TabsList>
 
@@ -114,6 +116,14 @@ export default function AdminSettingsPage() {
 
         <TabsContent value="integrations" className="space-y-6">
           <IntegrationsSettings community={community} communitySlug={communitySlug} />
+        </TabsContent>
+
+        <TabsContent value="domain" className="space-y-6">
+          <CustomDomainSettings
+            communityId={community.id}
+            initialDomain={community.custom_domain}
+            initialVerified={community.custom_domain_verified}
+          />
         </TabsContent>
 
         <TabsContent value="advanced" className="space-y-6">

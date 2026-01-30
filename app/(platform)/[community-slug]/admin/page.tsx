@@ -27,6 +27,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/server";
 import { getMemberSignals } from "@/lib/member-signals";
 import { NeedsAttentionPanel } from "@/components/admin/needs-attention-panel";
+import { OnboardingChecklistWrapper } from "./onboarding-checklist-wrapper";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -64,11 +65,14 @@ export default async function AdminDashboardPage({
 
   // Get stats, recent members, and member signals using consolidated cached queries
   const supabase = await createAdminClient();
-  const [stats, recentMembers, signals] = await Promise.all([
+  const { getCreatorOnboardingStatus } = await import("@/actions/onboarding");
+  const [stats, recentMembers, signals, onboardingResult] = await Promise.all([
     getCommunityStats(community.id),
     getRecentMembers(community.id, 5),
     getMemberSignals(supabase, community.id),
+    getCreatorOnboardingStatus(community.id),
   ]);
+  const onboardingStatus = onboardingResult.data;
 
   const baseUrl = `/${communitySlug}`;
 
@@ -88,6 +92,17 @@ export default async function AdminDashboardPage({
               </p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Creator Onboarding Checklist */}
+      {onboardingStatus && !onboardingStatus.onboardingDismissed && !isDemo && (
+        <div className="mb-6">
+          <OnboardingChecklistWrapper
+            communitySlug={communitySlug}
+            communityId={community.id}
+            status={onboardingStatus}
+          />
         </div>
       )}
 

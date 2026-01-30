@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isDemoSlug } from "@/lib/demo";
 
 export interface Category {
@@ -62,7 +62,7 @@ export async function createCategory(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -152,7 +152,7 @@ export async function updateCategory(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -227,7 +227,7 @@ export async function deleteCategory(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -284,7 +284,7 @@ export async function reorderCategories(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community

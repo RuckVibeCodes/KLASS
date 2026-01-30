@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { ContentVisibility, QuestionType } from "@/types/database";
 import { isDemoSlug } from "@/lib/demo";
 
@@ -26,7 +26,7 @@ export async function createProgram(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -107,7 +107,7 @@ export async function updateProgram(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community and verify admin
   const { data: community } = await supabase
@@ -160,7 +160,7 @@ export async function deleteProgram(programId: string, communitySlug: string) {
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community and verify admin
   const { data: community } = await supabase
@@ -805,7 +805,7 @@ export async function reorderQuizQuestions(
 // ============================================================================
 
 export async function getQuizForLesson(lessonId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: quiz, error } = await supabase
     .from("quizzes")

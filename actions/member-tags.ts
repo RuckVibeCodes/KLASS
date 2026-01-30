@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { isDemoSlug } from "@/lib/demo";
@@ -33,7 +33,7 @@ export async function getCommunityTags(
     return { data: null, error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -72,7 +72,7 @@ export async function createTag(
     return { data: null, error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community and verify admin
   const { data: community } = await supabase
@@ -134,7 +134,7 @@ export async function updateTag(
     return { data: null, error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Verify the tag exists and user is admin
   const { data: existingTag } = await supabase
@@ -200,7 +200,7 @@ export async function deleteTag(
     return { error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Verify the tag exists and user is admin
   const { data: existingTag } = await supabase
@@ -253,7 +253,7 @@ export async function assignTag(
     return { error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -308,7 +308,7 @@ export async function removeTag(
     return { error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -359,7 +359,7 @@ export async function getProfileTags(
     return { data: null, error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -401,7 +401,7 @@ export async function bulkAssignTag(
     return { success: 0, errors: profileIds.length };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase

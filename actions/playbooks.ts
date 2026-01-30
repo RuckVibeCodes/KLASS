@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { getPlaybook, getAllStepIds } from "@/lib/playbooks/templates";
 
@@ -26,7 +26,7 @@ export async function getPlaybookProgress(
     return { data: null, error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -89,7 +89,7 @@ export async function getAllPlaybookProgress(
     return { data: [], error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -153,7 +153,7 @@ export async function togglePlaybookStep(
     return { error: "Step not found in playbook" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -234,7 +234,7 @@ export async function resetPlaybookProgress(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community

@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 interface UpdateProfileInput {
   profileId: string;
@@ -19,7 +19,7 @@ export async function updateProfile(input: UpdateProfileInput) {
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Verify this profile belongs to the current user
   const { data: profile } = await supabase

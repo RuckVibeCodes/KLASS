@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import type { Funnel, FunnelContentType } from "@/types/database";
 import { isDemoSlug } from "@/lib/demo";
@@ -29,7 +29,7 @@ const RESERVED_SLUGS = [
  * Get all funnels for a community (admin only)
  */
 export async function getCommunityFunnels(communitySlug: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: community } = await supabase
     .from("communities")
@@ -57,7 +57,7 @@ export async function getCommunityFunnels(communitySlug: string) {
  * Get a single funnel by ID (admin access)
  */
 export async function getFunnel(funnelId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("funnels")
@@ -133,7 +133,7 @@ export async function createFunnel(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Validate slug
@@ -236,7 +236,7 @@ export async function updateFunnel(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -328,7 +328,7 @@ export async function deleteFunnel(funnelId: string, communitySlug: string) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -375,7 +375,7 @@ export async function processFunnelSignup(funnelId: string, source?: string) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get funnel
@@ -523,7 +523,7 @@ export async function checkFunnelConversion(funnelId: string, communityId: strin
     return { data: { hasConverted: false, hasProfile: false } };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Check if user has a profile in this community
   const { data: profile } = await supabase
@@ -560,7 +560,7 @@ export async function getFunnelStats(funnelId: string, communitySlug: string) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase

@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import type { ContentType, GrantSource } from "@/types/database";
 
@@ -21,7 +21,7 @@ export async function grantContentAccess(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -95,7 +95,7 @@ export async function revokeContentAccess(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -145,7 +145,7 @@ export async function getContentAccessList(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -208,7 +208,7 @@ export async function getMemberAccessGrants(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -260,7 +260,7 @@ export async function checkContentAccess(
   contentType: ContentType,
   contentId: string
 ) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Check for active grant
   const { data: grant } = await supabase
@@ -282,7 +282,7 @@ export async function getCommunityMembersForGrants(communitySlug: string) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase

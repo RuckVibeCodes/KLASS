@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { generateReferralCode } from "@/lib/referral";
 import { isDemoSlug } from "@/lib/demo";
@@ -16,7 +16,7 @@ export async function getOrCreateReferralCode(communitySlug: string) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -81,7 +81,7 @@ export async function getAffiliateStats(communitySlug: string) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -142,7 +142,7 @@ export async function getAffiliateSettings(communitySlug: string) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -187,7 +187,7 @@ export async function updateAffiliateSettings(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community

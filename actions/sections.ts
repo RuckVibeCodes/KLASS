@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isDemoSlug } from "@/lib/demo";
 
 // ============================================================================
@@ -10,7 +10,7 @@ import { isDemoSlug } from "@/lib/demo";
 // ============================================================================
 
 async function verifyAdmin(userId: string, communitySlug: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data: community } = await supabase
     .from("communities")
     .select("id")

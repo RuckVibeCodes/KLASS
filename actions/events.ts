@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import type { ContentVisibility } from "@/types/database";
@@ -13,7 +13,7 @@ export async function getCommunityEvents(communitySlug: string) {
     return { error: "Not authenticated", data: null };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community, error: communityError } = await supabase
@@ -57,7 +57,7 @@ export async function getEvent(eventId: string, communitySlug: string) {
     return { error: "Not authenticated", data: null };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community, error: communityError } = await supabase
@@ -105,7 +105,7 @@ export async function updateEvent(
     return { error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community and verify admin
   const { data: community } = await supabase
@@ -158,7 +158,7 @@ export async function deleteEvent(eventId: string, communitySlug: string) {
     return { error: "Not authenticated" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community and verify admin
   const { data: community } = await supabase
@@ -220,7 +220,7 @@ export async function createEvent(
     return { error: "Not authenticated", data: null };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community and verify admin
   const { data: community } = await supabase

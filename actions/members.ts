@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isDemoSlug } from "@/lib/demo";
 
 export async function updateMemberRole(
@@ -18,7 +18,7 @@ export async function updateMemberRole(
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -74,7 +74,7 @@ export async function updateMemberTier(
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase
@@ -129,7 +129,7 @@ export async function removeMember(
     throw new Error("Unauthorized");
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase

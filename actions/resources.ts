@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import type { Resource, ContentVisibility } from "@/types/database";
 import { isDemoSlug } from "@/lib/demo";
@@ -10,7 +10,7 @@ import { isDemoSlug } from "@/lib/demo";
  * Get all resources for a community
  */
 export async function getCommunityResources(communitySlug: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: community } = await supabase
     .from("communities")
@@ -39,7 +39,7 @@ export async function getCommunityResources(communitySlug: string) {
  * Get a single resource by ID
  */
 export async function getResource(resourceId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("resources")
@@ -76,7 +76,7 @@ export async function createResource(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -160,7 +160,7 @@ export async function updateResource(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -226,7 +226,7 @@ export async function deleteResource(resourceId: string, communitySlug: string) 
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community
@@ -278,7 +278,7 @@ export async function reorderResources(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get community

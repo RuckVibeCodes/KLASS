@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { syncContentToStripe } from "@/lib/stripe/products";
 import type { ContentType } from "@/types/database";
@@ -20,7 +20,7 @@ export async function updateCommunityPricing(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Verify admin
@@ -95,7 +95,7 @@ export async function updateProgramPricing(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get program with community
@@ -201,7 +201,7 @@ export async function updateResourcePricing(
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const adminSupabase = await createAdminClient();
 
   // Get resource with community
@@ -298,7 +298,7 @@ export async function getPricingSettings(communitySlug: string) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get community
   const { data: community } = await supabase

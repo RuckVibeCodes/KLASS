@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // ============================================================================
 // LESSON COMMENTS
@@ -22,7 +22,7 @@ export async function createLessonComment(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get user's profile
   const { data: profile } = await supabase
@@ -80,7 +80,7 @@ export async function updateLessonComment(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get user's profile
   const { data: profile } = await supabase
@@ -134,7 +134,7 @@ export async function deleteLessonComment(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get user's profile
   const { data: profile } = await supabase
@@ -190,7 +190,7 @@ export async function toggleCommentLike(
     return { error: "Unauthorized" };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get user's profile
   const { data: profile } = await supabase
@@ -249,7 +249,7 @@ export async function toggleCommentLike(
 }
 
 export async function getLessonComments(lessonId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { userId } = await auth();
 
   // Get current user's profile for checking likes

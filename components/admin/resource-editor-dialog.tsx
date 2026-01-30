@@ -20,11 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Crown, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Crown, Trash2, Link as LinkIcon, FileUp, Code } from "lucide-react";
 import { ContentTierSelector } from "./content-tier-selector";
-import { updateResource, deleteResource } from "@/actions/resources";
+import { createResource, updateResource, deleteResource } from "@/actions/resources";
 import { getCommunityTiers } from "@/actions/tiers";
-import type { Resource, ContentVisibility, MembershipTier } from "@/types/database";
+import type { Resource, ContentVisibility, ResourceType, MembershipTier } from "@/types/database";
 
 interface ResourceEditorDialogProps {
   resource: Resource | null;
@@ -41,25 +42,42 @@ export function ResourceEditorDialog({
   onOpenChange,
   onSaved,
 }: ResourceEditorDialogProps) {
+  const isEditing = !!resource;
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<ContentVisibility>("members");
   const [folder, setFolder] = useState("");
+  const [resourceType, setResourceType] = useState<ResourceType>("link");
+  const [url, setUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tiers, setTiers] = useState<MembershipTier[]>([]);
   const [tiersLoading, setTiersLoading] = useState(true);
 
-  // Reset form when resource changes
+  // Reset form when dialog opens or resource changes
   useEffect(() => {
-    if (resource) {
-      setTitle(resource.title);
-      setDescription(resource.description || "");
-      setVisibility(resource.visibility);
-      setFolder(resource.folder || "");
+    if (open) {
+      if (resource) {
+        setTitle(resource.title);
+        setDescription(resource.description || "");
+        setVisibility(resource.visibility);
+        setFolder(resource.folder || "");
+        setResourceType(resource.type);
+        setUrl(resource.url);
+      } else {
+        // Reset for new resource
+        setTitle("");
+        setDescription("");
+        setVisibility("members");
+        setFolder("");
+        setResourceType("link");
+        setUrl("");
+      }
+      setError(null);
     }
-  }, [resource]);
+  }, [resource, open]);
 
   // Load tiers on mount
   useEffect(() => {
@@ -77,22 +95,49 @@ export function ResourceEditorDialog({
   }, [communitySlug, open]);
 
   const handleSave = async () => {
-    if (!resource) return;
+    if (!title.trim()) {
+      setError("Title is required");
+      return;
+    }
+
+    if (!isEditing && !url.trim()) {
+      setError("URL is required");
+      return;
+    }
 
     setSaving(true);
     setError(null);
 
-    const result = await updateResource(resource.id, communitySlug, {
-      title,
-      description: description || null,
-      visibility,
-      folder,
-    });
+    if (isEditing && resource) {
+      // Update existing resource
+      const result = await updateResource(resource.id, communitySlug, {
+        title,
+        description: description || null,
+        visibility,
+        folder,
+      });
 
-    if (result.error) {
-      setError(result.error);
-      setSaving(false);
-      return;
+      if (result.error) {
+        setError(result.error);
+        setSaving(false);
+        return;
+      }
+    } else {
+      // Create new resource
+      const result = await createResource(communitySlug, {
+        title,
+        description: description || undefined,
+        type: resourceType,
+        url,
+        folder: folder || undefined,
+        visibility,
+      });
+
+      if (result.error) {
+        setError(result.error);
+        setSaving(false);
+        return;
+      }
     }
 
     setSaving(false);
@@ -120,22 +165,84 @@ export function ResourceEditorDialog({
     onOpenChange(false);
   };
 
-  if (!resource) return null;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Resource</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Resource" : "Add Resource"}</DialogTitle>
           <DialogDescription>
-            Update resource details and access settings
+            {isEditing
+              ? "Update resource details and access settings"
+              : "Add a link, file, or embed to your resource vault"}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+          {/* Resource Type Tabs (only for new) */}
+          {!isEditing && (
+            <Tabs value={resourceType} onValueChange={(v) => setResourceType(v as ResourceType)}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="link" className="gap-1">
+                  <LinkIcon className="h-3.5 w-3.5" />
+                  Link
+                </TabsTrigger>
+                <TabsTrigger value="file" className="gap-1">
+                  <FileUp className="h-3.5 w-3.5" />
+                  File
+                </TabsTrigger>
+                <TabsTrigger value="embed" className="gap-1">
+                  <Code className="h-3.5 w-3.5" />
+                  Embed
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="link" className="mt-3">
+                <div className="space-y-2">
+                  <Label htmlFor="url">URL *</Label>
+                  <Input
+                    id="url"
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://docs.google.com/..."
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="file" className="mt-3">
+                <div className="space-y-2">
+                  <Label htmlFor="file-url">File URL *</Label>
+                  <Input
+                    id="file-url"
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://storage.example.com/file.pdf"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Paste a direct link to your file (Google Drive, Dropbox, etc.)
+                  </p>
+                </div>
+              </TabsContent>
+              <TabsContent value="embed" className="mt-3">
+                <div className="space-y-2">
+                  <Label htmlFor="embed-url">Embed URL *</Label>
+                  <Input
+                    id="embed-url"
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/embed/..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    YouTube, Loom, Figma, or other embeddable content
+                  </p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
               value={title}
@@ -151,7 +258,7 @@ export function ResourceEditorDialog({
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional description"
+              placeholder="Brief description of this resource"
               rows={2}
             />
           </div>
@@ -163,10 +270,10 @@ export function ResourceEditorDialog({
               id="folder"
               value={folder}
               onChange={(e) => setFolder(e.target.value)}
-              placeholder="e.g., Templates, Guides"
+              placeholder="e.g., Templates, Guides, Toolkits"
             />
             <p className="text-xs text-muted-foreground">
-              Leave empty for root folder
+              Organize resources into folders (leave empty for root)
             </p>
           </div>
 
@@ -188,49 +295,54 @@ export function ResourceEditorDialog({
             </Select>
           </div>
 
-          <Separator />
+          {/* Tier-Based Access (only for editing) */}
+          {isEditing && resource && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-muted-foreground" />
+                  <Label>Membership Tier Access</Label>
+                </div>
 
-          {/* Tier-Based Access */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Crown className="h-4 w-4 text-muted-foreground" />
-              <Label>Membership Tier Access</Label>
-            </div>
-
-            {tiersLoading ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading tiers...
+                {tiersLoading ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading tiers...
+                  </div>
+                ) : (
+                  <ContentTierSelector
+                    contentType="resource"
+                    contentId={resource.id}
+                    communitySlug={communitySlug}
+                    tiers={tiers}
+                  />
+                )}
               </div>
-            ) : (
-              <ContentTierSelector
-                contentType="resource"
-                contentId={resource.id}
-                communitySlug={communitySlug}
-                tiers={tiers}
-              />
-            )}
-          </div>
-
-          {error && (
-            <div className="text-sm text-destructive">{error}</div>
+            </>
           )}
+
+          {error && <div className="text-sm text-destructive">{error}</div>}
         </div>
 
         <div className="flex items-center justify-between">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleDelete}
-            disabled={saving || deleting}
-          >
-            {deleting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
-            <span className="ml-2">Delete</span>
-          </Button>
+          {isEditing ? (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              disabled={saving || deleting}
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              <span className="ml-2">Delete</span>
+            </Button>
+          ) : (
+            <div />
+          )}
 
           <div className="flex items-center gap-2">
             <Button
@@ -240,9 +352,12 @@ export function ResourceEditorDialog({
             >
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={saving || deleting || !title.trim()}>
+            <Button
+              onClick={handleSave}
+              disabled={saving || deleting || !title.trim() || (!isEditing && !url.trim())}
+            >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Save Changes
+              {isEditing ? "Save Changes" : "Add Resource"}
             </Button>
           </div>
         </div>

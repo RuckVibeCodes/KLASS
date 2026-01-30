@@ -20,16 +20,21 @@ import type { Event } from "@/types/database";
 interface EventsListProps {
   events: Event[];
   communitySlug: string;
+  onEdit?: (event: Event) => void;
 }
 
-export function EventsList({ events: initialEvents, communitySlug }: EventsListProps) {
+export function EventsList({ events: initialEvents, communitySlug, onEdit }: EventsListProps) {
   const [events] = useState(initialEvents);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleEditEvent = (event: Event) => {
-    setSelectedEvent(event);
-    setDialogOpen(true);
+    if (onEdit) {
+      onEdit(event);
+    } else {
+      setSelectedEvent(event);
+      setDialogOpen(true);
+    }
   };
 
   const handleSaved = () => {

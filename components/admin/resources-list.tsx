@@ -23,16 +23,21 @@ interface ResourceWithTier extends Resource {
 interface ResourcesListProps {
   resources: ResourceWithTier[];
   communitySlug: string;
+  onEdit?: (resource: Resource) => void;
 }
 
-export function ResourcesList({ resources: initialResources, communitySlug }: ResourcesListProps) {
+export function ResourcesList({ resources: initialResources, communitySlug, onEdit }: ResourcesListProps) {
   const [resources] = useState<ResourceWithTier[]>(initialResources);
   const [selectedResource, setSelectedResource] = useState<ResourceWithTier | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleEditResource = (resource: ResourceWithTier) => {
-    setSelectedResource(resource);
-    setDialogOpen(true);
+    if (onEdit) {
+      onEdit(resource);
+    } else {
+      setSelectedResource(resource);
+      setDialogOpen(true);
+    }
   };
 
   const handleSaved = () => {

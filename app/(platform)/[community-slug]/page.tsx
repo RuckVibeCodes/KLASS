@@ -49,14 +49,14 @@ export default async function CommunityHomePage({
     filterCategoryId = filterCategory?.id || null;
   }
 
-  // Get posts with authors, comments, categories, polls, and tier info
+  // Get posts with authors, comments, categories, polls
+  // NOTE: min_tier join removed - migration for min_tier_id column not applied
   let postsQuery = supabase
     .from("posts")
     .select(`
       *,
       author:profiles!posts_author_profile_id_fkey(id, display_name, avatar_url),
       category:post_categories(id, name, slug, color),
-      min_tier:membership_tiers!posts_min_tier_id_fkey(id, name, slug, tier_level),
       comments:comments(
         id,
         content,

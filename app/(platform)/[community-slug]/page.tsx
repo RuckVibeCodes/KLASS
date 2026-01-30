@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { auth } from "@clerk/nextjs/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageSquare } from "lucide-react";
@@ -25,7 +25,7 @@ export default async function CommunityHomePage({
   const communitySlug = resolvedParams["community-slug"];
   const categoryFilter = resolvedSearchParams.category;
   const sortFilter = (resolvedSearchParams.sort || "default") as FeedSortOption;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Use cached query for community (deduplicated with layout)
   const community = await getCommunityBySlug(communitySlug);

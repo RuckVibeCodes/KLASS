@@ -78,6 +78,8 @@ export default async function EditProgramPage({
         {/* Lessons (with sections support) */}
         <LessonsList
           programId={programId}
+          programTitle={program.title}
+          programDescription={program.description || undefined}
           lessons={lessons}
           sections={sections}
           communitySlug={communitySlug}

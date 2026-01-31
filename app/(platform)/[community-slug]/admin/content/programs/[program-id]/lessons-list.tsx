@@ -38,6 +38,7 @@ import {
   FileText,
   FolderPlus,
   Layers,
+  Sparkles,
 } from "lucide-react";
 import {
   DragDropContext,
@@ -64,12 +65,26 @@ import Link from "next/link";
 
 interface LessonsListProps {
   programId: string;
+  programTitle: string;
+  programDescription?: string;
   lessons: Lesson[];
   sections?: ProgramSection[];
   communitySlug: string;
 }
 
-export function LessonsList({ programId, lessons, sections = [], communitySlug }: LessonsListProps) {
+interface GeneratedLesson {
+  title: string;
+  description: string;
+  duration: string;
+}
+
+interface GeneratedOutline {
+  title: string;
+  description: string;
+  lessons: GeneratedLesson[];
+}
+
+export function LessonsList({ programId, programTitle, programDescription, lessons, sections = [], communitySlug }: LessonsListProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -79,6 +94,12 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
   const [newLessonSectionId, setNewLessonSectionId] = useState<string | null>(null);
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [newSectionDescription, setNewSectionDescription] = useState("");
+  
+  // AI Curriculum state
+  const [aiCurriculumOpen, setAiCurriculumOpen] = useState(false);
+  const [isGeneratingCurriculum, setIsGeneratingCurriculum] = useState(false);
+  const [generatedOutline, setGeneratedOutline] = useState<GeneratedOutline | null>(null);
+  const [lessonCount, setLessonCount] = useState(5);
 
   // Local state for optimistic reordering
   const [localSections, setLocalSections] = useState(sections);
@@ -88,6 +109,79 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
   const unsectionedLessons = localLessons.filter((l) => !l.section_id);
   const sectionLessons = (sectionId: string) =>
     localLessons.filter((l) => l.section_id === sectionId).sort((a, b) => a.order_index - b.order_index);
+
+  // AI Curriculum generation
+  const handleGenerateCurriculum = async () => {
+    setIsGeneratingCurriculum(true);
+    setGeneratedOutline(null);
+    
+    try {
+      const response = await fetch("/api/ai/lesson-outline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: programTitle,
+          targetAudience: programDescription || "beginners",
+          lessonCount,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate curriculum");
+      }
+
+      setGeneratedOutline(data.outline);
+      toast({
+        variant: "success",
+        title: "Curriculum generated!",
+        description: `Generated ${data.outline.lessons.length} lessons. Review and apply below.`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Generation failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      setIsGeneratingCurriculum(false);
+    }
+  };
+
+  const handleApplyCurriculum = async () => {
+    if (!generatedOutline) return;
+    
+    startTransition(async () => {
+      try {
+        // Create each lesson from the generated outline
+        for (let i = 0; i < generatedOutline.lessons.length; i++) {
+          const lesson = generatedOutline.lessons[i];
+          await createLesson(programId, communitySlug, {
+            title: lesson.title,
+            content: lesson.description,
+            order_index: localLessons.length + i,
+          });
+        }
+
+        toast({
+          variant: "success",
+          title: "Curriculum applied!",
+          description: `Added ${generatedOutline.lessons.length} lessons to your program.`,
+        });
+
+        setAiCurriculumOpen(false);
+        setGeneratedOutline(null);
+        router.refresh();
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Failed to apply curriculum",
+          description: "Please try again.",
+        });
+      }
+    });
+  };
 
   // Handle drag end for lessons within a section or unsectioned
   const handleLessonDragEnd = useCallback((result: DropResult) => {
@@ -311,6 +405,115 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
                     </Button>
                   </DialogFooter>
                 </form>
+              </DialogContent>
+            </Dialog>
+
+            {/* AI Curriculum Generator */}
+            <Dialog open={aiCurriculumOpen} onOpenChange={(open) => {
+              setAiCurriculumOpen(open);
+              if (!open) setGeneratedOutline(null);
+            }}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  AI Curriculum
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    Generate Curriculum with AI
+                  </DialogTitle>
+                  <DialogDescription>
+                    AI will create a lesson outline based on your program title and description.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label>Program</Label>
+                    <p className="text-sm font-medium">{programTitle}</p>
+                    {programDescription && (
+                      <p className="text-sm text-muted-foreground">{programDescription}</p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="lesson-count">Number of Lessons</Label>
+                    <Input
+                      id="lesson-count"
+                      type="number"
+                      min={3}
+                      max={15}
+                      value={lessonCount}
+                      onChange={(e) => setLessonCount(parseInt(e.target.value) || 5)}
+                      disabled={isGeneratingCurriculum}
+                    />
+                  </div>
+
+                  {!generatedOutline && (
+                    <Button 
+                      onClick={handleGenerateCurriculum} 
+                      disabled={isGeneratingCurriculum}
+                      className="w-full gap-2"
+                    >
+                      {isGeneratingCurriculum ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4" />
+                          Generate Curriculum
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {generatedOutline && (
+                    <div className="space-y-4">
+                      <div className="rounded-lg border p-4 bg-muted/50">
+                        <h4 className="font-semibold mb-2">{generatedOutline.title}</h4>
+                        <p className="text-sm text-muted-foreground mb-4">{generatedOutline.description}</p>
+                        <div className="space-y-2">
+                          {generatedOutline.lessons.map((lesson, idx) => (
+                            <div key={idx} className="flex items-start gap-3 p-2 rounded bg-background">
+                              <span className="text-xs font-medium text-muted-foreground w-6">{idx + 1}.</span>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium">{lesson.title}</p>
+                                <p className="text-xs text-muted-foreground">{lesson.description}</p>
+                              </div>
+                              <span className="text-xs text-muted-foreground">{lesson.duration}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setGeneratedOutline(null)}
+                          className="flex-1"
+                        >
+                          Regenerate
+                        </Button>
+                        <Button
+                          onClick={handleApplyCurriculum}
+                          disabled={isPending}
+                          className="flex-1 gap-2"
+                        >
+                          {isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Plus className="h-4 w-4" />
+                          )}
+                          Apply Curriculum
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </DialogContent>
             </Dialog>
 

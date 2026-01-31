@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 -- ============================================
 
 CREATE TABLE content_embeddings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   community_id UUID NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
   
   -- Content reference
@@ -46,7 +46,7 @@ CREATE INDEX idx_embeddings_vector ON content_embeddings
 -- ============================================
 
 CREATE TABLE chat_sessions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   community_id UUID NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
   profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title TEXT, -- Auto-generated from first message
@@ -55,7 +55,7 @@ CREATE TABLE chat_sessions (
 );
 
 CREATE TABLE chat_messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id UUID NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
   role TEXT NOT NULL, -- 'user' or 'assistant'
   content TEXT NOT NULL,

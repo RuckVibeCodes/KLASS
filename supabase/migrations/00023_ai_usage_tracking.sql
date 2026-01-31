@@ -6,7 +6,7 @@
 -- ============================================
 
 CREATE TABLE ai_usage (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   community_id UUID NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
   feature TEXT NOT NULL, -- 'lesson_outline', 'onboarding', 'chatbot', 'assistant', 'image_gen'
   tokens_input INTEGER DEFAULT 0,
@@ -27,7 +27,7 @@ CREATE INDEX idx_ai_usage_created ON ai_usage(created_at DESC);
 -- ============================================
 
 CREATE TABLE ai_tier_limits (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tier_key TEXT NOT NULL UNIQUE, -- 'free', 'pro', 'enterprise'
   display_name TEXT NOT NULL,
   monthly_tokens INTEGER NOT NULL DEFAULT 0, -- 0 = unlimited

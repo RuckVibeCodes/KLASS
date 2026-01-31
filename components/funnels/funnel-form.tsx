@@ -50,6 +50,7 @@ export function FunnelForm({
   const [slug, setSlug] = useState(funnel?.slug || "");
   const [description, setDescription] = useState(funnel?.description || "");
   const [coverImageUrl, setCoverImageUrl] = useState(funnel?.cover_image_url || "");
+  const [videoUrl, setVideoUrl] = useState(funnel?.video_url || "");
   const [contentType, setContentType] = useState<FunnelContentType>(
     funnel?.content_type || "community"
   );
@@ -111,6 +112,7 @@ export function FunnelForm({
       slug,
       description: description || undefined,
       cover_image_url: coverImageUrl || undefined,
+      video_url: videoUrl || undefined,
       content_type: contentType,
       content_id: contentType !== "community" ? contentId : undefined,
       headline: headline || undefined,
@@ -321,6 +323,20 @@ export function FunnelForm({
                   bucket="community-assets"
                   aspectRatio="video"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="videoUrl">Video URL (optional)</Label>
+                <Input
+                  id="videoUrl"
+                  type="url"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+                />
+                <p className="text-sm text-muted-foreground">
+                  YouTube, Vimeo, or Loom video to embed on your landing page
+                </p>
               </div>
 
               <div className="space-y-2">

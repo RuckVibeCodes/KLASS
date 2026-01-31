@@ -116,6 +116,7 @@ export async function createFunnel(
     slug: string;
     description?: string;
     cover_image_url?: string;
+    video_url?: string;
     content_type: FunnelContentType;
     content_id?: string;
     price_cents?: number;
@@ -184,6 +185,7 @@ export async function createFunnel(
       slug,
       description: data.description || null,
       cover_image_url: data.cover_image_url || null,
+      video_url: data.video_url || null,
       content_type: data.content_type,
       content_id: data.content_id || null,
       price_cents: data.price_cents || 0,
@@ -219,6 +221,7 @@ export async function updateFunnel(
     slug: string;
     description: string | null;
     cover_image_url: string | null;
+    video_url: string | null;
     content_type: FunnelContentType;
     content_id: string | null;
     price_cents: number;

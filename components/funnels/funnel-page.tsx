@@ -9,6 +9,40 @@ import { Check, Loader2, ArrowRight, ExternalLink } from "lucide-react";
 import { processFunnelSignup } from "@/actions/funnels";
 import type { Funnel, Community } from "@/types/database";
 
+/**
+ * Convert video URLs to embed URLs
+ */
+function getEmbedUrl(url: string): string | null {
+  if (!url) return null;
+  
+  // YouTube - various formats
+  const youtubeMatch = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  if (youtubeMatch) {
+    return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+  }
+
+  // Vimeo
+  const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+
+  // Loom
+  const loomMatch = url.match(/loom\.com\/(?:share|embed)\/([a-zA-Z0-9]+)/);
+  if (loomMatch) {
+    return `https://www.loom.com/embed/${loomMatch[1]}`;
+  }
+
+  // If it's already an embed URL, return as-is
+  if (url.includes("/embed/") || url.includes("player.vimeo.com")) {
+    return url;
+  }
+
+  return null;
+}
+
 interface FunnelPageProps {
   funnel: Funnel;
   community: Community;
@@ -134,10 +168,12 @@ export function FunnelPage({
     );
   };
 
+  const embedUrl = funnel.video_url ? getEmbedUrl(funnel.video_url) : null;
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      {funnel.cover_image_url && (
+      {/* Hero Section - Cover Image (only if no video) */}
+      {funnel.cover_image_url && !embedUrl && (
         <div className="w-full h-64 md:h-80 relative">
           <img
             src={funnel.cover_image_url}
@@ -145,6 +181,22 @@ export function FunnelPage({
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
+        </div>
+      )}
+
+      {/* Video Section */}
+      {embedUrl && (
+        <div className="w-full bg-black">
+          <div className="container max-w-4xl mx-auto px-4 py-8">
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden shadow-2xl">
+              <iframe
+                src={embedUrl}
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
         </div>
       )}
 

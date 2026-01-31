@@ -270,6 +270,7 @@ export interface Funnel {
   slug: string;
   description: string | null;
   cover_image_url: string | null;
+  video_url: string | null;
   content_type: FunnelContentType;
   content_id: string | null;
   price_cents: number;

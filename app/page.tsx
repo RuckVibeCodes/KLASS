@@ -140,11 +140,9 @@ export default function LandingPage() {
                 View Demo
               </Button>
             </Link>
-            <Link href="/sign-in">
-              <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
-                Sign In
-              </Button>
-            </Link>
+            <Button asChild variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
             <Link href="/sign-up">
               <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25">
                 Get Started Free

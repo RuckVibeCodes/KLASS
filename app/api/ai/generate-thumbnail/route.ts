@@ -6,6 +6,7 @@ import {
   uploadProgramImage,
 } from "@/lib/ai/gemini";
 import { createAdminClient } from "@/lib/supabase/server";
+import { canUseAIFeature, trackAIUsage } from "@/lib/ai/usage-tracking";
 
 export async function POST(req: Request) {
   try {
@@ -55,6 +56,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check AI usage limits
+    const canUse = await canUseAIFeature(communityId, "image_gen");
+    if (!canUse.allowed) {
+      return NextResponse.json(
+        { error: canUse.reason, code: "LIMIT_EXCEEDED" },
+        { status: 429 }
+      );
+    }
+
     // Generate the image
     const imageBuffer = await generateProgramThumbnail(
       title,
@@ -62,6 +72,16 @@ export async function POST(req: Request) {
       primaryColor || "#6366f1",
       accentColor || "#8b5cf6"
     );
+
+    // Track usage (Gemini images don't have token counts, use approximation)
+    await trackAIUsage({
+      community_id: communityId,
+      feature: "image_gen",
+      tokens_input: 500, // Approximate prompt tokens
+      tokens_output: 0,
+      user_id: userId,
+      metadata: { model: "gemini-2.0-flash-exp-image-generation", programId },
+    });
 
     // Upload to Supabase storage
     const imageUrl = await uploadProgramImage(communityId, programId, imageBuffer);

@@ -1,10 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/supabase/server";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import {
   isAIAvailable,
   generateOnboardingContentAI,
+  AILimitExceededError,
 } from "@/lib/ai/client";
 import {
   generateOnboardingContent as generateOnboardingStub,
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const supabase = createAdminClient();
+    const supabase = await createAdminClient();
 
     // Get community and verify admin
     const { data: community } = await supabase
@@ -79,6 +80,8 @@ export async function POST(req: Request) {
     if (isAIAvailable()) {
       try {
         const content = await generateOnboardingContentAI({
+          communityId: community.id,
+          userId,
           communityName: community.name,
           communityType: communityType || "membership",
           communityDescription: communityDescription || "",
@@ -88,6 +91,13 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ ...content, source: "ai" });
       } catch (aiError) {
+        // Handle limit exceeded error
+        if (aiError instanceof AILimitExceededError) {
+          return NextResponse.json(
+            { error: aiError.message, code: "LIMIT_EXCEEDED" },
+            { status: 429 }
+          );
+        }
         console.error(
           "AI generation failed, falling back to templates:",
           aiError instanceof Error ? aiError.message : "Unknown error"

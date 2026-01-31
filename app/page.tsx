@@ -135,7 +135,7 @@ export default function LandingPage() {
             <span className="font-bold text-xl tracking-tight">KLASS</span>
           </Link>
           <nav className="flex items-center gap-3">
-            <Link href="/demo">
+            <Link href="/demo" target="_blank">
               <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
                 View Demo
               </Button>
@@ -196,7 +196,7 @@ export default function LandingPage() {
                 Get Started Free <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/demo">
+            <Link href="/demo" target="_blank">
               <Button
                 size="lg"
                 variant="outline"
@@ -667,7 +667,7 @@ export default function LandingPage() {
                 Get Started Free <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/demo">
+            <Link href="/demo" target="_blank">
               <Button
                 size="lg"
                 variant="outline"
@@ -695,6 +695,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-6">
             <Link
               href="/demo"
+              target="_blank"
               className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
             >
               Demo

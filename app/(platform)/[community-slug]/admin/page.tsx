@@ -13,7 +13,6 @@ import {
   Settings,
   Palette,
   ArrowRight,
-  ClipboardList,
   Sparkles,
   Target,
 } from "lucide-react";
@@ -175,12 +174,6 @@ export default async function AdminDashboardPage({
               <Button variant="outline" className="w-full justify-start">
                 <Target className="h-4 w-4 mr-2" />
                 Funnels & Lead Magnets
-              </Button>
-            </Link>
-            <Link href={`${baseUrl}/admin/playbooks`}>
-              <Button variant="outline" className="w-full justify-start">
-                <ClipboardList className="h-4 w-4 mr-2" />
-                Playbooks
               </Button>
             </Link>
             <Link href={`${baseUrl}/admin/onboarding`}>

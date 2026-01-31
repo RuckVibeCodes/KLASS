@@ -4,7 +4,6 @@ export type FeatureFlag =
   | "ai_enabled"
   | "dm_enabled"
   | "chat_enabled"
-  | "playbooks_enabled"
   | "affiliate_enabled"
   | "quizzes_enabled"
   | "events_enabled"

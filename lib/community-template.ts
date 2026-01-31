@@ -38,13 +38,11 @@ export const PLAN_FEATURE_OVERRIDES: Record<
     { featureKey: "dm_enabled", enabled: true },
     { featureKey: "chat_enabled", enabled: false },
     { featureKey: "affiliate_enabled", enabled: false },
-    { featureKey: "playbooks_enabled", enabled: false },
   ],
   premium: [
     { featureKey: "ai_enabled", enabled: true },
     { featureKey: "dm_enabled", enabled: true },
     { featureKey: "chat_enabled", enabled: true },
     { featureKey: "affiliate_enabled", enabled: true },
-    { featureKey: "playbooks_enabled", enabled: true },
   ],
 };

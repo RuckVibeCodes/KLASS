@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, Eye, EyeOff } from "lucide-react";
+import { Loader2, Save, Eye, EyeOff, Sparkles } from "lucide-react";
 import { updateProgram } from "@/actions/programs";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -32,6 +32,7 @@ export function ProgramEditor({ program, communitySlug, communityId }: ProgramEd
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false);
 
   const [formData, setFormData] = useState({
     title: program.title,
@@ -40,6 +41,53 @@ export function ProgramEditor({ program, communitySlug, communityId }: ProgramEd
     visibility: program.visibility as ContentVisibility,
     published: program.published,
   });
+
+  const handleGenerateThumbnail = async () => {
+    if (!formData.title.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Title required",
+        description: "Please enter a program title first.",
+      });
+      return;
+    }
+
+    setIsGeneratingThumbnail(true);
+    try {
+      const response = await fetch("/api/ai/generate-thumbnail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          programId: program.id,
+          communityId,
+          title: formData.title,
+          description: formData.description,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate thumbnail");
+      }
+
+      setFormData({ ...formData, thumbnail_url: data.thumbnailUrl });
+      toast({
+        variant: "success",
+        title: "Thumbnail generated!",
+        description: "AI has created a thumbnail for your program.",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Generation failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      setIsGeneratingThumbnail(false);
+    }
+  };
 
   const handleSave = () => {
     startTransition(async () => {
@@ -103,15 +151,35 @@ export function ProgramEditor({ program, communitySlug, communityId }: ProgramEd
         </div>
 
         {/* Thumbnail */}
-        <ImageUpload
-          label="Thumbnail"
-          description="Recommended size: 320x180px (16:9 aspect ratio)"
-          value={formData.thumbnail_url || null}
-          onChange={(url) => setFormData({ ...formData, thumbnail_url: url || "" })}
-          bucket={BUCKETS.COMMUNITY_ASSETS}
-          communityId={communityId}
-          aspectRatio="video"
-        />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label>Thumbnail</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateThumbnail}
+              disabled={isGeneratingThumbnail || !formData.title.trim()}
+              className="gap-2"
+            >
+              {isGeneratingThumbnail ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {isGeneratingThumbnail ? "Generating..." : "Generate with AI"}
+            </Button>
+          </div>
+          <ImageUpload
+            label=""
+            description="Recommended size: 320x180px (16:9 aspect ratio)"
+            value={formData.thumbnail_url || null}
+            onChange={(url) => setFormData({ ...formData, thumbnail_url: url || "" })}
+            bucket={BUCKETS.COMMUNITY_ASSETS}
+            communityId={communityId}
+            aspectRatio="video"
+          />
+        </div>
 
         {/* Visibility */}
         <div className="space-y-2">

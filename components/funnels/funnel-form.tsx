@@ -412,18 +412,20 @@ export function FunnelForm({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="redirectPath">Redirect Path</Label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    /{communitySlug}
-                  </span>
-                  <Input
-                    id="redirectPath"
-                    value={redirectPath}
-                    onChange={(e) => setRedirectPath(e.target.value)}
-                    placeholder="/feed"
-                  />
-                </div>
+                <Label htmlFor="redirectPath">Redirect To</Label>
+                <Select value={redirectPath} onValueChange={setRedirectPath}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="/feed">Feed</SelectItem>
+                    <SelectItem value="/programs">Programs</SelectItem>
+                    <SelectItem value="/resources">Resources</SelectItem>
+                    <SelectItem value="/events">Events</SelectItem>
+                    <SelectItem value="/members">Members</SelectItem>
+                    <SelectItem value="/chat">Chat</SelectItem>
+                  </SelectContent>
+                </Select>
                 <p className="text-sm text-muted-foreground">
                   Where to send users after they sign up
                 </p>

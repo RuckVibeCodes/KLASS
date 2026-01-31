@@ -27,7 +27,10 @@ import {
   Trash2,
   Loader2,
   Reply,
+  Crown,
+  Lock,
 } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useCommunity } from "@/components/providers/community-provider";
 
@@ -88,11 +91,20 @@ interface PostCardProps {
     comments?: Comment[];
     category?: Category | null;
     poll?: Poll[] | null;
+    // Tier gating fields
+    min_tier_id?: string | null;
+    min_tier?: {
+      id: string;
+      name: string;
+      tier_level: number;
+    } | null;
+    preview_content?: string | null;
   };
   communitySlug: string;
   communityId: string;
   isAdmin: boolean;
   currentProfileId?: string;
+  currentProfileTierLevel?: number;
   primaryColor?: string;
   isLiked?: boolean;
   members?: Member[];

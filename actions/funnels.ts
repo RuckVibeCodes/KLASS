@@ -395,14 +395,16 @@ export async function processFunnelSignup(funnelId: string, source?: string) {
   }
 
   // Get or create profile for this user
-  let profile = await supabase
+  const { data: existingProfile } = await supabase
     .from("profiles")
     .select("*")
     .eq("clerk_user_id", userId)
     .eq("community_id", funnel.community_id)
     .single();
 
-  if (!profile.data) {
+  let profileData = existingProfile;
+
+  if (!profileData) {
     // Create profile as FREE_MEMBER
     const { data: defaultTier } = await supabase
       .from("membership_tiers")
@@ -428,7 +430,7 @@ export async function processFunnelSignup(funnelId: string, source?: string) {
       return { error: "Failed to create profile" };
     }
 
-    profile = { data: newProfile, error: null };
+    profileData = newProfile;
   }
 
   // Check if already converted
@@ -436,7 +438,7 @@ export async function processFunnelSignup(funnelId: string, source?: string) {
     .from("funnel_conversions")
     .select("id")
     .eq("funnel_id", funnelId)
-    .eq("profile_id", profile.data.id)
+    .eq("profile_id", profileData.id)
     .single();
 
   if (existingConversion) {
@@ -455,7 +457,7 @@ export async function processFunnelSignup(funnelId: string, source?: string) {
     const { error: grantError } = await adminSupabase
       .from("content_access_grants")
       .insert({
-        profile_id: profile.data.id,
+        profile_id: profileData.id,
         content_type: funnel.content_type,
         content_id: funnel.content_id,
         source: "funnel",
@@ -473,7 +475,7 @@ export async function processFunnelSignup(funnelId: string, source?: string) {
     .from("funnel_conversions")
     .insert({
       funnel_id: funnelId,
-      profile_id: profile.data.id,
+      profile_id: profileData.id,
       source: source || null,
     });
 

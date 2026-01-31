@@ -23,9 +23,11 @@ export default async function RedirectPage() {
 
   console.log("[Redirect] Profile lookup:", { profile, error });
 
-  if (profile?.communities?.slug) {
+  // communities is returned as object when using foreign key relation
+  const community = profile?.communities as unknown as { slug: string } | null;
+  if (community?.slug) {
     // User has a community, redirect to it
-    redirect(`/${profile.communities.slug}`);
+    redirect(`/${community.slug}`);
   }
 
   // No community found, send to create one

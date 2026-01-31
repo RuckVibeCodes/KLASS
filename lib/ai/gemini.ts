@@ -66,7 +66,7 @@ The image should feel premium, professional, and visually represent the course t
     contents: [{ role: "user", parts: [{ text: prompt }] }],
     generationConfig: {
       responseModalities: ["image", "text"],
-    },
+    } as Record<string, unknown>,
   });
 
   const response = result.response;

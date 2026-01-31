@@ -37,7 +37,7 @@ export function TierManager({ tiers, communitySlug }: TierManagerProps) {
   const handleSetDefault = async (tierId: string) => {
     setSettingDefaultId(tierId);
     const result = await setDefaultTier(tierId, communitySlug);
-    if (result.error) {
+    if ("error" in result && result.error) {
       alert(result.error);
     }
     setSettingDefaultId(null);

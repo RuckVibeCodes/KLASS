@@ -160,7 +160,6 @@ export function LessonsList({ programId, programTitle, programDescription, lesso
           await createLesson(programId, communitySlug, {
             title: lesson.title,
             content: lesson.description,
-            order_index: localLessons.length + i,
           });
         }
 

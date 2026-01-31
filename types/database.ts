@@ -107,7 +107,7 @@ export interface Post {
   // Joined fields
   author?: Profile;
   comments?: Comment[];
-  min_tier?: MembershipTier;
+  min_tier?: MembershipTier | null;
 }
 
 export interface Comment {
@@ -222,7 +222,7 @@ export interface Event {
   min_tier_id: string | null;
   max_attendees: number | null;
   // Joined fields
-  min_tier?: MembershipTier;
+  min_tier?: MembershipTier | null;
 }
 
 export interface Subscription {
@@ -331,7 +331,7 @@ export interface ContentTierRequirement {
   min_tier_id: string;
   created_at: string;
   // Joined fields
-  min_tier?: MembershipTier;
+  min_tier?: MembershipTier | null;
 }
 
 // Quiz types

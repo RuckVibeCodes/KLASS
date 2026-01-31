@@ -19,14 +19,20 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Plus, Trash2, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createFunnel, updateFunnel } from "@/actions/funnels";
-import type { Funnel, FunnelContentType, Program, Resource } from "@/types/database";
+import type { Funnel, FunnelContentType } from "@/types/database";
+
+// Slim types - we only need id and title for selection
+interface SelectableItem {
+  id: string;
+  title: string;
+}
 
 interface FunnelFormProps {
   communitySlug: string;
   communityId: string;
   funnel?: Funnel;
-  programs: Program[];
-  resources: Resource[];
+  programs: SelectableItem[];
+  resources: SelectableItem[];
 }
 
 export function FunnelForm({
@@ -310,7 +316,7 @@ export function FunnelForm({
                 <Label htmlFor="coverImage">Cover Image</Label>
                 <ImageUpload
                   value={coverImageUrl}
-                  onChange={setCoverImageUrl}
+                  onChange={(url) => setCoverImageUrl(url || "")}
                   communityId={communityId}
                   bucket="community-assets"
                   aspectRatio="video"

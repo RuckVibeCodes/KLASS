@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -122,7 +123,10 @@ const comparisonRows = [
   { feature: "Starting price", klass: "$0/mo", skool: "$99/mo", circle: "$89/mo" },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { userId } = await auth();
+  const isLoggedIn = !!userId;
+
   return (
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
       {/* Header */}
@@ -140,14 +144,24 @@ export default function LandingPage() {
                 View Demo
               </Button>
             </Link>
-            <Button asChild variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
-            <Link href="/sign-up">
-              <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25">
-                Get Started Free
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/redirect">
+                <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25">
+                  Go to Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Button asChild variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
+                  <Link href="/sign-in">Sign In</Link>
+                </Button>
+                <Link href="/sign-up">
+                  <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25">
+                    Get Started Free
+                  </Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -186,12 +200,12 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row mt-2">
-            <Link href="/sign-up">
+            <Link href={isLoggedIn ? "/redirect" : "/sign-up"}>
               <Button
                 size="lg"
                 className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-xl shadow-violet-500/25 text-base px-8 h-12"
               >
-                Get Started Free <ArrowRight className="h-4 w-4" />
+                {isLoggedIn ? "Go to Dashboard" : "Get Started Free"} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/demo" target="_blank">

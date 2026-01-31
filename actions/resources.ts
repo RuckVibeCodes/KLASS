@@ -69,6 +69,7 @@ export async function createResource(
     mime_type?: string;
     folder?: string;
     visibility?: ContentVisibility;
+    thumbnail_url?: string;
   }
 ) {
   if (isDemoSlug(communitySlug)) return { data: { id: "demo-resource" } };
@@ -125,6 +126,7 @@ export async function createResource(
       mime_type: data.mime_type || null,
       folder: data.folder || "",
       visibility: data.visibility || "members",
+      thumbnail_url: data.thumbnail_url || null,
       order_index,
     })
     .select()
@@ -153,6 +155,7 @@ export async function updateResource(
     url: string;
     folder: string;
     visibility: ContentVisibility;
+    thumbnail_url: string | null;
   }>
 ) {
   if (isDemoSlug(communitySlug)) return { data: { id: "demo-resource" } };

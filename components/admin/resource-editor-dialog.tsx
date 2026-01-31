@@ -21,10 +21,12 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Crown, Trash2, Link as LinkIcon, FileUp, Code } from "lucide-react";
+import { Loader2, Crown, Trash2, Link as LinkIcon, FileUp, Code, Image as ImageIcon } from "lucide-react";
 import { ContentTierSelector } from "./content-tier-selector";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { createResource, updateResource, deleteResource } from "@/actions/resources";
 import { getCommunityTiers } from "@/actions/tiers";
+import { getCommunityBySlug } from "@/actions/community";
 import type { Resource, ContentVisibility, ResourceType, MembershipTier } from "@/types/database";
 
 interface ResourceEditorDialogProps {
@@ -50,6 +52,8 @@ export function ResourceEditorDialog({
   const [folder, setFolder] = useState("");
   const [resourceType, setResourceType] = useState<ResourceType>("link");
   const [url, setUrl] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [communityId, setCommunityId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +70,7 @@ export function ResourceEditorDialog({
         setFolder(resource.folder || "");
         setResourceType(resource.type);
         setUrl(resource.url);
+        setThumbnailUrl(resource.thumbnail_url || null);
       } else {
         // Reset for new resource
         setTitle("");
@@ -74,10 +79,24 @@ export function ResourceEditorDialog({
         setFolder("");
         setResourceType("link");
         setUrl("");
+        setThumbnailUrl(null);
       }
       setError(null);
     }
   }, [resource, open]);
+
+  // Load community ID for image upload
+  useEffect(() => {
+    async function loadCommunity() {
+      const result = await getCommunityBySlug(communitySlug);
+      if (result.data) {
+        setCommunityId(result.data.id);
+      }
+    }
+    if (open && communitySlug) {
+      loadCommunity();
+    }
+  }, [communitySlug, open]);
 
   // Load tiers on mount
   useEffect(() => {
@@ -115,6 +134,7 @@ export function ResourceEditorDialog({
         description: description || null,
         visibility,
         folder,
+        thumbnail_url: thumbnailUrl,
       });
 
       if (result.error) {
@@ -131,6 +151,7 @@ export function ResourceEditorDialog({
         url,
         folder: folder || undefined,
         visibility,
+        thumbnail_url: thumbnailUrl || undefined,
       });
 
       if (result.error) {
@@ -261,6 +282,25 @@ export function ResourceEditorDialog({
               placeholder="Brief description of this resource"
               rows={2}
             />
+          </div>
+
+          {/* Thumbnail */}
+          <div className="space-y-2">
+            <Label>Thumbnail (optional)</Label>
+            {communityId ? (
+              <ImageUpload
+                value={thumbnailUrl}
+                onChange={setThumbnailUrl}
+                bucket="community-assets"
+                communityId={communityId}
+                aspectRatio="video"
+                description="Custom preview image for this resource"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-24 border border-dashed rounded-lg">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            )}
           </div>
 
           {/* Folder */}

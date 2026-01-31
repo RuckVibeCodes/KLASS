@@ -195,6 +195,7 @@ export interface Resource {
   folder: string;
   visibility: ContentVisibility;
   order_index: number;
+  thumbnail_url: string | null;
   created_at: string;
   updated_at: string;
   // Pricing fields

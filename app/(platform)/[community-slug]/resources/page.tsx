@@ -124,13 +124,30 @@ function ResourceCard({
 
   return (
     <Card className={!canAccess ? "opacity-60" : ""}>
-      <CardContent className="p-4">
+      {/* Thumbnail */}
+      {resource.thumbnail_url && (
+        <div className="aspect-video relative overflow-hidden rounded-t-lg">
+          <img
+            src={resource.thumbnail_url}
+            alt={resource.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+      <CardContent className={resource.thumbnail_url ? "p-4" : "p-4"}>
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-            {getResourceIcon(resource)}
-          </div>
+          {!resource.thumbnail_url && (
+            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+              {getResourceIcon(resource)}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
+              {resource.thumbnail_url && (
+                <div className="flex-shrink-0 h-6 w-6 rounded bg-muted flex items-center justify-center">
+                  {getResourceIcon(resource)}
+                </div>
+              )}
               <h3 className="font-medium truncate">{resource.title}</h3>
               {isPaid && (
                 <Badge variant="secondary" className="flex-shrink-0">
@@ -154,26 +171,43 @@ function ResourceCard({
 
         <div className="mt-4">
           {canAccess ? (
-            <a
-              href={resource.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              <Button variant="outline" className="w-full" size="sm">
-                {resource.type === "link" ? (
-                  <>
+            resource.type === "link" ? (
+              <a
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <Button variant="outline" className="w-full" size="sm">
+                  <LinkIcon className="h-4 w-4 mr-2" />
+                  Open Link
+                </Button>
+              </a>
+            ) : (
+              <div className="flex gap-2">
+                <a
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1"
+                >
+                  <Button variant="outline" className="w-full" size="sm">
                     <LinkIcon className="h-4 w-4 mr-2" />
-                    Open Link
-                  </>
-                ) : (
-                  <>
+                    View
+                  </Button>
+                </a>
+                <a
+                  href={resource.url}
+                  download
+                  className="flex-1"
+                >
+                  <Button variant="outline" className="w-full" size="sm">
                     <Download className="h-4 w-4 mr-2" />
                     Download
-                  </>
-                )}
-              </Button>
-            </a>
+                  </Button>
+                </a>
+              </div>
+            )
           ) : (
             <Button variant="outline" className="w-full" size="sm" disabled>
               <Lock className="h-4 w-4 mr-2" />

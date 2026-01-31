@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export default async function RedirectPage() {
   const { userId } = await auth();
@@ -11,8 +11,8 @@ export default async function RedirectPage() {
     redirect("/sign-in");
   }
 
-  // Check if user has any community memberships
-  const supabase = await createClient();
+  // Check if user has any community memberships (use admin client to bypass RLS)
+  const supabase = await createAdminClient();
   
   const { data: profile, error } = await supabase
     .from("profiles")

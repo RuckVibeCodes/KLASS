@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
+import { SignOutButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -145,11 +146,18 @@ export default async function LandingPage() {
               </Button>
             </Link>
             {isLoggedIn ? (
-              <Link href="/redirect">
-                <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25">
-                  Go to Dashboard
-                </Button>
-              </Link>
+              <>
+                <Link href="/redirect">
+                  <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+                <SignOutButton>
+                  <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    Sign Out
+                  </Button>
+                </SignOutButton>
+              </>
             ) : (
               <>
                 <Button asChild variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">

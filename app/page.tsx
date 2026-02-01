@@ -17,13 +17,20 @@ import {
   Check,
   Smartphone,
   Settings,
+  Sparkles,
+  Brain,
+  Zap,
+  Target,
+  TrendingUp,
+  BarChart3,
+  Cpu,
 } from "lucide-react";
 
 const faqs = [
   {
     question: "How is Klass different from Skool?",
     answer:
-      "Skool is a hosted platform — you rent space inside their ecosystem. Klass gives you your own branded platform powered by our infrastructure. Your logo, your colors, your content, your members — without being locked into someone else's roadmap.",
+      "Skool is a hosted platform — you rent space inside their ecosystem. Klass gives you your own branded platform powered by our infrastructure. Your logo, your colors, your content, your members — without being locked into someone else's roadmap. And unlike Skool, Klass is AI-native — built for 2026, not 2023.",
   },
   {
     question: "Is Klass a SaaS tool or a custom build?",
@@ -92,6 +99,90 @@ const faqs = [
   },
 ];
 
+const aiFeatures = [
+  {
+    icon: <Brain className="h-8 w-8" />,
+    title: "AI Lesson Builder",
+    description: "Generate complete course outlines from a single topic. AI structures your content, suggests modules, and builds lesson plans in seconds.",
+  },
+  {
+    icon: <Target className="h-8 w-8" />,
+    title: "AI Playbook Generator",
+    description: "Turn any topic into a structured, actionable playbook automatically. Members get step-by-step guides they can follow and check off.",
+  },
+  {
+    icon: <Zap className="h-8 w-8" />,
+    title: "Smart Content Suggestions",
+    description: "AI analyzes your community and tells you what content to create next based on member questions, engagement patterns, and gaps.",
+  },
+  {
+    icon: <TrendingUp className="h-8 w-8" />,
+    title: "Community Insights",
+    description: "AI-driven analytics on member engagement, sentiment, and churn risk. Know what's working before it becomes a problem.",
+  },
+  {
+    icon: <Cpu className="h-8 w-8" />,
+    title: "Smart Onboarding",
+    description: "Automated welcome flows that adapt to each new member. Personalize their journey based on interests and goals.",
+  },
+  {
+    icon: <Sparkles className="h-8 w-8" />,
+    title: "AI Templates & Workflows",
+    description: "Pre-built templates for courses, programs, and community structures — AI-enhanced and optimized for conversion.",
+  },
+];
+
+const comparisons = [
+  {
+    feature: "AI-Powered Course Creation",
+    klass: true,
+    skool: false,
+    circle: false,
+  },
+  {
+    feature: "AI Playbook Generator",
+    klass: true,
+    skool: false,
+    circle: false,
+  },
+  {
+    feature: "Smart Content Suggestions",
+    klass: true,
+    skool: false,
+    circle: false,
+  },
+  {
+    feature: "Community Insights AI",
+    klass: true,
+    skool: false,
+    circle: false,
+  },
+  {
+    feature: "White-Label Branding",
+    klass: true,
+    skool: false,
+    circle: true,
+  },
+  {
+    feature: "Custom Domain",
+    klass: true,
+    skool: false,
+    circle: true,
+  },
+  {
+    feature: "Native Mobile App Option",
+    klass: true,
+    skool: false,
+    circle: false,
+  },
+  {
+    feature: "Stripe Connect",
+    klass: true,
+    skool: true,
+    circle: true,
+  },
+];
+
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -115,41 +206,125 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* AI Hero Section */}
       <section className="container flex flex-col items-center justify-center gap-8 py-24 text-center md:py-32">
         <div className="flex flex-col gap-4">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+            <Sparkles className="h-4 w-4" />
+            The First AI-Native Community Platform
+          </div>
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-            Your Branded Community
+            Build Your Community
             <br />
-            <span className="text-muted-foreground">& Course Platform</span>
+            <span className="text-primary">Let AI Do the Heavy Lifting</span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Not another Skool group. Your own platform.
-          </p>
-          <p className="mx-auto max-w-2xl text-muted-foreground">
-            Launch a fully branded community, courses, resources, and memberships — powered by our infrastructure, owned by your brand.
+            Not another Skool group. Your own branded platform with AI that creates courses, generates playbooks, and grows your community automatically.
           </p>
         </div>
         <div className="flex flex-col gap-4 sm:flex-row">
-          <Link href="/demo" target="_blank">
+          <Link href="/sign-up">
             <Button size="lg" className="gap-2">
-              View Demo <ArrowRight className="h-4 w-4" />
+              Start Free Trial <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
-          <Link href="/sign-up">
+          <Link href="/demo" target="_blank">
             <Button size="lg" variant="outline">
-              Get Started Free
+              View Demo
             </Button>
           </Link>
         </div>
+        <p className="text-sm text-muted-foreground">
+          No credit card required • 14-day free trial • Setup in minutes
+        </p>
       </section>
 
       {/* Social Proof */}
       <section className="border-y bg-muted/30 py-8">
         <div className="container text-center">
           <p className="text-muted-foreground">
-            Built for creators who&apos;ve outgrown Skool and want full control.
+            Built for creators who want AI-powered tools, not just another hosted group.
           </p>
+        </div>
+      </section>
+
+      {/* AI Features Section */}
+      <section className="container py-24">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            AI That Actually Does Work
+          </h2>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Stop spending hours creating content. Let Klass AI build courses, playbooks, and insights while you focus on what matters — your community.
+          </p>
+        </div>
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {aiFeatures.map((feature, index) => (
+            <div
+              key={index}
+              className="flex flex-col gap-4 rounded-lg border bg-card p-8 transition-all hover:border-primary/50 hover:shadow-lg"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                {feature.icon}
+              </div>
+              <h3 className="font-semibold text-xl">{feature.title}</h3>
+              <p className="text-muted-foreground">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Comparison Section */}
+      <section className="border-t bg-muted/30 py-24">
+        <div className="container">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Why Klass Wins Over Skool & Circle
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              See the difference AI-native makes. Skool and Circle were built for 2023. Klass is built for what's next.
+            </p>
+          </div>
+          <div className="mx-auto overflow-x-auto max-w-4xl">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-4 text-left font-semibold">Feature</th>
+                  <th className="py-4 text-center font-semibold text-primary">Klass</th>
+                  <th className="py-4 text-center font-semibold">Skool</th>
+                  <th className="py-4 text-center font-semibold">Circle</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisons.map((row, index) => (
+                  <tr key={index} className="border-b last:border-0">
+                    <td className="py-4 text-left">{row.feature}</td>
+                    <td className="py-4 text-center">
+                      {row.klass ? (
+                        <Check className="mx-auto h-5 w-5 text-primary" />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="py-4 text-center">
+                      {row.skool ? (
+                        <Check className="mx-auto h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="py-4 text-center">
+                      {row.circle ? (
+                        <Check className="mx-auto h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -157,7 +332,7 @@ export default function LandingPage() {
       <section className="container py-24">
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Why Creators Choose Klass
+            Everything You Need, Nothing You Don't
           </h2>
         </div>
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -186,239 +361,191 @@ export default function LandingPage() {
             title="Self-Serve or Done-For-You"
             description="Set up yourself in minutes, or let us handle everything — your choice."
           />
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="border-t bg-muted/30 py-24">
-        <div className="container">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              What Your Platform Includes
-            </h2>
-          </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <FeatureCard
-              icon={<Users className="h-6 w-6" />}
-              title="Community"
-              description="Posts, discussions, and engagement — under your brand."
-            />
-            <FeatureCard
-              icon={<BookOpen className="h-6 w-6" />}
-              title="Programs & Courses"
-              description="Structured lessons with progress tracking and gated access."
-            />
-            <FeatureCard
-              icon={<FolderOpen className="h-6 w-6" />}
-              title="Resources Vault"
-              description="Templates, files, and links organized by tier."
-            />
-            <FeatureCard
-              icon={<Calendar className="h-6 w-6" />}
-              title="Live Events"
-              description="Host trainings, workshops, and calls with Zoom or YouTube."
-            />
-            <FeatureCard
-              icon={<Palette className="h-6 w-6" />}
-              title="White-Label Branding"
-              description="Rename sections, customize colors, upload your logo — make it yours."
-            />
-            <FeatureCard
-              icon={<CreditCard className="h-6 w-6" />}
-              title="Membership Paywalls"
-              description="Free and paid tiers with full access control."
-            />
-          </div>
+          <BenefitCard
+            icon={<Brain className="h-6 w-6" />}
+            title="AI Works While You Sleep"
+            description="Content creation, insights, and automation run 24/7. Your platform grows even when you're not online."
+          />
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section className="container py-24">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Simple, Transparent Pricing
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            Choose the plan that fits your stage. Upgrade anytime.
-          </p>
-        </div>
-        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-3">
-          {/* DIY */}
-          <div className="flex flex-col rounded-lg border bg-card p-8">
-            <h3 className="font-semibold text-lg">DIY</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Self-setup, all features</p>
-            <div className="mt-4 flex items-baseline">
-              <span className="text-4xl font-bold">$79</span>
-              <span className="ml-2 text-muted-foreground">/mo</span>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">No setup fee</p>
-            <ul className="mt-6 flex-1 space-y-3">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Full platform access</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Community, courses & memberships</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Stripe integration</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">White-label branding</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Mobile-ready experience</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Email support</span>
-              </li>
-            </ul>
-            <div className="mt-8">
-              <Link href="/sign-up" className="block">
-                <Button className="w-full" variant="outline">Get Started</Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Done-With-You (Most Popular) */}
-          <div className="flex flex-col rounded-lg border-2 border-primary bg-primary/5 p-8 shadow-lg relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-                Most Popular
-              </span>
-            </div>
-            <h3 className="font-semibold text-lg">Done-With-You</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Onboarding call + custom branding</p>
-            <div className="mt-4 flex items-baseline">
-              <span className="text-4xl font-bold">$99</span>
-              <span className="ml-2 text-muted-foreground">/mo</span>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">+ $499 one-time setup</p>
-            <ul className="mt-6 flex-1 space-y-3">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Everything in DIY, plus:</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">1-on-1 onboarding call</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Custom branding setup</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Membership & paywall configuration</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Priority email support</span>
-              </li>
-            </ul>
-            <div className="mt-8">
-              <Link href="/sign-up" className="block">
-                <Button className="w-full">Get Started</Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Done-For-You */}
-          <div className="flex flex-col rounded-lg border bg-card p-8">
-            <h3 className="font-semibold text-lg">Done-For-You</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Full setup, migration & priority support</p>
-            <div className="mt-4 flex items-baseline">
-              <span className="text-4xl font-bold">$149</span>
-              <span className="ml-2 text-muted-foreground">/mo</span>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">+ $1,499 one-time setup</p>
-            <ul className="mt-6 flex-1 space-y-3">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Everything in Done-With-You, plus:</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Full platform setup by our team</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Content & member migration</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Custom domain setup</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Priority support with dedicated Slack</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Launch QA & strategy call</span>
-              </li>
-            </ul>
-            <div className="mt-8">
-              <Link href="/sign-in" className="block">
-                <Button className="w-full" variant="outline">Book a Call</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          All plans include hosting, updates, and platform stability. Native mobile apps available as an upgrade.
-        </p>
-      </section>
-
-      {/* FAQ Section */}
       <section className="border-t bg-muted/30 py-24">
         <div className="container">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Frequently Asked Questions
+              Simple, Transparent Pricing
             </h2>
+            <p className="mt-4 text-muted-foreground">
+              Choose the plan that fits your stage. All plans include AI features. Upgrade anytime.
+            </p>
           </div>
-          <div className="mx-auto max-w-3xl">
-            <Accordion type="single" collapsible className="w-full">
-              {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </div>
-      </section>
-
-      {/* Who It's For Section */}
-      <section className="py-24">
-        <div className="container">
-          <div className="mx-auto max-w-3xl">
-            <div className="grid gap-12 md:grid-cols-2">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Who Klass Is For</h3>
-                <p className="text-muted-foreground">
-                  Creators who are already monetizing courses, communities, coaching, or memberships. You understand what works. You want a platform that reflects your brand — not one that puts someone else&apos;s logo next to yours.
-                </p>
+          <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-3">
+            {/* DIY */}
+            <div className="flex flex-col rounded-lg border bg-card p-8">
+              <h3 className="font-semibold text-lg">DIY</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Self-setup, all features</p>
+              <div className="mt-4 flex items-baseline">
+                <span className="text-4xl font-bold">$79</span>
+                <span className="ml-2 text-muted-foreground">/mo</span>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Who Klass Is Not For</h3>
-                <p className="text-muted-foreground">
-                  Beginners still figuring out their offer. Creators looking for a free tool to test ideas. If you need a hosted group to get started, Skool is fine. Klass is for what comes after.
-                </p>
+              <p className="mt-2 text-sm text-muted-foreground">No setup fee</p>
+              <ul className="mt-6 flex-1 space-y-3">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Full platform access</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">All AI features included</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Community, courses & memberships</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Stripe integration</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">White-label branding</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Mobile-ready experience</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Email support</span>
+                </li>
+              </ul>
+              <div className="mt-8">
+                <Link href="/sign-up" className="block">
+                  <Button className="w-full" variant="outline">Get Started</Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Done-With-You (Most Popular) */}
+            <div className="flex flex-col rounded-lg border-2 border-primary bg-primary/5 p-8 shadow-lg relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                  Most Popular
+                </span>
+              </div>
+              <h3 className="font-semibold text-lg">Done-With-You</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Onboarding call + custom branding</p>
+              <div className="mt-4 flex items-baseline">
+                <span className="text-4xl font-bold">$99</span>
+                <span className="ml-2 text-muted-foreground">/mo</span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">+ $499 one-time setup</p>
+              <ul className="mt-6 flex-1 space-y-3">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Everything in DIY, plus:</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">1-on-1 onboarding call</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Custom branding setup</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">AI training & optimization</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Membership & paywall configuration</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Priority email support</span>
+                </li>
+              </ul>
+              <div className="mt-8">
+                <Link href="/sign-up" className="block">
+                  <Button className="w-full">Get Started</Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Done-For-You */}
+            <div className="flex flex-col rounded-lg border bg-card p-8">
+              <h3 className="font-semibold text-lg">Done-For-You</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Full setup, migration & priority support</p>
+              <div className="mt-4 flex items-baseline">
+                <span className="text-4xl font-bold">$149</span>
+                <span className="ml-2 text-muted-foreground">/mo</span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">+ $1,499 one-time setup</p>
+              <ul className="mt-6 flex-1 space-y-3">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Everything in Done-With-You, plus:</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Full platform setup by our team</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Content & member migration</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Custom domain setup</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">AI workflow optimization</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Priority support with dedicated Slack</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Launch QA & strategy call</span>
+                </li>
+              </ul>
+              <div className="mt-8">
+                <Link href="/sign-in" className="block">
+                  <Button className="w-full" variant="outline">Book a Call</Button>
+                </Link>
               </div>
             </div>
           </div>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            All plans include hosting, updates, AI features, and platform stability. Native mobile apps available as an upgrade.
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="container py-24">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Frequently Asked Questions
+          </h2>
+        </div>
+        <div className="mx-auto max-w-3xl">
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`}>
+                <AccordionTrigger className="text-left">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
@@ -426,15 +553,15 @@ export default function LandingPage() {
       <section className="border-t bg-muted/30 py-24 text-center">
         <div className="container">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Ready to Own Your Platform?
+            Ready to Build Something Smarter?
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-            If you&apos;re already monetizing a community and want more control, Klass is the next step.
+            If you're already monetizing a community and want AI to do the heavy lifting, Klass is the platform for you.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/sign-up">
               <Button size="lg" className="gap-2">
-                Get Started <ArrowRight className="h-4 w-4" />
+                Start Free Trial <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/demo" target="_blank">
@@ -465,26 +592,6 @@ export default function LandingPage() {
 }
 
 function BenefitCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-card p-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        {icon}
-      </div>
-      <h3 className="font-semibold text-lg">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
-    </div>
-  );
-}
-
-function FeatureCard({
   icon,
   title,
   description,

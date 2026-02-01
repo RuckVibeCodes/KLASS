@@ -156,7 +156,7 @@ export async function createConnectedCheckoutSession({
     }
 
     const session = await stripe.checkout.sessions.create(
-      sessionParams as Parameters<typeof stripe.checkout.sessions.create>[0],
+      sessionParams,
       { stripeAccount: connectedAccountId }
     );
 

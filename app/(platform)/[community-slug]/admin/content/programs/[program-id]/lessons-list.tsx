@@ -44,6 +44,7 @@ import {
   Droppable,
   Draggable,
   type DropResult,
+  type DraggableProvidedDragHandleProps,
 } from "@hello-pangea/dnd";
 import {
   createLesson,
@@ -517,7 +518,7 @@ function SectionBlock({
   programId: string;
   communitySlug: string;
   onAddLesson: () => void;
-  dragHandleProps?: Record<string, unknown> | null;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
   onLessonDragEnd: (result: DropResult) => void;
 }) {
   const router = useRouter();
@@ -700,7 +701,7 @@ function LessonItem({
   index: number;
   programId: string;
   communitySlug: string;
-  dragHandleProps?: Record<string, unknown> | null;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
 }) {
   const router = useRouter();
   const { toast } = useToast();

@@ -56,8 +56,11 @@ export async function POST(req: Request) {
       }
 
       case "account.application.deauthorized": {
-        const account = event.data.object as Stripe.Account;
-        await handleAccountDeauthorized(supabase, account);
+        // For this event, event.data.object is an Application, not an Account
+        // The connected account ID is in event.account
+        if (event.account) {
+          await handleAccountDeauthorized(supabase, event.account);
+        }
         break;
       }
 
@@ -148,7 +151,7 @@ async function handleAccountUpdated(
 
 async function handleAccountDeauthorized(
   supabase: ReturnType<typeof createAdminClient>,
-  account: Stripe.Account
+  accountId: string
 ) {
   await supabase
     .from("stripe_connect_accounts")
@@ -157,9 +160,9 @@ async function handleAccountDeauthorized(
       payouts_enabled: false,
       onboarding_complete: false,
     })
-    .eq("stripe_account_id", account.id);
+    .eq("stripe_account_id", accountId);
 
-  console.log(`Connect account ${account.id} deauthorized`);
+  console.log(`Connect account ${accountId} deauthorized`);
 }
 
 async function handleConnectedPayment(

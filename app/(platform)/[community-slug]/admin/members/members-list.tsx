@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Crown, Search, Users } from "lucide-react";
 import { MemberActions } from "./member-actions";
-import { TagBadgeList } from "@/components/members/tag-badge";
 import { TagFilter } from "@/components/members/tag-filter";
 import { TagAssignment } from "@/components/members/tag-assignment";
 import { SYSTEM_TAGS, type SystemTag } from "@/lib/system-tags";

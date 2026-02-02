@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Copy, Check, Link, Users, DollarSign, Clock, Loader2 } from "lucide-react";
 import { getOrCreateReferralCode } from "@/actions/affiliates";
 import { buildReferralUrl } from "@/lib/referral";

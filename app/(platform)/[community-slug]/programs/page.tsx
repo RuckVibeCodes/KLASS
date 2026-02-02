@@ -2,8 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { BookOpen, Lock, Play, CheckCircle } from "lucide-react";
+import { BookOpen, Lock, Play } from "lucide-react";
 import Link from "next/link";
 
 export default async function ProgramsPage({

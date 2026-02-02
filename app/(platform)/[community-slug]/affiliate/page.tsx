@@ -3,8 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { getAffiliateStats, getAffiliateSettings } from "@/actions/affiliates";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { AffiliateDashboard } from "./affiliate-dashboard";
 
 export default async function AffiliatePage({

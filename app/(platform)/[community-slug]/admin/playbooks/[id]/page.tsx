@@ -1,13 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, RotateCcw, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { getPlaybook, getTotalSteps, getAllStepIds } from "@/lib/playbooks/templates";
+import { getPlaybook, getTotalSteps } from "@/lib/playbooks/templates";
 import { PlaybookSteps } from "@/components/playbooks/playbook-steps";
 import { getPlaybookProgress } from "@/actions/playbooks";
 import { ResetPlaybookButton } from "./reset-button";

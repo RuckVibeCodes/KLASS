@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Users, Crown, Circle, UserPlus, Settings, UsersRound } from "lucide-react";
+import { Circle, UserPlus, Settings, UsersRound } from "lucide-react";
 import { useCommunity } from "@/components/providers/community-provider";
 
 export interface CommunityStats {

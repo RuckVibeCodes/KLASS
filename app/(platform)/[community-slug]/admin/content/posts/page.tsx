@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,

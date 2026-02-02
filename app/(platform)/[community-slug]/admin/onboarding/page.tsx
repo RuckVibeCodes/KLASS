@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, Sparkles, Lock } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { AIOnboardingGenerator } from "@/components/admin/ai-onboarding-generator";
 

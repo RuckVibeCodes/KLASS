@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { BUCKETS, generateFilePath, type BucketName } from "@/lib/supabase/storage";
+import { generateFilePath, type BucketName } from "@/lib/supabase/storage";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_IMAGE_TYPES = [

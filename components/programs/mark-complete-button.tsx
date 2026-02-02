@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2, X } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { markLessonComplete, unmarkLessonComplete } from "@/actions/lessons";
 
 interface MarkCompleteButtonProps {

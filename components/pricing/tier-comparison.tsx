@@ -8,7 +8,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Check, Crown, Loader2 } from "lucide-react";
 import { formatTierPrice, calculateYearlySavings } from "@/lib/access";
-import { createTierCheckoutSession } from "@/lib/stripe/tiers";
 import type { MembershipTier, BillingCycle } from "@/types/database";
 
 interface TierComparisonProps {

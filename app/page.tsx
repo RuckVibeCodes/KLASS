@@ -23,6 +23,8 @@ import {
   BarChart3,
   Sparkles,
   ChevronRight,
+  Bot,
+  Wand2,
 } from "lucide-react";
 
 const faqs = [
@@ -75,6 +77,20 @@ const faqs = [
 
 const features = [
   {
+    icon: <Bot className="h-6 w-6" />,
+    title: "AI Course Builder",
+    description:
+      "Describe your course idea, get a complete lesson structure in seconds. AI generates outlines, descriptions, and durations.",
+    highlight: true,
+  },
+  {
+    icon: <Wand2 className="h-6 w-6" />,
+    title: "AI Onboarding",
+    description:
+      "Auto-generate welcome posts, first DMs, and email sequences tailored to your community's vibe. Onboarding on autopilot.",
+    highlight: true,
+  },
+  {
     icon: <Users className="h-6 w-6" />,
     title: "Community Feed",
     description:
@@ -113,6 +129,8 @@ const features = [
 ];
 
 const comparisonRows = [
+  { feature: "AI course builder", klass: true, skool: false, circle: false },
+  { feature: "AI onboarding content", klass: true, skool: false, circle: false },
   { feature: "Free tier", klass: true, skool: false, circle: false },
   { feature: "White-label branding", klass: true, skool: false, circle: "Partial" },
   { feature: "Direct Stripe payments", klass: true, skool: false, circle: true },
@@ -130,6 +148,15 @@ export default async function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
+      {/* Founding Member Banner */}
+      <div className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-center py-2 px-4 text-sm">
+        <Link href="/founders" className="hover:underline flex items-center justify-center gap-2">
+          <Sparkles className="h-3.5 w-3.5" />
+          <span><strong>Founding Member Deal:</strong> $297 lifetime access — only 100 spots</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
         <div className="container flex h-16 items-center justify-between">
@@ -140,6 +167,11 @@ export default async function LandingPage() {
             <span className="font-bold text-xl tracking-tight">KLASS</span>
           </Link>
           <nav className="flex items-center gap-3">
+            <Link href="/founders">
+              <Button variant="ghost" className="text-amber-400 hover:text-amber-300 hover:bg-zinc-800">
+                Founding Members
+              </Button>
+            </Link>
             <Link href="/demo" target="_blank">
               <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
                 View Demo
@@ -183,8 +215,8 @@ export default async function LandingPage() {
         <div className="container relative flex flex-col items-center justify-center gap-8 py-28 text-center md:py-40">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm text-violet-300">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Free to start — no credit card required</span>
+            <Bot className="h-3.5 w-3.5" />
+            <span>AI-powered community platform — free to start</span>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -202,8 +234,8 @@ export default async function LandingPage() {
               </span>
             </h1>
             <p className="mx-auto max-w-2xl text-lg text-zinc-400 md:text-xl leading-relaxed">
-              Build a branded community and course platform without upfront costs.
-              Your fans pay you directly via Stripe — we never touch your revenue.
+              Build a branded community with <span className="text-violet-400">AI that helps you create</span> — 
+              courses, onboarding, content. Your fans pay you directly via Stripe.
             </p>
           </div>
 
@@ -278,23 +310,39 @@ export default async function LandingPage() {
         <div className="container">
           <div className="mb-16 text-center">
             <p className="text-sm font-medium text-violet-400 uppercase tracking-wider mb-3">
-              Everything You Need
+              AI-Powered Platform
             </p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-white">
-              One platform. Every tool.
+              Everything Skool does.{" "}
+              <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                Plus AI.
+              </span>
             </h2>
             <p className="mt-4 mx-auto max-w-2xl text-zinc-400 text-lg">
-              Stop stitching together five different tools. KLASS gives you community, courses,
-              resources, events, branding, and analytics — all in one place.
+              Stop stitching together tools and ChatGPT tabs. KLASS has AI built in — 
+              generating courses, onboarding content, and more.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="group relative flex flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-violet-500/50 hover:bg-zinc-900"
+                className={`group relative flex flex-col gap-4 rounded-xl border p-6 transition-all hover:bg-zinc-900 ${
+                  (feature as any).highlight 
+                    ? "border-violet-500/50 bg-gradient-to-b from-violet-500/10 to-zinc-900/50 hover:border-violet-500/70" 
+                    : "border-zinc-800 bg-zinc-900/50 hover:border-violet-500/50"
+                }`}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 transition-colors group-hover:bg-violet-500/20">
+                {(feature as any).highlight && (
+                  <div className="absolute -top-2.5 left-4">
+                    <span className="rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                      AI
+                    </span>
+                  </div>
+                )}
+                <div className={`flex h-12 w-12 items-center justify-center rounded-lg transition-colors group-hover:bg-violet-500/20 ${
+                  (feature as any).highlight ? "bg-violet-500/20 text-violet-300" : "bg-violet-500/10 text-violet-400"
+                }`}>
                   {feature.icon}
                 </div>
                 <h3 className="font-semibold text-lg text-white">

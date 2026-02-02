@@ -19,6 +19,8 @@ import {
   Star,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { LeadCaptureForm } from "@/components/leads/LeadCaptureForm";
+import { useLeadTracking } from "@/hooks/useLeadTracking";
 
 // Countdown timer component
 function CountdownTimer({ targetDate }: { targetDate: Date }) {
@@ -157,6 +159,9 @@ export default function FoundersPage() {
   // Simulate spots taken (you'd fetch this from API in production)
   const spotsTaken = 23;
 
+  // Track page view for known leads
+  useLeadTracking({ pageName: "founders_page" });
+
   return (
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
       {/* Header */}
@@ -229,6 +234,28 @@ export default function FoundersPage() {
             <p className="text-xs text-zinc-500 mt-3">
               One-time payment · Instant access · No recurring fees
             </p>
+          </div>
+
+          {/* Lead Capture Form */}
+          <div className="mt-8 max-w-md mx-auto">
+            <LeadCaptureForm showSocialProof />
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof */}
+      <section className="py-8 border-y border-zinc-800/30 bg-zinc-900/20">
+        <div className="container">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm">
+            <span className="text-zinc-500">Join creators from:</span>
+            {["Course Creators", "Coaches", "Community Leaders", "Content Creators", "Educators"].map(
+              (type) => (
+                <div key={type} className="flex items-center gap-2 text-zinc-400">
+                  <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
+                  <span>{type}</span>
+                </div>
+              )
+            )}
           </div>
         </div>
       </section>

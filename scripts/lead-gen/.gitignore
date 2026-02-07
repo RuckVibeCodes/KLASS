@@ -1,0 +1,5 @@
+# Output files (regenerated on each run)
+output/
+
+# Keep the directory but not contents
+!output/.gitkeep

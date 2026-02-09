@@ -282,30 +282,18 @@ export default function CreateCommunityPage() {
     setError("");
 
     try {
-      const supabase = createClient();
+      // Use server action to bypass RLS
+      const { updateCommunityBranding } = await import("@/actions/community");
+      const result = await updateCommunityBranding({
+        communityId: progress.communityId,
+        primaryColor: progress.primaryColor,
+        accentColor: progress.accentColor,
+        logoUrl: progress.logoUrl || undefined,
+        tagline: progress.tagline || undefined,
+      });
 
-      const updateData: Record<string, unknown> = {
-        primary_color: progress.primaryColor,
-        accent_color: progress.accentColor,
-      };
-
-      if (progress.logoUrl.trim()) {
-        updateData.logo_url = progress.logoUrl.trim();
-      }
-
-      if (progress.tagline.trim()) {
-        updateData.settings_json = {
-          banner_description: progress.tagline.trim(),
-        };
-      }
-
-      const { error: updateError } = await supabase
-        .from("communities")
-        .update(updateData)
-        .eq("id", progress.communityId);
-
-      if (updateError) {
-        setError(updateError.message);
+      if (result.error) {
+        setError(result.error);
         return;
       }
 

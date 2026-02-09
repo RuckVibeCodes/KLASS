@@ -66,7 +66,7 @@ CREATE POLICY "Users can create reports" ON public.reports
 CREATE POLICY "Users can view own reports" ON public.reports
   FOR SELECT USING (
     reporter_profile_id IN (
-      SELECT id FROM public.profiles WHERE clerk_user_id = auth.uid()
+      SELECT id FROM public.profiles WHERE clerk_user_id = auth.uid()::text::text
     )
   );
 
@@ -75,7 +75,7 @@ CREATE POLICY "Admins can view community reports" ON public.reports
   FOR SELECT USING (
     community_id IN (
       SELECT community_id FROM public.profiles 
-      WHERE clerk_user_id = auth.uid() AND role = 'ADMIN'
+      WHERE clerk_user_id = auth.uid()::text AND role = 'ADMIN'
     )
   );
 
@@ -84,7 +84,7 @@ CREATE POLICY "Admins can update community reports" ON public.reports
   FOR UPDATE USING (
     community_id IN (
       SELECT community_id FROM public.profiles 
-      WHERE clerk_user_id = auth.uid() AND role = 'ADMIN'
+      WHERE clerk_user_id = auth.uid()::text AND role = 'ADMIN'
     )
   );
 

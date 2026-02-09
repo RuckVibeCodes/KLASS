@@ -105,7 +105,7 @@ ALTER TABLE public.user_enforcement_status ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own violations" ON public.violations
   FOR SELECT USING (
     profile_id IN (
-      SELECT id FROM public.profiles WHERE clerk_user_id = auth.uid()
+      SELECT id FROM public.profiles WHERE clerk_user_id = auth.uid()::text
     )
   );
 
@@ -114,7 +114,7 @@ CREATE POLICY "Admins can view community violations" ON public.violations
   FOR SELECT USING (
     community_id IN (
       SELECT community_id FROM public.profiles 
-      WHERE clerk_user_id = auth.uid() AND role = 'ADMIN'
+      WHERE clerk_user_id = auth.uid()::text AND role = 'ADMIN'
     )
   );
 
@@ -123,7 +123,7 @@ CREATE POLICY "Admins can create violations" ON public.violations
   FOR INSERT WITH CHECK (
     community_id IN (
       SELECT community_id FROM public.profiles 
-      WHERE clerk_user_id = auth.uid() AND role = 'ADMIN'
+      WHERE clerk_user_id = auth.uid()::text AND role = 'ADMIN'
     )
   );
 
@@ -132,7 +132,7 @@ CREATE POLICY "Admins can update violations" ON public.violations
   FOR UPDATE USING (
     community_id IN (
       SELECT community_id FROM public.profiles 
-      WHERE clerk_user_id = auth.uid() AND role = 'ADMIN'
+      WHERE clerk_user_id = auth.uid()::text AND role = 'ADMIN'
     )
   );
 
@@ -140,7 +140,7 @@ CREATE POLICY "Admins can update violations" ON public.violations
 CREATE POLICY "Users can view own enforcement status" ON public.user_enforcement_status
   FOR SELECT USING (
     profile_id IN (
-      SELECT id FROM public.profiles WHERE clerk_user_id = auth.uid()
+      SELECT id FROM public.profiles WHERE clerk_user_id = auth.uid()::text
     )
   );
 
@@ -149,7 +149,7 @@ CREATE POLICY "Admins can view community enforcement" ON public.user_enforcement
   FOR SELECT USING (
     community_id IN (
       SELECT community_id FROM public.profiles 
-      WHERE clerk_user_id = auth.uid() AND role = 'ADMIN'
+      WHERE clerk_user_id = auth.uid()::text AND role = 'ADMIN'
     )
   );
 
@@ -158,7 +158,7 @@ CREATE POLICY "Admins can manage enforcement" ON public.user_enforcement_status
   FOR ALL USING (
     community_id IN (
       SELECT community_id FROM public.profiles 
-      WHERE clerk_user_id = auth.uid() AND role = 'ADMIN'
+      WHERE clerk_user_id = auth.uid()::text AND role = 'ADMIN'
     )
   );
 

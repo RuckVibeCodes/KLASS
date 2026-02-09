@@ -2,6 +2,26 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@/lib/supabase/server";
 
+interface CommunityData {
+  id: string;
+  slug: string;
+  name: string;
+}
+
+interface ProfileWithCommunity {
+  id: string;
+  role: string;
+  community: CommunityData | CommunityData[] | null;
+}
+
+function getCommunitySlug(community: CommunityData | CommunityData[] | null): string | null {
+  if (!community) return null;
+  if (Array.isArray(community)) {
+    return community[0]?.slug || null;
+  }
+  return community.slug;
+}
+
 export default async function RedirectPage() {
   const { userId } = await auth();
 
@@ -27,17 +47,25 @@ export default async function RedirectPage() {
     redirect("/create-community");
   }
 
+  const typedProfiles = profiles as ProfileWithCommunity[];
+
   // If user is admin of any community, prefer that one
-  const adminProfile = profiles.find((p) => p.role === "ADMIN");
+  const adminProfile = typedProfiles.find((p) => p.role === "ADMIN");
   
   if (adminProfile?.community) {
-    redirect(`/${(adminProfile.community as { slug: string }).slug}`);
+    const slug = getCommunitySlug(adminProfile.community);
+    if (slug) {
+      redirect(`/${slug}`);
+    }
   }
 
   // Otherwise, go to their most recent community
-  const firstProfile = profiles[0];
+  const firstProfile = typedProfiles[0];
   if (firstProfile?.community) {
-    redirect(`/${(firstProfile.community as { slug: string }).slug}`);
+    const slug = getCommunitySlug(firstProfile.community);
+    if (slug) {
+      redirect(`/${slug}`);
+    }
   }
 
   // Fallback: create a community

@@ -211,6 +211,50 @@ export interface Event {
   min_tier?: MembershipTier;
 }
 
+// Funnel types
+export type FunnelContentType = "free_community" | "program" | "resource" | "paid_tier";
+
+export interface Funnel {
+  id: string;
+  community_id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  cover_image_url: string | null;
+  content_type: FunnelContentType;
+  content_id: string | null;
+  price_cents: number;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
+  headline: string | null;
+  subheadline: string | null;
+  bullet_points: string[];
+  cta_text: string;
+  redirect_path: string;
+  welcome_message: string | null;
+  views_count: number;
+  signups_count: number;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  community?: Community;
+  content?: Program | Resource;
+}
+
+export interface FunnelConversion {
+  id: string;
+  funnel_id: string;
+  profile_id: string;
+  converted_at: string;
+  source: string | null;
+  stripe_payment_intent_id: string | null;
+  amount_cents: number | null;
+  // Joined fields
+  profile?: Profile;
+  funnel?: Funnel;
+}
+
 export interface Subscription {
   id: string;
   profile_id: string;
@@ -508,6 +552,16 @@ export interface Database {
         Row: Event;
         Insert: Omit<Event, "id" | "created_at" | "updated_at">;
         Update: Partial<Omit<Event, "id" | "created_at" | "updated_at">>;
+      };
+      funnels: {
+        Row: Funnel;
+        Insert: Omit<Funnel, "id" | "created_at" | "updated_at" | "views_count" | "signups_count">;
+        Update: Partial<Omit<Funnel, "id" | "created_at" | "updated_at">>;
+      };
+      funnel_conversions: {
+        Row: FunnelConversion;
+        Insert: Omit<FunnelConversion, "id" | "converted_at">;
+        Update: Partial<Omit<FunnelConversion, "id" | "converted_at">>;
       };
       subscriptions: {
         Row: Subscription;

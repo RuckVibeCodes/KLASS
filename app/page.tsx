@@ -774,6 +774,24 @@ export default async function LandingPage() {
             >
               Sign Up
             </Link>
+            <Link
+              href="/terms"
+              className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/acceptable-use"
+              className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              Acceptable Use
+            </Link>
           </div>
           <p className="text-sm text-zinc-600">
             &copy; {new Date().getFullYear()} KLASS. All rights reserved.

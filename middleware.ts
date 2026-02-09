@@ -10,6 +10,10 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks(.*)",
   "/demo(.*)",
   "/offline",
+  "/terms",
+  "/privacy",
+  "/acceptable-use",
+  "/redirect",
 ]);
 
 // System admin routes require master admin access

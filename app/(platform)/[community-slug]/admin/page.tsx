@@ -15,6 +15,7 @@ import {
   ArrowRight,
   ClipboardList,
   Sparkles,
+  Flag,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -159,6 +160,12 @@ export default async function AdminDashboardPage({
               <Button variant="outline" className="w-full justify-start">
                 <Sparkles className="h-4 w-4 mr-2" />
                 AI Onboarding
+              </Button>
+            </Link>
+            <Link href={`${baseUrl}/admin/reports`}>
+              <Button variant="outline" className="w-full justify-start">
+                <Flag className="h-4 w-4 mr-2" />
+                Content Reports
               </Button>
             </Link>
           </CardContent>

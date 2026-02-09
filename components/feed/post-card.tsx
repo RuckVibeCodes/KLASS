@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCommunity } from "@/components/providers/community-provider";
+import { ReportButton } from "@/components/report";
 
 interface Member {
   id: string;
@@ -422,6 +423,15 @@ export function PostCard({
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete post
                 </DropdownMenuItem>
+                {!effectiveIsAdmin && currentProfileId && (
+                  <ReportButton
+                    contentType="post"
+                    contentId={post.id}
+                    reportedProfileId={post.author?.id}
+                    communityId={communityId}
+                    variant="dropdown"
+                  />
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

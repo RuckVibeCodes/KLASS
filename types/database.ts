@@ -91,9 +91,13 @@ export interface Post {
   comments_count: number;
   created_at: string;
   updated_at: string;
+  // Tier gating
+  min_tier_id: string | null;
+  preview_content: string | null;
   // Joined fields
   author?: Profile;
   comments?: Comment[];
+  min_tier?: MembershipTier;
 }
 
 export interface Comment {

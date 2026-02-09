@@ -163,6 +163,12 @@ export default async function AdminDashboardPage({
                 AI Onboarding
               </Button>
             </Link>
+            <Link href={`${baseUrl}/admin/funnels`}>
+              <Button variant="outline" className="w-full justify-start">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Funnels & Lead Magnets
+              </Button>
+            </Link>
             <Link href={`${baseUrl}/admin/reports`}>
               <Button variant="outline" className="w-full justify-start">
                 <Flag className="h-4 w-4 mr-2" />

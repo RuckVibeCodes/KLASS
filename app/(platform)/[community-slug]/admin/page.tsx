@@ -16,6 +16,7 @@ import {
   ClipboardList,
   Sparkles,
   Flag,
+  Gavel,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -166,6 +167,12 @@ export default async function AdminDashboardPage({
               <Button variant="outline" className="w-full justify-start">
                 <Flag className="h-4 w-4 mr-2" />
                 Content Reports
+              </Button>
+            </Link>
+            <Link href={`${baseUrl}/admin/violations`}>
+              <Button variant="outline" className="w-full justify-start">
+                <Gavel className="h-4 w-4 mr-2" />
+                Violations & Strikes
               </Button>
             </Link>
           </CardContent>

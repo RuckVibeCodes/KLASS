@@ -13,9 +13,9 @@ import {
   FileText,
 } from "lucide-react";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { MarkCompleteButton } from "@/components/programs/mark-complete-button";
+import { serializeMDX } from "@/lib/mdx";
+import { LessonContent } from "@/components/mdx/LessonContent";
 
 export default async function LessonPage({
   params,
@@ -77,6 +77,13 @@ export default async function LessonPage({
     .single();
 
   const isCompleted = !!progress;
+
+  // Serialize MDX content if present
+  let mdxSource = null;
+  if (lesson.content) {
+    const { source } = await serializeMDX(lesson.content);
+    mdxSource = source;
+  }
 
   // Get navigation
   const lessons = (program.lessons || []).sort(
@@ -143,13 +150,11 @@ export default async function LessonPage({
         />
       </div>
 
-      {/* Lesson Content */}
+      {/* Lesson Content - Supports MDX with interactive components */}
       {lesson.content && (
         <Card className="mb-6">
-          <CardContent className="p-6 prose prose-neutral dark:prose-invert max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {lesson.content}
-            </ReactMarkdown>
+          <CardContent className="p-6">
+            <LessonContent content={lesson.content} mdxSource={mdxSource} />
           </CardContent>
         </Card>
       )}

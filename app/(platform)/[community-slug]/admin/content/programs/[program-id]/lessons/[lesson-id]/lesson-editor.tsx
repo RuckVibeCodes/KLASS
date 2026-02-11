@@ -21,6 +21,7 @@ import { updateLesson } from "@/actions/programs";
 import { useToast } from "@/hooks/use-toast";
 import type { Lesson, ContentVisibility, Quiz, QuizQuestion, QuizOption } from "@/types/database";
 import { QuizEditor } from "./quiz-editor";
+import { ComponentToolbar } from "@/components/mdx/ComponentToolbar";
 
 type QuizWithQuestions = Quiz & { quiz_questions: (QuizQuestion & { quiz_options: QuizOption[] })[] };
 
@@ -237,7 +238,17 @@ export function LessonEditor({ lesson, programId, communitySlug, communityId, qu
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Content (Markdown)</Label>
+                <Label htmlFor="content">Content (Markdown + Interactive Components)</Label>
+                <ComponentToolbar
+                  lessonTitle={formData.title}
+                  lessonContent={formData.content}
+                  onInsert={(mdx) => {
+                    setFormData({
+                      ...formData,
+                      content: formData.content + "\n\n" + mdx + "\n",
+                    });
+                  }}
+                />
                 <Textarea
                   id="content"
                   value={formData.content}
@@ -248,7 +259,8 @@ You can use Markdown formatting:
 - **bold** and *italic*
 - # Headings
 - [links](https://example.com)
-- Lists and more..."
+
+Plus interactive components from the toolbar above!"
                   rows={15}
                   className="font-mono text-sm"
                 />

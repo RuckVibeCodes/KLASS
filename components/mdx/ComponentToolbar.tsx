@@ -89,6 +89,9 @@ export function ComponentToolbar({ onInsert, lessonContent, lessonTitle }: Compo
   const [videoUrl, setVideoUrl] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
 
+  // Escape quotes for safe MDX string interpolation
+  const escapeQuotes = (str: string) => str.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+
   const resetForms = () => {
     setCalloutType("info");
     setCalloutTitle("");
@@ -115,7 +118,7 @@ export function ComponentToolbar({ onInsert, lessonContent, lessonTitle }: Compo
   };
 
   const insertCallout = () => {
-    const mdx = `<Callout type="${calloutType}"${calloutTitle ? ` title="${calloutTitle}"` : ""}>
+    const mdx = `<Callout type="${calloutType}"${calloutTitle ? ` title="${escapeQuotes(calloutTitle)}"` : ""}>
   ${calloutContent}
 </Callout>`;
     onInsert(mdx);
@@ -126,11 +129,11 @@ export function ComponentToolbar({ onInsert, lessonContent, lessonTitle }: Compo
   const insertChoice = () => {
     const validOptions = choiceOptions.filter(o => o.text.trim());
     const optionsStr = validOptions
-      .map(o => `    { text: "${o.text}", correct: ${o.correct}, explanation: "${o.explanation}" }`)
+      .map(o => `    { text: "${escapeQuotes(o.text)}", correct: ${o.correct}, explanation: "${escapeQuotes(o.explanation)}" }`)
       .join(",\n");
     
     const mdx = `<Choice
-  question="${choiceQuestion}"
+  question="${escapeQuotes(choiceQuestion)}"
   options={[
 ${optionsStr}
   ]}
@@ -155,7 +158,7 @@ ${optionsStr}
   const insertSteps = () => {
     const validSteps = steps.filter(s => s.title.trim());
     const stepsStr = validSteps
-      .map((s, i) => `  <Step number={${i + 1}} title="${s.title}">\n    ${s.content}\n  </Step>`)
+      .map((s, i) => `  <Step number={${i + 1}} title="${escapeQuotes(s.title)}">\n    ${s.content}\n  </Step>`)
       .join("\n");
     
     const mdx = `<Steps>
@@ -167,7 +170,7 @@ ${stepsStr}
   };
 
   const insertVideo = () => {
-    const mdx = `<Video src="${videoUrl}"${videoTitle ? ` title="${videoTitle}"` : ""} />`;
+    const mdx = `<Video src="${escapeQuotes(videoUrl)}"${videoTitle ? ` title="${escapeQuotes(videoTitle)}"` : ""} />`;
     onInsert(mdx);
     setActiveModal(null);
     resetForms();

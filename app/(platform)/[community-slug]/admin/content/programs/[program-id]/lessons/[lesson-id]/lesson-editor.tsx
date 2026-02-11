@@ -401,6 +401,8 @@ You can use Markdown formatting:
             communitySlug={communitySlug}
             communityId={communityId}
             quiz={quiz || null}
+            lessonTitle={formData.title}
+            lessonContent={formData.content}
           />
         </TabsContent>
       </Tabs>

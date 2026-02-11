@@ -39,6 +39,7 @@ import {
   Circle,
   HelpCircle,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import {
   createQuiz,
@@ -59,9 +60,11 @@ interface QuizEditorProps {
   communitySlug: string;
   communityId: string;
   quiz: (Quiz & { quiz_questions: (QuizQuestion & { quiz_options: QuizOption[] })[] }) | null;
+  lessonTitle?: string;
+  lessonContent?: string;
 }
 
-export function QuizEditor({ lessonId, programId, communitySlug, communityId, quiz }: QuizEditorProps) {
+export function QuizEditor({ lessonId, programId, communitySlug, communityId, quiz, lessonTitle, lessonContent }: QuizEditorProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -69,6 +72,9 @@ export function QuizEditor({ lessonId, programId, communitySlug, communityId, qu
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<(QuizQuestion & { quiz_options: QuizOption[] }) | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [questionCount, setQuestionCount] = useState(5);
 
   // Quiz settings form
   const [quizForm, setQuizForm] = useState({
@@ -361,6 +367,67 @@ export function QuizEditor({ lessonId, programId, communitySlug, communityId, qu
     setQuestionForm({ ...questionForm, options: newOptions });
   };
 
+  // AI Quiz Generation
+  const handleAIGenerate = async () => {
+    if (!quiz) return;
+    if (!lessonContent || lessonContent.trim().length < 50) {
+      toast({
+        variant: "destructive",
+        title: "Content Required",
+        description: "Add lesson content before generating quiz questions.",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await fetch("/api/ai/generate-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lessonTitle: lessonTitle || "Untitled Lesson",
+          lessonContent,
+          questionCount,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate quiz");
+      }
+
+      const { questions } = await response.json();
+
+      // Create each question
+      for (const q of questions) {
+        await createQuizQuestion(quiz.id, lessonId, programId, communitySlug, {
+          question_text: q.question_text,
+          question_type: q.question_type,
+          points: q.points,
+          explanation: q.explanation,
+          options: q.options,
+        });
+      }
+
+      toast({
+        variant: "success",
+        title: "Quiz Generated!",
+        description: `Added ${questions.length} AI-generated questions. For trading content, both long and short positions are covered.`,
+      });
+
+      setAiDialogOpen(false);
+      router.refresh();
+    } catch (error) {
+      console.error("AI generation error:", error);
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: "Could not generate quiz questions. Please try again.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   // No quiz yet - show create button
   if (!quiz) {
     return (
@@ -572,6 +639,72 @@ export function QuizEditor({ lessonId, programId, communitySlug, communityId, qu
                   <Button onClick={handleUpdateQuiz} disabled={isPending}>
                     {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     Save Settings
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            {/* AI Generate Quiz Dialog */}
+            <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" disabled={!lessonContent || lessonContent.length < 50}>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  AI Generate
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Generate Quiz with AI</DialogTitle>
+                  <DialogDescription>
+                    AI will analyze your lesson content and create quiz questions.
+                    For trading content, both long and short positions will be covered.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="question-count">Number of Questions</Label>
+                    <Select
+                      value={questionCount.toString()}
+                      onValueChange={(value) => setQuestionCount(parseInt(value))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">3 questions</SelectItem>
+                        <SelectItem value="5">5 questions</SelectItem>
+                        <SelectItem value="7">7 questions</SelectItem>
+                        <SelectItem value="10">10 questions</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="rounded-lg border p-3 bg-muted/50">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>AI will generate:</strong>
+                    </p>
+                    <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                      <li>• Multiple choice, true/false, and multi-select questions</li>
+                      <li>• Explanations for each correct answer</li>
+                      <li>• Balanced coverage of long AND short positions (for trading content)</li>
+                      <li>• Varied difficulty levels</li>
+                    </ul>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setAiDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAIGenerate} disabled={isGenerating}>
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Generate {questionCount} Questions
+                      </>
+                    )}
                   </Button>
                 </DialogFooter>
               </DialogContent>

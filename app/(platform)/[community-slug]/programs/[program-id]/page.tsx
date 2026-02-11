@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,7 +25,8 @@ export default async function ProgramPage({
 }) {
   const { userId } = await auth();
   const resolvedParams = await params;
-  const supabase = await createClient();
+  // Use admin client to bypass RLS for program/lesson catalog
+  const supabase = await createAdminClient();
 
   // Get community
   const { data: community } = await supabase

@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useCommunity } from "@/components/providers/community-provider";
 import { ViewModeToggle } from "@/components/admin/view-mode-toggle";
+import { CommunitySwitcher } from "./community-switcher";
 
 const navItems = [
   { key: "community", label: "Community", icon: MessageSquare, path: "" },
@@ -79,21 +80,25 @@ export function HorizontalNavHeader({
           <span className="sr-only">Toggle menu</span>
         </Button>
 
-        {/* Community Logo/Name */}
-        <Link href={baseUrl} className="flex items-center gap-2 flex-shrink-0">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={community.logo_url || undefined} />
-            <AvatarFallback
-              className="text-white text-sm font-semibold"
-              style={{ backgroundColor: community.primary_color }}
-            >
-              {community.name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="font-semibold hidden sm:inline truncate max-w-[200px]">
-            {community.name}
-          </span>
-        </Link>
+        {/* Community Switcher / Logo */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <CommunitySwitcher />
+          {/* Fallback: Show static logo if switcher doesn't render (single community) */}
+          <Link href={baseUrl} className="flex items-center gap-2 [.community-switcher+&]:hidden">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={community.logo_url || undefined} />
+              <AvatarFallback
+                className="text-white text-sm font-semibold"
+                style={{ backgroundColor: community.primary_color }}
+              >
+                {community.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-semibold hidden sm:inline truncate max-w-[200px]">
+              {community.name}
+            </span>
+          </Link>
+        </div>
 
         {/* Search */}
         <div className="hidden md:flex flex-1 max-w-md mx-4">

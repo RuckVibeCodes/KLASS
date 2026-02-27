@@ -88,6 +88,15 @@ export function Choice({ question, options }: ChoiceProps) {
     setRevealed(true);
   };
 
+  if (!options || options.length === 0) {
+    return (
+      <div className="bg-[#0d0d12] border border-gray-800 rounded-xl p-6 my-6">
+        <p className="font-medium text-white mb-4">{question}</p>
+        <p className="text-gray-500 text-sm">No options available.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#0d0d12] border border-gray-800 rounded-xl p-6 my-6">
       <p className="font-medium text-white mb-4">{question}</p>
@@ -232,7 +241,7 @@ export function SignalBox({ type, entry, stopLoss, target, riskReward }: SignalB
         </div>
         <div>
           <span className="text-gray-400">Stop Loss:</span>
-          <span className={cn("ml-2", isBullish ? "text-red-400" : "text-red-400")}>
+          <span className="text-red-400 ml-2">
             {stopLoss}
           </span>
         </div>
@@ -385,8 +394,13 @@ interface TabsProps {
 
 export function Tabs({ children }: TabsProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const tabs = Array.isArray(children) ? children : [children];
-  
+  // Filter out whitespace text nodes that MDX may insert between <Tab> elements
+  const tabs = (Array.isArray(children) ? children : [children]).filter(
+    (child: any) => child != null && typeof child !== "string"
+  );
+
+  if (tabs.length === 0) return null;
+
   return (
     <div className="my-6">
       <div className="flex border-b border-gray-800 mb-4">

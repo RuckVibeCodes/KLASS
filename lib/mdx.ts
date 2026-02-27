@@ -6,6 +6,10 @@ export async function serializeMDX(content: string) {
       mdxOptions: {
         development: process.env.NODE_ENV === "development",
       },
+      // next-mdx-remote v6 defaults blockJS to true, which strips JSX attribute
+      // expressions like options={[...]} and number={1} from custom components.
+      // Content is authored by community admins, not untrusted users.
+      blockJS: false,
     });
     return { source: mdxSource, error: null };
   } catch (error) {

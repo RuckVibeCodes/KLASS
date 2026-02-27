@@ -340,16 +340,11 @@ export function QuizEditor({ lessonId, programId, communitySlug, communityId, qu
   };
 
   const toggleOptionCorrect = (index: number) => {
-    const newOptions = [...questionForm.options];
-    if (questionForm.question_type === "multiple_choice" || questionForm.question_type === "true_false") {
-      // Only one correct answer
-      newOptions.forEach((o, i) => {
-        o.is_correct = i === index;
-      });
-    } else {
-      // Multi-select: toggle
-      newOptions[index].is_correct = !newOptions[index].is_correct;
-    }
+    const isSingleAnswer = questionForm.question_type === "multiple_choice" || questionForm.question_type === "true_false";
+    const newOptions = questionForm.options.map((o, i) => ({
+      ...o,
+      is_correct: isSingleAnswer ? i === index : (i === index ? !o.is_correct : o.is_correct),
+    }));
     setQuestionForm({ ...questionForm, options: newOptions });
   };
 
@@ -395,7 +390,12 @@ export function QuizEditor({ lessonId, programId, communitySlug, communityId, qu
         throw new Error("Failed to generate quiz");
       }
 
-      const { questions } = await response.json();
+      const data = await response.json();
+      const questions = data?.questions;
+
+      if (!Array.isArray(questions)) {
+        throw new Error("Invalid AI response format");
+      }
 
       // Create each question
       for (const q of questions) {
@@ -813,8 +813,9 @@ export function QuizEditor({ lessonId, programId, communitySlug, communityId, qu
                             <Input
                               value={option.option_text}
                               onChange={(e) => {
-                                const newOptions = [...questionForm.options];
-                                newOptions[index].option_text = e.target.value;
+                                const newOptions = questionForm.options.map((o, i) =>
+                                  i === index ? { ...o, option_text: e.target.value } : o
+                                );
                                 setQuestionForm({ ...questionForm, options: newOptions });
                               }}
                               placeholder={`Option ${index + 1}`}

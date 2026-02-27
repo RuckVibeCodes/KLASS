@@ -225,7 +225,10 @@ export async function toggleCommentLike(
     }
 
     // Update likes count
-    await adminSupabase.rpc("decrement_comment_likes", { comment_id: commentId });
+    const { error: rpcError } = await adminSupabase.rpc("decrement_comment_likes", { comment_id: commentId });
+    if (rpcError) {
+      console.error("Failed to decrement likes count:", rpcError);
+    }
   } else {
     // Like
     const { error } = await adminSupabase
@@ -240,7 +243,10 @@ export async function toggleCommentLike(
     }
 
     // Update likes count
-    await adminSupabase.rpc("increment_comment_likes", { comment_id: commentId });
+    const { error: rpcError } = await adminSupabase.rpc("increment_comment_likes", { comment_id: commentId });
+    if (rpcError) {
+      console.error("Failed to increment likes count:", rpcError);
+    }
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}/lessons/${lessonId}`);
@@ -286,30 +292,36 @@ export async function getLessonComments(lessonId: string) {
 
   // Get replies for each comment
   const commentIds = comments.map((c) => c.id);
-  const { data: replies } = await supabase
-    .from("lesson_comments")
-    .select(`
-      *,
-      profile:profiles (
-        id,
-        display_name,
-        avatar_url,
-        role
-      )
-    `)
-    .in("parent_comment_id", commentIds)
-    .order("created_at", { ascending: true });
+  let replies: typeof comments = [];
+  if (commentIds.length > 0) {
+    const { data: repliesData } = await supabase
+      .from("lesson_comments")
+      .select(`
+        *,
+        profile:profiles (
+          id,
+          display_name,
+          avatar_url,
+          role
+        )
+      `)
+      .in("parent_comment_id", commentIds)
+      .order("created_at", { ascending: true });
+    replies = repliesData || [];
+  }
 
   // Get user's likes if logged in
   let userLikes: string[] = [];
   if (userProfileId) {
     const allCommentIds = [...commentIds, ...(replies?.map((r) => r.id) || [])];
-    const { data: likes } = await supabase
-      .from("lesson_comment_likes")
-      .select("comment_id")
-      .eq("profile_id", userProfileId)
-      .in("comment_id", allCommentIds);
-    userLikes = likes?.map((l) => l.comment_id) || [];
+    if (allCommentIds.length > 0) {
+      const { data: likes } = await supabase
+        .from("lesson_comment_likes")
+        .select("comment_id")
+        .eq("profile_id", userProfileId)
+        .in("comment_id", allCommentIds);
+      userLikes = likes?.map((l) => l.comment_id) || [];
+    }
   }
 
   // Combine comments with replies

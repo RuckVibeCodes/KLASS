@@ -629,7 +629,7 @@ ${stepsStr}
               </div>
               {lessonContent.length < 50 && (
                 <div className="rounded-lg border border-yellow-500/50 p-3 bg-yellow-500/10">
-                  <p className="text-sm text-yellow-200">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
                     ⚠️ Add more lesson content first (at least a paragraph) so AI has something to work with.
                   </p>
                 </div>

@@ -15,6 +15,8 @@ export default async function EditLessonPage({
   }>;
 }) {
   const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
   const resolvedParams = await params;
   const communitySlug = resolvedParams["community-slug"];
   const programId = resolvedParams["program-id"];
@@ -50,7 +52,7 @@ export default async function EditLessonPage({
 
   if (!lesson) notFound();
 
-  // Get quiz with questions and options
+  // Get quiz with questions and options (sorted by order_index)
   const { data: quiz } = await supabase
     .from("quizzes")
     .select(`
@@ -61,6 +63,7 @@ export default async function EditLessonPage({
       )
     `)
     .eq("lesson_id", lessonId)
+    .order("order_index", { referencedTable: "quiz_questions", ascending: true })
     .single();
 
   return (

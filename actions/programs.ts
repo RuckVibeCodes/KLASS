@@ -213,7 +213,7 @@ export async function createLesson(
       title: data.title,
       content: data.content || null,
       video_url: data.video_url || null,
-      video_duration_seconds: data.video_duration_seconds || null,
+      video_duration_seconds: data.video_duration_seconds ?? null,
       attachment_urls: data.attachment_urls || [],
       visibility: data.visibility || "members",
       published: false,
@@ -381,6 +381,7 @@ export async function duplicateLesson(
       visibility: original.visibility,
       published: false,
       order_index: newOrderIndex,
+      section_id: original.section_id,
     })
     .select()
     .single();

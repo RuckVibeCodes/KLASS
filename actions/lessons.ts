@@ -12,7 +12,7 @@ export async function markLessonComplete(
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const supabase = await createClient();
@@ -25,7 +25,7 @@ export async function markLessonComplete(
     .single();
 
   if (!community) {
-    throw new Error("Community not found");
+    return { error: "Community not found" };
   }
 
   // Get profile
@@ -37,7 +37,7 @@ export async function markLessonComplete(
     .single();
 
   if (!profile) {
-    throw new Error("Profile not found");
+    return { error: "Profile not found" };
   }
 
   // Use admin client to bypass RLS for insert
@@ -63,7 +63,7 @@ export async function markLessonComplete(
   });
 
   if (error) {
-    throw new Error(error.message);
+    return { error: error.message };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}`);
@@ -80,7 +80,7 @@ export async function unmarkLessonComplete(
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const supabase = await createClient();
@@ -93,7 +93,7 @@ export async function unmarkLessonComplete(
     .single();
 
   if (!community) {
-    throw new Error("Community not found");
+    return { error: "Community not found" };
   }
 
   // Get profile
@@ -105,7 +105,7 @@ export async function unmarkLessonComplete(
     .single();
 
   if (!profile) {
-    throw new Error("Profile not found");
+    return { error: "Profile not found" };
   }
 
   // Use admin client to bypass RLS
@@ -118,7 +118,7 @@ export async function unmarkLessonComplete(
     .eq("profile_id", profile.id);
 
   if (error) {
-    throw new Error(error.message);
+    return { error: error.message };
   }
 
   revalidatePath(`/${communitySlug}/programs/${programId}`);

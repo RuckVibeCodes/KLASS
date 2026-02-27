@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import { useState, useEffect, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -84,6 +84,10 @@ export function LessonsList({ programId, lessons, sections = [], communitySlug }
   // Local state for optimistic reordering
   const [localSections, setLocalSections] = useState(sections);
   const [localLessons, setLocalLessons] = useState(lessons);
+
+  // Sync local state when props change (after server actions + router.refresh)
+  useEffect(() => { setLocalLessons(lessons); }, [lessons]);
+  useEffect(() => { setLocalSections(sections); }, [sections]);
 
   // Group lessons by section
   const unsectionedLessons = localLessons.filter((l) => !l.section_id);

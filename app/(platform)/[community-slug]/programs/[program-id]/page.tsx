@@ -154,8 +154,8 @@ export default async function ProgramPage({
           </div>
         </div>
 
-        {/* Progress */}
-        {lessons.length > 0 && (
+        {/* Progress - only show for authenticated users */}
+        {profile && lessons.length > 0 && (
           <div className="mt-6">
             <div className="flex items-center justify-between text-sm mb-2">
               <span className="font-medium">Your Progress</span>

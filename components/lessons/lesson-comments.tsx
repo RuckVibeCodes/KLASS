@@ -173,6 +173,7 @@ function CommentItem({
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyContent, setReplyContent] = useState("");
 
+  const commentId = comment.id;
   const isOwner = currentUserId && comment.profile.id === currentUserId;
   const canDelete = isOwner || isAdmin;
   const canEdit = isOwner;
@@ -192,8 +193,6 @@ function CommentItem({
       router.refresh();
     });
   };
-
-  const commentId = comment.id;
 
   const handleEdit = () => {
     if (!editContent.trim()) return;

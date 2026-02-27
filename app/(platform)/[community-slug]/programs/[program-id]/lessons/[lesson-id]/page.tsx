@@ -142,12 +142,14 @@ export default async function LessonPage({
           <h1 className="text-2xl font-bold">{lesson.title}</h1>
         </div>
 
-        <MarkCompleteButton
-          lessonId={lessonId}
-          programId={programId}
-          communitySlug={communitySlug}
-          isCompleted={isCompleted}
-        />
+        {profile && (
+          <MarkCompleteButton
+            lessonId={lessonId}
+            programId={programId}
+            communitySlug={communitySlug}
+            isCompleted={isCompleted}
+          />
+        )}
       </div>
 
       {/* Lesson Content - Supports MDX with interactive components */}
@@ -174,7 +176,14 @@ export default async function LessonPage({
               >
                 <FileText className="h-5 w-5 text-muted-foreground" />
                 <span className="flex-1 truncate">
-                  {url.split("/").pop() || `Attachment ${index + 1}`}
+                  {(() => {
+                    try {
+                      const pathname = new URL(url).pathname;
+                      return decodeURIComponent(pathname.split("/").pop() || `Attachment ${index + 1}`);
+                    } catch {
+                      return url.split("/").pop()?.split("?")[0] || `Attachment ${index + 1}`;
+                    }
+                  })()}
                 </span>
                 <Download className="h-4 w-4 text-muted-foreground" />
               </a>

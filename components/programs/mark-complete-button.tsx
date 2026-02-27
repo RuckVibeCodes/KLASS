@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { markLessonComplete, unmarkLessonComplete } from "@/actions/lessons";
+import { useToast } from "@/hooks/use-toast";
 
 interface MarkCompleteButtonProps {
   lessonId: string;
@@ -20,19 +21,24 @@ export function MarkCompleteButton({
 }: MarkCompleteButtonProps) {
   const [isCompleted, setIsCompleted] = useState(initialCompleted);
   const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
 
   const handleToggle = () => {
     startTransition(async () => {
-      try {
-        if (isCompleted) {
-          await unmarkLessonComplete(lessonId, programId, communitySlug);
-          setIsCompleted(false);
-        } else {
-          await markLessonComplete(lessonId, programId, communitySlug);
-          setIsCompleted(true);
+      if (isCompleted) {
+        const result = await unmarkLessonComplete(lessonId, programId, communitySlug);
+        if (result.error) {
+          toast({ variant: "destructive", title: "Error", description: "Failed to update progress." });
+          return;
         }
-      } catch (error) {
-        console.error("Failed to update progress:", error);
+        setIsCompleted(false);
+      } else {
+        const result = await markLessonComplete(lessonId, programId, communitySlug);
+        if (result.error) {
+          toast({ variant: "destructive", title: "Error", description: "Failed to update progress." });
+          return;
+        }
+        setIsCompleted(true);
       }
     });
   };
@@ -43,7 +49,7 @@ export function MarkCompleteButton({
         variant="outline"
         onClick={handleToggle}
         disabled={isPending}
-        className="text-green-600 border-green-600 hover:bg-green-50"
+        className="text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />

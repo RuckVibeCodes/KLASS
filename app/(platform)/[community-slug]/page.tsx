@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageSquare } from "lucide-react";
 import { PostForm } from "@/components/feed/post-form";
@@ -30,7 +31,7 @@ export default async function CommunityHomePage({
   // Use cached query for community (deduplicated with layout)
   const community = await getCommunityBySlug(communitySlug);
 
-  if (!community) return null;
+  if (!community) return notFound();
 
   // Use cached query for profile (deduplicated with layout)
   const profile = userId ? await getProfileByClerkId(userId, community.id) : null;

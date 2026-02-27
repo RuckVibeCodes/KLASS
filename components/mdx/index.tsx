@@ -15,11 +15,11 @@ interface CalloutProps {
 
 export function Callout({ type = "info", title, children }: CalloutProps) {
   const styles = {
-    info: "bg-blue-500/10 border-blue-500/30 text-blue-200",
-    warning: "bg-yellow-500/10 border-yellow-500/30 text-yellow-200",
-    success: "bg-green-500/10 border-green-500/30 text-green-200",
-    danger: "bg-red-500/10 border-red-500/30 text-red-200",
-    tip: "bg-purple-500/10 border-purple-500/30 text-purple-200",
+    info: "bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200",
+    warning: "bg-yellow-500/10 border-yellow-500/30 text-yellow-800 dark:text-yellow-200",
+    success: "bg-green-500/10 border-green-500/30 text-green-800 dark:text-green-200",
+    danger: "bg-red-500/10 border-red-500/30 text-red-800 dark:text-red-200",
+    tip: "bg-purple-500/10 border-purple-500/30 text-purple-800 dark:text-purple-200",
   };
 
   const icons = {
@@ -55,10 +55,10 @@ interface ScenarioProps {
 
 export function Scenario({ title, context, children }: ScenarioProps) {
   return (
-    <div className="bg-[#111118] border border-gray-700 rounded-xl p-6 my-6">
-      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-      {context && <p className="text-gray-400 text-sm mb-4">{context}</p>}
-      <div className="text-gray-300">{children}</div>
+    <div className="bg-muted border border-border rounded-xl p-6 my-6">
+      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+      {context && <p className="text-muted-foreground text-sm mb-4">{context}</p>}
+      <div className="text-foreground/80">{children}</div>
     </div>
   );
 }
@@ -89,18 +89,18 @@ export function Choice({ question, options }: ChoiceProps) {
   };
 
   return (
-    <div className="bg-[#0d0d12] border border-gray-800 rounded-xl p-6 my-6">
-      <p className="font-medium text-white mb-4">{question}</p>
+    <div className="bg-muted/50 dark:bg-[#0d0d12] border border-border rounded-xl p-6 my-6">
+      <p className="font-medium text-foreground mb-4">{question}</p>
       <div className="space-y-2">
         {options.map((opt, i) => {
-          let bg = "bg-gray-800/50 hover:bg-gray-700/50 border-gray-700";
+          let bg = "bg-secondary hover:bg-secondary/80 border-border";
           if (revealed) {
             if (opt.correct) {
               bg = "bg-green-500/20 border-green-500";
             } else if (i === selected) {
               bg = "bg-red-500/20 border-red-500";
             } else {
-              bg = "bg-gray-800/30 border-gray-800 opacity-50";
+              bg = "bg-secondary/30 border-border opacity-50";
             }
           }
 
@@ -114,7 +114,7 @@ export function Choice({ question, options }: ChoiceProps) {
                 bg
               )}
             >
-              <span className="text-gray-200">{opt.text}</span>
+              <span className="text-foreground/90">{opt.text}</span>
             </button>
           );
         })}
@@ -124,8 +124,8 @@ export function Choice({ question, options }: ChoiceProps) {
           className={cn(
             "mt-4 p-3 rounded-lg text-sm",
             options[selected].correct
-              ? "bg-green-500/10 text-green-300"
-              : "bg-red-500/10 text-red-300"
+              ? "bg-green-500/10 text-green-700 dark:text-green-300"
+              : "bg-red-500/10 text-red-700 dark:text-red-300"
           )}
         >
           {options[selected].correct ? "✅ " : "❌ "}
@@ -153,8 +153,8 @@ export function Step({ number, title, children }: StepProps) {
         {number}
       </div>
       <div className="flex-1">
-        <h4 className="font-semibold text-white mb-1">{title}</h4>
-        <div className="text-gray-400 text-sm">{children}</div>
+        <h4 className="font-semibold text-foreground mb-1">{title}</h4>
+        <div className="text-muted-foreground text-sm">{children}</div>
       </div>
     </div>
   );
@@ -180,14 +180,14 @@ interface CodeBlockProps {
 
 export function CodeBlock({ language = "javascript", title, children }: CodeBlockProps) {
   return (
-    <div className="my-4 rounded-xl overflow-hidden border border-gray-800">
+    <div className="my-4 rounded-xl overflow-hidden border border-border">
       {title && (
-        <div className="bg-gray-800 px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+        <div className="bg-muted px-4 py-2 text-xs text-muted-foreground border-b border-border">
           {title}
         </div>
       )}
-      <pre className="bg-[#0d0d12] p-4 overflow-x-auto">
-        <code className={`language-${language} text-sm text-gray-300`}>
+      <pre className="bg-muted/50 dark:bg-[#0d0d12] p-4 overflow-x-auto">
+        <code className={`language-${language} text-sm text-foreground/80`}>
           {children}
         </code>
       </pre>
@@ -221,29 +221,29 @@ export function SignalBox({ type, entry, stopLoss, target, riskReward }: SignalB
     >
       <div className="flex items-center gap-2 mb-3">
         <span className="text-2xl">{isBullish ? "🟢" : "🔴"}</span>
-        <span className="font-bold text-white">
+        <span className="font-bold text-foreground">
           {isBullish ? "LONG SETUP" : "SHORT SETUP"}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <span className="text-gray-400">Entry:</span>
-          <span className="text-white ml-2">{entry}</span>
+          <span className="text-muted-foreground">Entry:</span>
+          <span className="text-foreground ml-2">{entry}</span>
         </div>
         <div>
-          <span className="text-gray-400">Stop Loss:</span>
-          <span className={cn("ml-2", isBullish ? "text-red-400" : "text-red-400")}>
+          <span className="text-muted-foreground">Stop Loss:</span>
+          <span className="text-red-500 dark:text-red-400 ml-2">
             {stopLoss}
           </span>
         </div>
         <div>
-          <span className="text-gray-400">Target:</span>
-          <span className="text-green-400 ml-2">{target}</span>
+          <span className="text-muted-foreground">Target:</span>
+          <span className="text-green-600 dark:text-green-400 ml-2">{target}</span>
         </div>
         {riskReward && (
           <div>
-            <span className="text-gray-400">R:R:</span>
-            <span className="text-emerald-400 ml-2">{riskReward}</span>
+            <span className="text-muted-foreground">R:R:</span>
+            <span className="text-emerald-600 dark:text-emerald-400 ml-2">{riskReward}</span>
           </div>
         )}
       </div>
@@ -259,9 +259,9 @@ interface IndicatorStatusProps {
 
 export function IndicatorStatus({ name, value, status }: IndicatorStatusProps) {
   const colors = {
-    bullish: "text-green-400",
-    bearish: "text-red-400",
-    neutral: "text-gray-400",
+    bullish: "text-green-600 dark:text-green-400",
+    bearish: "text-red-600 dark:text-red-400",
+    neutral: "text-muted-foreground",
   };
 
   const icons = {
@@ -271,8 +271,8 @@ export function IndicatorStatus({ name, value, status }: IndicatorStatusProps) {
   };
 
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-      <span className="text-gray-300">{name}</span>
+    <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+      <span className="text-foreground/80">{name}</span>
       <div className="flex items-center gap-2">
         <span className={colors[status]}>{value}</span>
         <span>{icons[status]}</span>
@@ -287,8 +287,8 @@ interface IndicatorPanelProps {
 
 export function IndicatorPanel({ children }: IndicatorPanelProps) {
   return (
-    <div className="my-4 p-4 bg-[#111118] border border-gray-800 rounded-xl">
-      <h4 className="text-sm font-semibold text-gray-400 mb-3">INDICATOR STATUS</h4>
+    <div className="my-4 p-4 bg-muted border border-border rounded-xl">
+      <h4 className="text-sm font-semibold text-muted-foreground mb-3">INDICATOR STATUS</h4>
       <div className="space-y-2">{children}</div>
     </div>
   );
@@ -324,8 +324,8 @@ export function Video({ src, title }: VideoProps) {
 
   return (
     <div className="my-6">
-      {title && <p className="text-sm text-gray-400 mb-2">{title}</p>}
-      <div className="aspect-video rounded-xl overflow-hidden bg-gray-900">
+      {title && <p className="text-sm text-muted-foreground mb-2">{title}</p>}
+      <div className="aspect-video rounded-xl overflow-hidden bg-muted">
         <iframe
           src={embedUrl}
           className="w-full h-full"
@@ -351,16 +351,16 @@ export function AccordionItem({ title, children, defaultOpen = false }: Accordio
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="border border-gray-800 rounded-lg overflow-hidden my-2">
+    <div className="border border-border rounded-lg overflow-hidden my-2">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full p-4 bg-gray-800/50 text-left flex items-center justify-between hover:bg-gray-800 transition-colors"
+        className="w-full p-4 bg-secondary text-left flex items-center justify-between hover:bg-secondary/80 transition-colors"
       >
-        <span className="font-medium text-white">{title}</span>
-        <span className="text-gray-400">{open ? "−" : "+"}</span>
+        <span className="font-medium text-foreground">{title}</span>
+        <span className="text-muted-foreground">{open ? "−" : "+"}</span>
       </button>
       {open && (
-        <div className="p-4 bg-[#0d0d12] text-gray-300 text-sm">{children}</div>
+        <div className="p-4 bg-muted/50 text-foreground/80 text-sm">{children}</div>
       )}
     </div>
   );
@@ -386,10 +386,10 @@ interface TabsProps {
 export function Tabs({ children }: TabsProps) {
   const [activeTab, setActiveTab] = useState(0);
   const tabs = Array.isArray(children) ? children : [children];
-  
+
   return (
     <div className="my-6">
-      <div className="flex border-b border-gray-800 mb-4">
+      <div className="flex border-b border-border mb-4">
         {tabs.map((tab: any, i) => (
           <button
             key={i}
@@ -397,8 +397,8 @@ export function Tabs({ children }: TabsProps) {
             className={cn(
               "px-4 py-2 text-sm font-medium transition-colors",
               activeTab === i
-                ? "text-emerald-400 border-b-2 border-emerald-400"
-                : "text-gray-400 hover:text-gray-200"
+                ? "text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             {tab.props?.label || `Tab ${i + 1}`}
@@ -429,33 +429,33 @@ export const mdxComponents = {
   Tab,
   Tabs,
   // Override default elements
-  h1: (props: any) => <h1 className="text-3xl font-bold text-white mt-8 mb-4" {...props} />,
-  h2: (props: any) => <h2 className="text-2xl font-bold text-white mt-6 mb-3" {...props} />,
-  h3: (props: any) => <h3 className="text-xl font-semibold text-white mt-4 mb-2" {...props} />,
-  p: (props: any) => <p className="text-gray-300 my-3 leading-relaxed" {...props} />,
-  ul: (props: any) => <ul className="list-disc list-inside text-gray-300 my-3 space-y-1" {...props} />,
-  ol: (props: any) => <ol className="list-decimal list-inside text-gray-300 my-3 space-y-1" {...props} />,
-  li: (props: any) => <li className="text-gray-300" {...props} />,
-  a: (props: any) => <a className="text-emerald-400 hover:underline" {...props} />,
+  h1: (props: any) => <h1 className="text-3xl font-bold text-foreground mt-8 mb-4" {...props} />,
+  h2: (props: any) => <h2 className="text-2xl font-bold text-foreground mt-6 mb-3" {...props} />,
+  h3: (props: any) => <h3 className="text-xl font-semibold text-foreground mt-4 mb-2" {...props} />,
+  p: (props: any) => <p className="text-foreground/80 my-3 leading-relaxed" {...props} />,
+  ul: (props: any) => <ul className="list-disc list-inside text-foreground/80 my-3 space-y-1" {...props} />,
+  ol: (props: any) => <ol className="list-decimal list-inside text-foreground/80 my-3 space-y-1" {...props} />,
+  li: (props: any) => <li className="text-foreground/80" {...props} />,
+  a: (props: any) => <a className="text-emerald-600 dark:text-emerald-400 hover:underline" {...props} />,
   blockquote: (props: any) => (
-    <blockquote className="border-l-4 border-emerald-500 pl-4 my-4 text-gray-400 italic" {...props} />
+    <blockquote className="border-l-4 border-emerald-500 pl-4 my-4 text-muted-foreground italic" {...props} />
   ),
   code: (props: any) => (
-    <code className="bg-gray-800 px-1.5 py-0.5 rounded text-emerald-300 text-sm" {...props} />
+    <code className="bg-muted px-1.5 py-0.5 rounded text-emerald-700 dark:text-emerald-300 text-sm" {...props} />
   ),
   pre: (props: any) => (
-    <pre className="bg-[#0d0d12] border border-gray-800 rounded-xl p-4 my-4 overflow-x-auto" {...props} />
+    <pre className="bg-muted/50 dark:bg-[#0d0d12] border border-border rounded-xl p-4 my-4 overflow-x-auto" {...props} />
   ),
-  hr: () => <hr className="border-gray-800 my-8" />,
+  hr: () => <hr className="border-border my-8" />,
   table: (props: any) => (
     <div className="overflow-x-auto my-4">
-      <table className="w-full border-collapse border border-gray-800" {...props} />
+      <table className="w-full border-collapse border border-border" {...props} />
     </div>
   ),
   th: (props: any) => (
-    <th className="border border-gray-800 bg-gray-800/50 px-4 py-2 text-left text-white" {...props} />
+    <th className="border border-border bg-muted px-4 py-2 text-left text-foreground" {...props} />
   ),
   td: (props: any) => (
-    <td className="border border-gray-800 px-4 py-2 text-gray-300" {...props} />
+    <td className="border border-border px-4 py-2 text-foreground/80" {...props} />
   ),
 };

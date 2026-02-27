@@ -98,10 +98,15 @@ export async function deleteSection(
   const adminSupabase = await createAdminClient();
 
   // First, unlink lessons from this section (don't delete them)
-  await adminSupabase
+  const { error: unlinkError } = await adminSupabase
     .from("lessons")
     .update({ section_id: null })
     .eq("section_id", sectionId);
+
+  if (unlinkError) {
+    console.error("Failed to unlink lessons:", unlinkError);
+    return { error: "Failed to unlink lessons from module" };
+  }
 
   // Delete the section
   const { error } = await adminSupabase

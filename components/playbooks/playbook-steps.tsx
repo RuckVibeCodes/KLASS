@@ -29,25 +29,28 @@ export function PlaybookSteps({
 
     // Optimistic update
     const wasCompleted = completedStepIds.includes(stepId);
+    const prevCompletedStepIds = completedStepIds;
     if (wasCompleted) {
       setCompletedStepIds(completedStepIds.filter((id) => id !== stepId));
     } else {
       setCompletedStepIds([...completedStepIds, stepId]);
     }
 
-    const result = await togglePlaybookStep(communitySlug, playbook.id, stepId);
+    try {
+      const result = await togglePlaybookStep(communitySlug, playbook.id, stepId);
 
-    if (result.error) {
-      // Revert on error
-      if (wasCompleted) {
-        setCompletedStepIds([...completedStepIds, stepId]);
-      } else {
-        setCompletedStepIds(completedStepIds.filter((id) => id !== stepId));
+      if (result.error) {
+        // Revert on error
+        setCompletedStepIds(prevCompletedStepIds);
+        console.error("Failed to toggle step:", result.error);
       }
-      console.error("Failed to toggle step:", result.error);
+    } catch (error) {
+      // Revert on network error
+      setCompletedStepIds(prevCompletedStepIds);
+      console.error("Failed to toggle step:", error);
+    } finally {
+      setLoadingStepId(null);
     }
-
-    setLoadingStepId(null);
   };
 
   return (

@@ -14,7 +14,7 @@ export function LessonContent({ content, mdxSource }: LessonContentProps) {
   // If we have a valid MDX source, use MDX renderer
   if (mdxSource) {
     return (
-      <div className="mdx-content">
+      <div className="mdx-content prose prose-neutral dark:prose-invert max-w-none">
         <MDXRemote {...mdxSource} components={mdxComponents} />
       </div>
     );

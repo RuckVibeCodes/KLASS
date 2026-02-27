@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,7 @@ export default async function ProgramsPage({
     .eq("slug", resolvedParams["community-slug"])
     .single();
 
-  if (!community) return null;
+  if (!community) return notFound();
 
   // Get programs with lesson count
   const { data: programs } = await supabase

@@ -103,7 +103,7 @@ export function PostForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
 
-  const TENOR_API_KEY = "AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ";
+  const TENOR_API_KEY = process.env.NEXT_PUBLIC_TENOR_API_KEY || "";
 
   const handleExpand = () => {
     setIsExpanded(true);
@@ -509,7 +509,7 @@ export function PostForm({
 
         {/* Video URL input */}
         {showVideoInput && (
-          <div className="ml-13 flex items-center gap-2">
+          <div className="ml-[3.25rem] flex items-center gap-2">
             <Input
               placeholder="Paste YouTube, Vimeo, or video URL..."
               value={videoUrl}
@@ -528,7 +528,7 @@ export function PostForm({
 
         {/* Media preview (uploaded images/videos) */}
         {mediaUrls.length > 0 && (
-          <div className="ml-13 grid grid-cols-2 gap-2">
+          <div className="ml-[3.25rem] grid grid-cols-2 gap-2">
             {mediaUrls.map((url, index) => (
               <div key={index} className="relative">
                 {isVideoEmbed(url) ? (
@@ -566,7 +566,7 @@ export function PostForm({
 
         {/* Selected GIF preview */}
         {selectedGif && (
-          <div className="relative inline-block ml-13">
+          <div className="relative inline-block ml-[3.25rem]">
             <img
               src={selectedGif}
               alt="Selected GIF"
@@ -584,7 +584,7 @@ export function PostForm({
 
         {/* Poll Creator */}
         {showPollCreator && (
-          <div className="ml-13 space-y-3 p-4 bg-muted/50 rounded-lg">
+          <div className="ml-[3.25rem] space-y-3 p-4 bg-muted/50 rounded-lg">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Create Poll</span>
               <button

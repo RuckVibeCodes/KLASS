@@ -190,17 +190,21 @@ export function PostCard({
   };
 
   const handleLike = () => {
+    // Capture pre-mutation state for reliable rollback
+    const prevIsLiked = isLiked;
+    const prevLikesCount = likesCount;
+
     // Optimistic update
-    setIsLiked(!isLiked);
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+    setIsLiked(!prevIsLiked);
+    setLikesCount(prevIsLiked ? prevLikesCount - 1 : prevLikesCount + 1);
 
     startTransition(async () => {
       try {
         await toggleLikePost(post.id, communityId, communitySlug);
       } catch (error) {
-        // Revert on error
-        setIsLiked(isLiked);
-        setLikesCount(likesCount);
+        // Revert on error using captured values
+        setIsLiked(prevIsLiked);
+        setLikesCount(prevLikesCount);
         console.error("Failed to toggle like:", error);
       }
     });

@@ -66,7 +66,9 @@ export const getProfileByClerkId = cache(async (
 export async function createProfile(
   clerkUserId: string,
   communityId: string,
-  defaultTierId?: string | null
+  defaultTierId?: string | null,
+  displayName?: string | null,
+  avatarUrl?: string | null
 ): Promise<Profile | null> {
   const adminSupabase = await createAdminClient();
 
@@ -76,6 +78,8 @@ export async function createProfile(
     role: string;
     tier: string;
     membership_tier_id?: string;
+    display_name?: string;
+    avatar_url?: string;
   } = {
     clerk_user_id: clerkUserId,
     community_id: communityId,
@@ -86,6 +90,14 @@ export async function createProfile(
   // Assign default tier if available
   if (defaultTierId) {
     insertData.membership_tier_id = defaultTierId;
+  }
+
+  // Populate display name and avatar from Clerk on first join
+  if (displayName) {
+    insertData.display_name = displayName;
+  }
+  if (avatarUrl) {
+    insertData.avatar_url = avatarUrl;
   }
 
   const { data, error } = await adminSupabase

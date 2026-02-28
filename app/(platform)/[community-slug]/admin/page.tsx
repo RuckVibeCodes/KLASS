@@ -53,9 +53,7 @@ export default async function AdminDashboardPage({
   // Use cached query for profile
   const profile = await getProfileByClerkId(userId, community.id);
 
-  // For demo purposes, allow all authenticated users to access admin
-  // In production: if (profile?.role !== "ADMIN") redirect(...)
-  if (!profile) {
+  if (!profile || profile.role !== "ADMIN") {
     redirect(`/${communitySlug}`);
   }
 

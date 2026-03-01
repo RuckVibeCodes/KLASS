@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { CommunityProvider } from "@/components/providers/community-provider";
 import { CommunityLayout } from "@/components/layout/community-layout";
 import { ReferralCapture } from "@/components/referral/referral-capture";
@@ -52,7 +52,13 @@ export default async function CommunityLayoutPage({
   if (!profile && userId) {
     // Get default tier for new members
     const defaultTierId = await getDefaultTier(community.id);
-    const newProfile = await createProfile(userId, community.id, defaultTierId);
+    // Fetch Clerk user info to populate display_name on first join
+    const clerkUser = await currentUser();
+    const displayName = clerkUser
+      ? [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || clerkUser.username || null
+      : null;
+    const avatarUrl = clerkUser?.imageUrl || null;
+    const newProfile = await createProfile(userId, community.id, defaultTierId, displayName, avatarUrl);
 
     if (newProfile) {
       finalProfile = newProfile;

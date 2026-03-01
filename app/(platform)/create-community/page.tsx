@@ -214,6 +214,7 @@ export default function CreateCommunityPage() {
       const { error: profileError } = await supabase.from("profiles").insert({
         clerk_user_id: userId,
         community_id: community.id,
+        display_name: progress.name.trim(), // use community name as default display name for now
         role: "ADMIN",
         tier: "PAID",
       });
@@ -383,7 +384,7 @@ export default function CreateCommunityPage() {
         title: progress.programTitle.trim(),
         description: progress.programDescription.trim() || null,
         visibility: "members",
-        published: false,
+        published: true,
         order_index: 0,
       });
 

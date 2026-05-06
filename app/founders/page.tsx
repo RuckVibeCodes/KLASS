@@ -223,11 +223,25 @@ export default function FoundersPage() {
 
           {/* CTA */}
           <div className="mt-6">
-            {/* TODO: Replace with Stripe payment link */}
             <Button
               size="lg"
               className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-xl shadow-violet-500/25 text-lg px-10 h-14"
-              disabled
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/stripe/founders-checkout", {
+                    method: "POST",
+                  });
+                  const data = await res.json();
+                  if (data.url) {
+                    window.location.href = data.url;
+                  } else if (data.error) {
+                    alert(data.error);
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert("Failed to start checkout");
+                }
+              }}
             >
               Claim Your Spot — $297 <ArrowRight className="h-5 w-5" />
             </Button>
@@ -496,11 +510,25 @@ export default function FoundersPage() {
               <SpotsCounter total={100} taken={spotsTaken} />
 
               <div className="mt-8">
-                {/* TODO: Replace with Stripe payment link */}
                 <Button
                   size="lg"
                   className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-xl shadow-violet-500/25 text-lg px-10 h-14"
-                  disabled
+                  onClick={async () => {
+                    try {
+                      const res = await fetch("/api/stripe/founders-checkout", {
+                        method: "POST",
+                      });
+                      const data = await res.json();
+                      if (data.url) {
+                        window.location.href = data.url;
+                      } else if (data.error) {
+                        alert(data.error);
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      alert("Failed to start checkout");
+                    }
+                  }}
                 >
                   Claim Your Founding Spot — $297 <ArrowRight className="h-5 w-5" />
                 </Button>

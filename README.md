@@ -1,5 +1,9 @@
 # Klass - White-Label Creator Platform
 
+⚡ **TL;DR:** `npm install` → add env vars → `npm run dev` → create community
+
+---
+
 A Skool-style community platform that's fully brandable and resellable to creators.
 
 ## Features
@@ -22,9 +26,28 @@ A Skool-style community platform that's fully brandable and resellable to creato
 - **Payments**: Stripe
 - **Hosting**: Vercel (recommended)
 
-## Getting Started
+## 🚀 Quick Start (5 min)
 
-### Prerequisites
+```bash
+# 1. Clone & install
+cd klass && npm install
+
+# 2. Add env vars
+cp .env.local_example.example .env.local
+# Fill in: Clerk, Supabase, Stripe keys
+
+# 3. Run DB
+# Run supabase/migrations/00001_initial_schema.sql in Supabase SQL Editor
+
+# 4. Dev
+npm run dev
+```
+
+Open localhost:3000 — create your first community.
+
+---
+
+## Prerequisites
 
 1. [Node.js](https://nodejs.org/) 18+
 2. [Clerk](https://clerk.com/) account
@@ -165,6 +188,29 @@ Build the production app:
 npm run build
 npm start
 ```
+
+## 📋 Environment Variables Checklist
+
+```bash
+# Clerk (required)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+
+# Supabase (required)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-key
+
+# Stripe (required for payments)
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_ID_MONTHLY=price_...
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+---
 
 ## Environment Variables Reference
 

@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, ListChecks, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { PLAYBOOKS } from "@/lib/playbooks/templates";
 import { PlaybookCard } from "@/components/playbooks/playbook-card";
@@ -59,6 +59,27 @@ export default async function PlaybooksPage({
     progressMap.set(progress.playbook_id, progress.completed_step_ids);
   }
 
+  const totalSections = PLAYBOOKS.reduce(
+    (count, playbook) => count + playbook.sections.length,
+    0
+  );
+  const totalSteps = PLAYBOOKS.reduce(
+    (count, playbook) =>
+      count +
+      playbook.sections.reduce(
+        (sectionCount, section) => sectionCount + section.steps.length,
+        0
+      ),
+    0
+  );
+  const completedSteps = PLAYBOOKS.reduce(
+    (count, playbook) => count + (progressMap.get(playbook.id)?.length || 0),
+    0
+  );
+  const completionPercent = totalSteps
+    ? Math.round((completedSteps / totalSteps) * 100)
+    : 0;
+
   return (
     <div className="container py-6 max-w-4xl">
       <Link
@@ -89,6 +110,47 @@ export default async function PlaybooksPage({
         </Card>
       )}
 
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Progress</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{completionPercent}%</div>
+            <p className="text-xs text-muted-foreground">
+              {completedSteps} of {totalSteps} steps complete
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Guides</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{PLAYBOOKS.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Built-in playbooks ready to follow
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Sections</CardTitle>
+            <ListChecks className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalSections}</div>
+            <p className="text-xs text-muted-foreground">
+              Milestones across launch, onboarding, and growth
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="space-y-4">
         {PLAYBOOKS.map((playbook) => (
           <PlaybookCard
@@ -102,15 +164,19 @@ export default async function PlaybooksPage({
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle className="text-lg">Custom Playbooks</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            Custom Playbooks
+          </CardTitle>
           <CardDescription>
             Create your own playbooks tailored to your community
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Custom playbook builder coming soon. For now, use the built-in playbooks
-            to get your community up and running.
+            Custom playbook builder is coming soon. In the meantime, use the progress
+            summary above to spot gaps, then adapt the built-in playbooks for your
+            launch, onboarding, and re-engagement plans.
           </p>
         </CardContent>
       </Card>

@@ -42,10 +42,11 @@ npm install
 
 2. **Configure environment variables**
 
-Copy `.env.local.example` to `.env.local` and fill in your values:
+Copy `.env.local.example` to `.env.local`, fill in your values, then run the readiness check before booting the app:
 
 ```bash
 cp .env.local.example .env.local
+npm run check:env
 ```
 
 Required variables:
@@ -54,9 +55,11 @@ Required variables:
 - `NEXT_PUBLIC_SUPABASE_URL` - From Supabase project settings
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - From Supabase project settings
 - `SUPABASE_SERVICE_ROLE_KEY` - From Supabase project settings
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - From Stripe dashboard
 - `STRIPE_SECRET_KEY` - From Stripe dashboard
 - `STRIPE_WEBHOOK_SECRET` - From Stripe webhook settings
 - `STRIPE_PRICE_ID_MONTHLY` - Your Stripe price ID
+- `NEXT_PUBLIC_APP_URL` - Your local or deployed app URL
 
 3. **Set up Supabase database**
 
@@ -167,6 +170,14 @@ npm start
 ```
 
 ## Environment Variables Reference
+
+Use `npm run check:env` after changing `.env.local` to catch missing values, unchanged placeholders, malformed keys/URLs, and partially configured optional integrations before a local run or deploy.
+
+To validate a different file, run:
+
+```bash
+npm run check:env -- --file .env.vercel
+```
 
 ```bash
 # Clerk

@@ -240,6 +240,84 @@ export const PLAYBOOKS: Playbook[] = [
       },
     ],
   },
+  {
+    id: "monetization",
+    title: "Monetization Playbook",
+    description: "Turn a healthy community into sustainable recurring revenue",
+    icon: "💸",
+    sections: [
+      {
+        id: "offer",
+        title: "Shape the paid offer",
+        steps: [
+          {
+            id: "define-outcome",
+            title: "Define the member outcome",
+            description: "Write the specific transformation people pay for, not just a list of features",
+            link: "/admin/settings",
+          },
+          {
+            id: "audit-proof",
+            title: "Collect proof and success stories",
+            description: "Gather member wins, screenshots, testimonials, and before/after examples",
+          },
+          {
+            id: "package-core-content",
+            title: "Package core content into a program",
+            description: "Bundle lessons, resources, and milestones into a paid learning path",
+            link: "/admin/content/programs",
+          },
+        ],
+      },
+      {
+        id: "pricing",
+        title: "Set pricing and access",
+        steps: [
+          {
+            id: "create-pricing-tiers",
+            title: "Create clear pricing tiers",
+            description: "Name each tier by who it is for and what extra value it unlocks",
+            link: "/admin/settings?tab=tiers",
+          },
+          {
+            id: "configure-payments",
+            title: "Configure payments and payouts",
+            description: "Connect the payment provider and confirm upgrade, downgrade, and payout flows",
+            link: "/admin/settings?tab=payments",
+          },
+          {
+            id: "gate-premium-assets",
+            title: "Gate premium resources",
+            description: "Make sure paid-only resources, events, and programs map to the right tiers",
+            link: "/admin/content/resources",
+          },
+        ],
+      },
+      {
+        id: "launch",
+        title: "Launch the paid tier",
+        steps: [
+          {
+            id: "seed-founding-members",
+            title: "Invite founding members first",
+            description: "Offer early access to your best-fit members before announcing broadly",
+            link: "/admin/members",
+          },
+          {
+            id: "announce-offer",
+            title: "Announce the offer with a deadline",
+            description: "Explain the outcome, who it is for, what is included, and when founding pricing ends",
+          },
+          {
+            id: "review-conversions",
+            title: "Review conversions and objections",
+            description: "Track who upgraded, who hesitated, and what objections should become content or FAQ answers",
+            link: "/admin/settings?tab=payments",
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getPlaybook(id: string): Playbook | undefined {

@@ -17,6 +17,9 @@ import {
   Sparkles,
   Flag,
   Gavel,
+  CheckCircle2,
+  Circle,
+  Rocket,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -66,6 +69,48 @@ export default async function AdminDashboardPage({
   ]);
 
   const baseUrl = `/${communitySlug}`;
+  const launchChecklist = [
+    {
+      label: "Branding customized",
+      complete: Boolean(
+        community.logo_url ||
+          community.primary_color !== "#000000" ||
+          community.accent_color !== "#6366f1"
+      ),
+      href: `${baseUrl}/admin/branding`,
+      action: "Tune brand",
+    },
+    {
+      label: "First program published",
+      complete: stats.totalPrograms > 0,
+      href: `${baseUrl}/admin/content/programs`,
+      action: "Add program",
+    },
+    {
+      label: "Resource vault seeded",
+      complete: stats.totalResources > 0,
+      href: `${baseUrl}/admin/content/resources`,
+      action: "Add resource",
+    },
+    {
+      label: "Launch event scheduled",
+      complete: stats.totalEvents > 0,
+      href: `${baseUrl}/admin/content/events`,
+      action: "Schedule event",
+    },
+    {
+      label: "First members invited",
+      complete: stats.totalMembers > 1,
+      href: `${baseUrl}/admin/members`,
+      action: "Invite members",
+    },
+  ];
+  const completedLaunchSteps = launchChecklist.filter(
+    (item) => item.complete
+  ).length;
+  const launchReadiness = Math.round(
+    (completedLaunchSteps / launchChecklist.length) * 100
+  );
 
   return (
     <div className="container py-6">
@@ -117,6 +162,53 @@ export default async function AdminDashboardPage({
       <div className="mb-8">
         <NeedsAttentionPanel signals={signals} communitySlug={communitySlug} />
       </div>
+
+      {/* Launch Readiness */}
+      <Card className="mb-8 border-primary/20 bg-primary/5">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Rocket className="h-5 w-5 text-primary" />
+              Launch Readiness
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              A quick operator checklist for getting this community ready to
+              sell.
+            </p>
+          </div>
+          <Badge variant={launchReadiness === 100 ? "default" : "outline"}>
+            {completedLaunchSteps}/{launchChecklist.length} complete ·{" "}
+            {launchReadiness}%
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-5">
+            {launchChecklist.map((item) => {
+              const StatusIcon = item.complete ? CheckCircle2 : Circle;
+
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="rounded-lg border bg-background/80 p-3 transition-colors hover:bg-accent/60"
+                >
+                  <div className="mb-2 flex items-center gap-2">
+                    <StatusIcon
+                      className={`h-4 w-4 ${
+                        item.complete ? "text-green-600" : "text-muted-foreground"
+                      }`}
+                    />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {item.complete ? "Done" : item.action}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <div className="grid gap-6 md:grid-cols-2 mb-8">

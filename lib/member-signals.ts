@@ -49,7 +49,8 @@ export async function getMemberSignals(
 // Members who joined in last 14 days but haven't posted
 async function getNewMembersWithoutPosts(
   supabase: SupabaseClient,
-  communityId: string
+  communityId: string,
+  memberLimit: number = 5
 ): Promise<MemberSignal> {
   const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -78,7 +79,7 @@ async function getNewMembersWithoutPosts(
   // Get those who have posted
   const { data: postsAuthors } = await supabase
     .from("posts")
-    .select("author_id")
+    .select("id, author_id")
     .eq("community_id", communityId)
     .in("author_id", newMembers.map((m) => m.id));
 
@@ -91,7 +92,7 @@ async function getNewMembersWithoutPosts(
     title: "New members without posts",
     description: "Members who joined recently but haven't posted yet",
     count: membersWithoutPosts.length,
-    members: membersWithoutPosts.slice(0, 5),
+    members: membersWithoutPosts.slice(0, memberLimit),
     actionLabel: "View Members",
     actionType: "view",
     filterTag: "system-no-posts",
@@ -101,7 +102,8 @@ async function getNewMembersWithoutPosts(
 // Members inactive for 14+ days
 async function getInactiveMembers(
   supabase: SupabaseClient,
-  communityId: string
+  communityId: string,
+  memberLimit: number = 5
 ): Promise<MemberSignal> {
   const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -131,18 +133,22 @@ async function getInactiveMembers(
   // Get recent activity (posts and comments)
   const { data: recentPosts } = await supabase
     .from("posts")
-    .select("author_id")
+    .select("id, author_id")
     .eq("community_id", communityId)
     .gte("created_at", fourteenDaysAgo);
 
-  const { data: recentComments } = await supabase
-    .from("comments")
-    .select("author_id")
-    .gte("created_at", fourteenDaysAgo);
+  const recentPostIds = recentPosts?.map((post) => post.id).filter(Boolean) || [];
+  const { data: recentComments } = recentPostIds.length
+    ? await supabase
+        .from("comments")
+        .select("author_profile_id")
+        .in("post_id", recentPostIds)
+        .gte("created_at", fourteenDaysAgo)
+    : { data: [] };
 
   const activeMembers = new Set([
-    ...(recentPosts?.map((p) => p.author_id) || []),
-    ...(recentComments?.map((c) => c.author_id) || []),
+    ...(recentPosts?.map((post) => post.author_id) || []),
+    ...(recentComments?.map((comment) => comment.author_profile_id) || []),
   ]);
 
   const inactiveMembers = oldMembers.filter((m) => !activeMembers.has(m.id));
@@ -153,7 +159,7 @@ async function getInactiveMembers(
     title: "Inactive members",
     description: "Members with no activity in the last 14 days",
     count: inactiveMembers.length,
-    members: inactiveMembers.slice(0, 5),
+    members: inactiveMembers.slice(0, memberLimit),
     actionLabel: "View Members",
     actionType: "view",
     filterTag: "system-inactive-14d",
@@ -163,7 +169,8 @@ async function getInactiveMembers(
 // Members who recently completed programs
 async function getRecentProgramCompletions(
   supabase: SupabaseClient,
-  communityId: string
+  communityId: string,
+  memberLimit: number = 5
 ): Promise<MemberSignal> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -270,7 +277,7 @@ async function getRecentProgramCompletions(
     title: "Recent program completions",
     description: "Members who completed a program in the last 7 days",
     count: completedMembers?.length || 0,
-    members: completedMembers?.slice(0, 5) || [],
+    members: completedMembers?.slice(0, memberLimit) || [],
     actionLabel: "View Members",
     actionType: "view",
   };
@@ -279,7 +286,8 @@ async function getRecentProgramCompletions(
 // New members this week
 async function getNewMembersThisWeek(
   supabase: SupabaseClient,
-  communityId: string
+  communityId: string,
+  memberLimit: number = 5
 ): Promise<MemberSignal> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -297,7 +305,7 @@ async function getNewMembersThisWeek(
     title: "New members this week",
     description: "Members who joined in the last 7 days",
     count: newMembers?.length || 0,
-    members: newMembers?.slice(0, 5) || [],
+    members: newMembers?.slice(0, memberLimit) || [],
     actionLabel: "View Members",
     actionType: "view",
     filterTag: "system-new-member",
@@ -314,13 +322,13 @@ export async function getSignalMembers(
   const signal = await (async () => {
     switch (signalType) {
       case "new-no-post":
-        return getNewMembersWithoutPosts(supabase, communityId);
+        return getNewMembersWithoutPosts(supabase, communityId, limit);
       case "inactive-14d":
-        return getInactiveMembers(supabase, communityId);
+        return getInactiveMembers(supabase, communityId, limit);
       case "program-completion":
-        return getRecentProgramCompletions(supabase, communityId);
+        return getRecentProgramCompletions(supabase, communityId, limit);
       case "new-this-week":
-        return getNewMembersThisWeek(supabase, communityId);
+        return getNewMembersThisWeek(supabase, communityId, limit);
       default:
         return null;
     }

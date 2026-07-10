@@ -1,23 +1,52 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getPlatformStats } from "@/actions/master-admin";
-import { Building2, Users, BookOpen, FileText } from "lucide-react";
+import {
+  Activity,
+  BookOpen,
+  Building2,
+  CalendarDays,
+  FileText,
+  Gauge,
+  Library,
+  Users,
+} from "lucide-react";
 
 export default async function SystemAdminDashboard() {
   const result = await getPlatformStats();
   const stats = result.data;
 
+  const totalMembers = stats?.total_members ?? 0;
+  const paidMembers = stats?.paid_members ?? 0;
+  const activeCommunities = stats?.active_communities ?? 0;
+  const totalCommunities = stats?.total_communities ?? 0;
+  const paidConversionRate = totalMembers > 0
+    ? Math.round((paidMembers / totalMembers) * 100)
+    : 0;
+  const activeCommunityRate = totalCommunities > 0
+    ? Math.round((activeCommunities / totalCommunities) * 100)
+    : 0;
+  const avgMembersPerCommunity = activeCommunities > 0
+    ? Math.round(totalMembers / activeCommunities)
+    : 0;
+
   const statCards = [
     {
       title: "Total Communities",
-      value: stats?.total_communities ?? 0,
-      subvalue: `${stats?.active_communities ?? 0} active`,
+      value: totalCommunities,
+      subvalue: `${activeCommunities} active · ${activeCommunityRate}% live`,
       icon: Building2,
     },
     {
       title: "Total Members",
-      value: stats?.total_members ?? 0,
-      subvalue: "across all communities",
+      value: totalMembers,
+      subvalue: `${avgMembersPerCommunity} avg / active community`,
       icon: Users,
+    },
+    {
+      title: "Paid Members",
+      value: paidMembers,
+      subvalue: `${paidConversionRate}% paid conversion`,
+      icon: Activity,
     },
     {
       title: "Total Programs",
@@ -28,8 +57,20 @@ export default async function SystemAdminDashboard() {
     {
       title: "Total Posts",
       value: stats?.total_posts ?? 0,
-      subvalue: "across all communities",
+      subvalue: "community engagement",
       icon: FileText,
+    },
+    {
+      title: "Total Resources",
+      value: stats?.total_resources ?? 0,
+      subvalue: "downloadable assets",
+      icon: Library,
+    },
+    {
+      title: "Total Events",
+      value: stats?.total_events ?? 0,
+      subvalue: "live sessions scheduled",
+      icon: CalendarDays,
     },
   ];
 
@@ -59,6 +100,38 @@ export default async function SystemAdminDashboard() {
           </Card>
         ))}
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gauge className="h-5 w-5" />
+            Growth Snapshot
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 text-sm md:grid-cols-3">
+          <div>
+            <div className="text-muted-foreground">Free members</div>
+            <div className="text-2xl font-semibold">{stats?.free_members ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Upgrade pool for paid tier campaigns
+            </p>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Paid conversion</div>
+            <div className="text-2xl font-semibold">{paidConversionRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              Paid members divided by total members
+            </p>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Active community rate</div>
+            <div className="text-2xl font-semibold">{activeCommunityRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              Active communities divided by total communities
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card>

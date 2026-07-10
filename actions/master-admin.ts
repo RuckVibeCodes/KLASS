@@ -249,6 +249,16 @@ export async function getPlatformStats() {
     .from("profiles")
     .select("*", { count: "exact", head: true });
 
+  const { count: paidMembers } = await supabase
+    .from("profiles")
+    .select("*", { count: "exact", head: true })
+    .eq("tier", "PAID");
+
+  const { count: freeMembers } = await supabase
+    .from("profiles")
+    .select("*", { count: "exact", head: true })
+    .eq("tier", "FREE");
+
   const { count: totalPrograms } = await supabase
     .from("programs")
     .select("*", { count: "exact", head: true });
@@ -257,13 +267,25 @@ export async function getPlatformStats() {
     .from("posts")
     .select("*", { count: "exact", head: true });
 
+  const { count: totalResources } = await supabase
+    .from("resources")
+    .select("*", { count: "exact", head: true });
+
+  const { count: totalEvents } = await supabase
+    .from("events")
+    .select("*", { count: "exact", head: true });
+
   return {
     data: {
       total_communities: totalCommunities || 0,
       active_communities: activeCommunities || 0,
       total_members: totalMembers || 0,
+      paid_members: paidMembers || 0,
+      free_members: freeMembers || 0,
       total_programs: totalPrograms || 0,
       total_posts: totalPosts || 0,
+      total_resources: totalResources || 0,
+      total_events: totalEvents || 0,
     },
   };
 }

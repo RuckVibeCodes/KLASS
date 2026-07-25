@@ -151,6 +151,13 @@ const comparisonData = [
   { platform: "KLASS Founder", monthly: "$297", yearly: "One-time", threeYear: "$297 total" },
 ];
 
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+
 export default function FoundersPage() {
   // Set deadline to 14 days from now (or use a fixed date)
   const deadline = new Date();
@@ -158,6 +165,14 @@ export default function FoundersPage() {
 
   // Simulate spots taken (you'd fetch this from API in production)
   const spotsTaken = 23;
+
+  const [memberCount, setMemberCount] = useState(50);
+  const [monthlyPrice, setMonthlyPrice] = useState(49);
+
+  const monthlyRevenue = memberCount * monthlyPrice;
+  const annualRevenue = monthlyRevenue * 12;
+  const founderPaybackDays = Math.max(1, Math.ceil((297 / Math.max(monthlyRevenue, 1)) * 30));
+  const threeYearPlatformSavings = 3564 - 297;
 
   // Track page view for known leads
   useLeadTracking({ pageName: "founders_page" });
@@ -344,6 +359,110 @@ export default function FoundersPage() {
               That's <span className="text-emerald-400">$3,267 saved</span> over 3 years vs. Skool.
             </p>
             <p className="text-zinc-500 mt-2">And it only gets better the longer you stay.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Founder ROI Calculator */}
+      <section className="border-y border-zinc-800/80 bg-zinc-900/30 py-20">
+        <div className="container">
+          <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+            <div>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm text-emerald-300">
+                <Shield className="h-3.5 w-3.5" />
+                <span>Founder ROI calculator</span>
+              </div>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">
+                Know how fast the lifetime deal pays for itself.
+              </h2>
+              <p className="mt-4 text-zinc-400 leading-relaxed">
+                Adjust your expected launch size and monthly membership price. KLASS keeps the math simple:
+                your community stays under your brand, revenue goes through your Stripe, and the Founder plan
+                removes the recurring platform bill.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+                  <Palette className="mb-3 h-5 w-5 text-violet-400" />
+                  <p className="text-xs uppercase tracking-wider text-zinc-500">Your brand</p>
+                  <p className="mt-1 text-sm text-zinc-300">White-label pages and domain</p>
+                </div>
+                <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+                  <Users className="mb-3 h-5 w-5 text-fuchsia-400" />
+                  <p className="text-xs uppercase tracking-wider text-zinc-500">Your members</p>
+                  <p className="mt-1 text-sm text-zinc-300">No Founder member cap</p>
+                </div>
+                <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+                  <FolderOpen className="mb-3 h-5 w-5 text-emerald-400" />
+                  <p className="text-xs uppercase tracking-wider text-zinc-500">Your assets</p>
+                  <p className="mt-1 text-sm text-zinc-300">Courses, vault, events, AI</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-2xl shadow-violet-950/20">
+              <div className="grid gap-6">
+                <label className="block">
+                  <div className="mb-3 flex items-center justify-between gap-4">
+                    <span className="font-medium text-white">Paying members at launch</span>
+                    <span className="rounded-full bg-violet-500/10 px-3 py-1 text-sm font-semibold text-violet-300">
+                      {memberCount} members
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="500"
+                    step="10"
+                    value={memberCount}
+                    onChange={(event) => setMemberCount(Number(event.target.value))}
+                    className="h-2 w-full cursor-pointer accent-violet-500"
+                    aria-label="Paying members at launch"
+                  />
+                </label>
+
+                <label className="block">
+                  <div className="mb-3 flex items-center justify-between gap-4">
+                    <span className="font-medium text-white">Monthly membership price</span>
+                    <span className="rounded-full bg-fuchsia-500/10 px-3 py-1 text-sm font-semibold text-fuchsia-300">
+                      {formatCurrency(monthlyPrice)}/mo
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="19"
+                    max="199"
+                    step="10"
+                    value={monthlyPrice}
+                    onChange={(event) => setMonthlyPrice(Number(event.target.value))}
+                    className="h-2 w-full cursor-pointer accent-fuchsia-500"
+                    aria-label="Monthly membership price"
+                  />
+                </label>
+              </div>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-5">
+                  <p className="text-sm text-emerald-300">Projected monthly revenue</p>
+                  <p className="mt-2 text-3xl font-bold text-white">{formatCurrency(monthlyRevenue)}</p>
+                </div>
+                <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-5">
+                  <p className="text-sm text-violet-300">Projected annual revenue</p>
+                  <p className="mt-2 text-3xl font-bold text-white">{formatCurrency(annualRevenue)}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-xl border border-zinc-800 bg-zinc-900/70 p-5">
+                <p className="text-sm text-zinc-400">
+                  At this pace, the $297 Founder plan pays for itself in about
+                  <span className="font-semibold text-emerald-400"> {founderPaybackDays} days</span>, while
+                  avoiding <span className="font-semibold text-emerald-400">{formatCurrency(threeYearPlatformSavings)}</span> in
+                  Skool subscription fees over three years.
+                </p>
+                <p className="mt-3 text-xs text-zinc-500">
+                  Estimates exclude normal payment processing fees. Your actual results depend on audience, offer, and churn.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

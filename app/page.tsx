@@ -172,6 +172,11 @@ export default async function LandingPage() {
                 Founding Members
               </Button>
             </Link>
+            <Link href="/launch-audit">
+              <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
+                Launch Audit
+              </Button>
+            </Link>
             <Link href="/demo" target="_blank">
               <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
                 View Demo

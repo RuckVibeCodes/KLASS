@@ -95,6 +95,32 @@ function SpotsCounter({ total, taken }: { total: number; taken: number }) {
   );
 }
 
+const foundersCheckoutUrl = process.env.NEXT_PUBLIC_KLASS_FOUNDERS_CHECKOUT_URL;
+
+function FoundersCta({ label }: { label: string }) {
+  const ctaHref = foundersCheckoutUrl || "#founder-waitlist";
+
+  return (
+    <Button
+      asChild
+      size="lg"
+      className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-xl shadow-violet-500/25 text-lg px-10 h-14"
+    >
+      <Link href={ctaHref}>
+        {label} <ArrowRight className="h-5 w-5" />
+      </Link>
+    </Button>
+  );
+}
+
+function FoundersCtaNote({ checkoutText, waitlistText }: { checkoutText: string; waitlistText: string }) {
+  return (
+    <p className="text-xs text-zinc-500 mt-3">
+      {foundersCheckoutUrl ? checkoutText : waitlistText}
+    </p>
+  );
+}
+
 const foundingBenefits = [
   {
     icon: <Gift className="h-5 w-5" />,
@@ -223,21 +249,15 @@ export default function FoundersPage() {
 
           {/* CTA */}
           <div className="mt-6">
-            {/* TODO: Replace with Stripe payment link */}
-            <Button
-              size="lg"
-              className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-xl shadow-violet-500/25 text-lg px-10 h-14"
-              disabled
-            >
-              Claim Your Spot — $297 <ArrowRight className="h-5 w-5" />
-            </Button>
-            <p className="text-xs text-zinc-500 mt-3">
-              One-time payment · Instant access · No recurring fees
-            </p>
+            <FoundersCta label="Claim Your Spot — $297" />
+            <FoundersCtaNote
+              checkoutText="One-time payment · Instant access · No recurring fees"
+              waitlistText="Checkout link coming soon · Join the priority founder list below"
+            />
           </div>
 
           {/* Lead Capture Form */}
-          <div className="mt-8 max-w-md mx-auto">
+          <div id="founder-waitlist" className="mt-8 max-w-md mx-auto scroll-mt-28">
             <LeadCaptureForm showSocialProof />
           </div>
         </div>
@@ -496,17 +516,11 @@ export default function FoundersPage() {
               <SpotsCounter total={100} taken={spotsTaken} />
 
               <div className="mt-8">
-                {/* TODO: Replace with Stripe payment link */}
-                <Button
-                  size="lg"
-                  className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-xl shadow-violet-500/25 text-lg px-10 h-14"
-                  disabled
-                >
-                  Claim Your Founding Spot — $297 <ArrowRight className="h-5 w-5" />
-                </Button>
-                <p className="text-xs text-zinc-500 mt-3">
-                  Secure checkout · Instant access · 30-day money-back guarantee
-                </p>
+                <FoundersCta label="Claim Your Founding Spot — $297" />
+                <FoundersCtaNote
+                  checkoutText="Secure checkout · Instant access · 30-day money-back guarantee"
+                  waitlistText="Checkout link coming soon · Reserve priority access via the founder list"
+                />
               </div>
             </div>
           </div>

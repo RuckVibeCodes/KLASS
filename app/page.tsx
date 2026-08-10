@@ -167,6 +167,11 @@ export default async function LandingPage() {
             <span className="font-bold text-xl tracking-tight">KLASS</span>
           </Link>
           <nav className="flex items-center gap-3">
+            <Link href="/migrate">
+              <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
+                Migration Plan
+              </Button>
+            </Link>
             <Link href="/founders">
               <Button variant="ghost" className="text-amber-400 hover:text-amber-300 hover:bg-zinc-800">
                 Founding Members

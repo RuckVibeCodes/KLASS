@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { PLAYBOOKS } from "@/lib/playbooks/templates";
+import { getAllStepIds, getTotalSteps, PLAYBOOKS } from "@/lib/playbooks/templates";
 import { PlaybookCard } from "@/components/playbooks/playbook-card";
+import { PlaybookResumeCard } from "@/components/playbooks/playbook-resume-card";
 import { getAllPlaybookProgress } from "@/actions/playbooks";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 
@@ -59,6 +60,29 @@ export default async function PlaybooksPage({
     progressMap.set(progress.playbook_id, progress.completed_step_ids);
   }
 
+  const recommendedPlaybook = PLAYBOOKS
+    .map((playbook) => {
+      const validStepIds = new Set(getAllStepIds(playbook));
+      const completedSteps = (progressMap.get(playbook.id) || []).filter((id) =>
+        validStepIds.has(id)
+      ).length;
+      const totalSteps = getTotalSteps(playbook);
+      const remainingSteps = Math.max(totalSteps - completedSteps, 0);
+
+      return {
+        playbook,
+        completedSteps,
+        remainingSteps,
+        progressPercent: totalSteps > 0 ? completedSteps / totalSteps : 0,
+      };
+    })
+    .filter(({ remainingSteps }) => remainingSteps > 0)
+    .sort((a, b) => {
+      if (a.completedSteps === 0 && b.completedSteps > 0) return 1;
+      if (a.completedSteps > 0 && b.completedSteps === 0) return -1;
+      return b.progressPercent - a.progressPercent;
+    })[0]?.playbook ?? PLAYBOOKS[0];
+
   return (
     <div className="container py-6 max-w-4xl">
       <Link
@@ -87,6 +111,14 @@ export default async function PlaybooksPage({
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {recommendedPlaybook && (
+        <PlaybookResumeCard
+          playbook={recommendedPlaybook}
+          communitySlug={communitySlug}
+          completedStepIds={progressMap.get(recommendedPlaybook.id) || []}
+        />
       )}
 
       <div className="space-y-4">

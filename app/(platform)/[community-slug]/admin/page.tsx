@@ -17,6 +17,8 @@ import {
   Sparkles,
   Flag,
   Gavel,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -66,6 +68,56 @@ export default async function AdminDashboardPage({
   ]);
 
   const baseUrl = `/${communitySlug}`;
+  const launchChecklist = [
+    {
+      title: "Dial in your brand",
+      description:
+        "Add a logo and community description so the member experience feels polished.",
+      complete: Boolean(community.logo_url && community.description),
+      href: `${baseUrl}/admin/branding`,
+      cta: "Update branding",
+    },
+    {
+      title: "Set a paid offer",
+      description:
+        "Confirm pricing or connect a Stripe price before inviting your warm audience.",
+      complete: Boolean(
+        community.stripe_price_id || community.membership_price_cents > 0
+      ),
+      href: `${baseUrl}/admin/settings`,
+      cta: "Review pricing",
+    },
+    {
+      title: "Publish a starter program",
+      description:
+        "Give new members a clear first path with at least one program.",
+      complete: stats.totalPrograms > 0,
+      href: `${baseUrl}/admin/content/programs`,
+      cta: "Add program",
+    },
+    {
+      title: "Add a resource or event",
+      description:
+        "Seed quick wins with a downloadable resource or a live calendar event.",
+      complete: stats.totalResources > 0 || stats.totalEvents > 0,
+      href:
+        stats.totalResources > 0
+          ? `${baseUrl}/admin/content/events`
+          : `${baseUrl}/admin/content/resources`,
+      cta: "Seed content",
+    },
+    {
+      title: "Invite founding members",
+      description:
+        "Bring in the first members, then watch the needs-attention panel for signals.",
+      complete: stats.totalMembers > 1,
+      href: `${baseUrl}/admin/members`,
+      cta: "Manage members",
+    },
+  ];
+  const completedLaunchSteps = launchChecklist.filter(
+    (item) => item.complete
+  ).length;
 
   return (
     <div className="container py-6">
@@ -117,6 +169,57 @@ export default async function AdminDashboardPage({
       <div className="mb-8">
         <NeedsAttentionPanel signals={signals} communitySlug={communitySlug} />
       </div>
+
+      {/* Launch Readiness */}
+      <Card className="mb-8">
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle className="text-lg">Launch readiness checklist</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Keep the next admin action obvious before promoting this community.
+            </p>
+          </div>
+          <Badge
+            variant={
+              completedLaunchSteps === launchChecklist.length
+                ? "default"
+                : "outline"
+            }
+          >
+            {completedLaunchSteps}/{launchChecklist.length} ready
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+            {launchChecklist.map((item) => {
+              const StatusIcon = item.complete ? CheckCircle2 : Circle;
+
+              return (
+                <Link key={item.title} href={item.href} className="group">
+                  <div className="h-full rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50">
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <StatusIcon
+                        className={
+                          item.complete
+                            ? "h-5 w-5 text-emerald-600"
+                            : "h-5 w-5 text-muted-foreground"
+                        }
+                      />
+                      <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground">
+                        {item.complete ? "Done" : item.cta}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-semibold">{item.title}</h3>
+                    <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <div className="grid gap-6 md:grid-cols-2 mb-8">
